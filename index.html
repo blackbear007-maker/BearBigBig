@@ -6,12 +6,13 @@
   <title>Master of GYM 健身大師</title>
   <link rel="manifest" href="./manifest.json" />
   <meta name="theme-color" content="#f97316" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -77,7 +78,17 @@
   </style>
 </head>
 <body>
-<div id="root"></div>
+<div id="root"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#0f172a;gap:16px;font-family:system-ui,sans-serif;">
+  <div style="font-size:64px;animation:bear-bounce 0.5s ease-in-out infinite alternate">🐻</div>
+  <p style="color:#f97316;font-weight:700;font-size:18px;margin:0;">Master of GYM</p>
+  <p style="color:#94a3b8;font-size:13px;margin:0;">健身大師載入中，請稍候…</p>
+  <div style="display:flex;gap:6px;margin-top:4px;">
+    <span style="width:8px;height:8px;border-radius:50%;background:#f97316;animation:dot-pulse 1.2s ease-in-out infinite;animation-delay:0s"></span>
+    <span style="width:8px;height:8px;border-radius:50%;background:#f97316;animation:dot-pulse 1.2s ease-in-out infinite;animation-delay:0.4s"></span>
+    <span style="width:8px;height:8px;border-radius:50%;background:#f97316;animation:dot-pulse 1.2s ease-in-out infinite;animation-delay:0.8s"></span>
+  </div>
+  <style>@keyframes dot-pulse{0%,80%,100%{opacity:.2;transform:scale(0.8)}40%{opacity:1;transform:scale(1)}}</style>
+</div></div>
 <script type="text/babel">
 const { useState, useEffect, useCallback, useRef } = React;
 
@@ -2655,11 +2666,9 @@ function WorkoutDetailModal({ workout, onClose, onComplete }) {
                 {/* #9 組數 */}
                 <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'2px',flexShrink:0}}>
                   <div style={{display:'flex',alignItems:'center',gap:'2px',marginTop:'2px'}}>
-                    <button onClick={e=>{e.stopPropagation();setSets(s=>({...s,[i]:Math.max(0,(s[i]||0)-1)})
-                      ;}} style={{width:'16px',height:'16px',borderRadius:'3px',border:'1px solid #475569',background:'#1e293b',color:'#94a3b8',cursor:'pointer',fontSize:'10px',display:'flex',alignItems:'center',justifyContent:'center',lineHeight:1}}>－</button>
+                    <button onClick={e=>{e.stopPropagation();setSets(s=>({...s,[i]:Math.max(0,(s[i]||0)-1)}));}} style={{width:'16px',height:'16px',borderRadius:'3px',border:'1px solid #475569',background:'#1e293b',color:'#94a3b8',cursor:'pointer',fontSize:'10px',display:'flex',alignItems:'center',justifyContent:'center',lineHeight:1}}>－</button>
                     <span style={{fontSize:'11px',fontWeight:700,minWidth:'28px',textAlign:'center',color:(sets[i]||0)>=ex.sets?'#34d399':'#f97316'}}>{sets[i]||0}<span style={{color:'#475569',fontWeight:400}}>/{ex.sets}</span></span>
-                    <button onClick={e=>{e.stopPropagation();setSets(s=>({...s,[i]:(s[i]||0)+1}));
-                      }} style={{width:'16px',height:'16px',borderRadius:'3px',border:'1px solid #f97316',background:'rgba(249,115,22,0.2)',color:'#f97316',cursor:'pointer',fontSize:'10px',display:'flex',alignItems:'center',justifyContent:'center',lineHeight:1}}>＋</button>
+                    <button onClick={e=>{e.stopPropagation();setSets(s=>({...s,[i]:(s[i]||0)+1}));}} style={{width:'16px',height:'16px',borderRadius:'3px',border:'1px solid #f97316',background:'rgba(249,115,22,0.2)',color:'#f97316',cursor:'pointer',fontSize:'10px',display:'flex',alignItems:'center',justifyContent:'center',lineHeight:1}}>＋</button>
                   </div>
                   <span style={{fontSize:'9px',color:'#64748b'}}>組</span>
                 </div>
@@ -4510,7 +4519,24 @@ function App() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+try {
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+} catch(e) {
+  document.getElementById('root').innerHTML =
+    '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;background:#0f172a;padding:24px;text-align:center">' +
+    '<div style="font-size:48px;margin-bottom:16px">😵</div>' +
+    '<p style="color:#f87171;font-weight:700;font-size:16px;margin-bottom:8px">載入失敗</p>' +
+    '<p style="color:#64748b;font-size:12px">' + e.message + '</p>' +
+    '</div>';
+}
 </script>
 </body>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .catch(e => console.warn('SW register failed:', e));
+    });
+  }
+</script>
 </html>

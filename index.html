@@ -2567,6 +2567,86 @@ function BearBubble({ msg, mood = 'happy' }) {
   );
 }
 
+// ── WEEK SCHEDULE CARD ────────────────────────────────────────────────────
+function WeekScheduleStrip({ goal = 'fat_loss' }) {
+  const today = new Date().getDay(); // 0=Sun
+  const dayNames = ['日','一','二','三','四','五','六'];
+
+  const plans = {
+    fat_loss: [
+      { icon:'🏋️', label:'重訓', sub:'上肢推' },
+      { icon:'🏃', label:'有氧', sub:'30分鐘' },
+      { icon:'🏋️', label:'重訓', sub:'下肢' },
+      { icon:'😴', label:'休息', sub:'主動恢復' },
+      { icon:'🏋️', label:'重訓', sub:'上肢拉' },
+      { icon:'🔥', label:'HIIT', sub:'20分鐘' },
+      { icon:'😴', label:'完全休息', sub:'肌肉在長' },
+    ],
+    muscle: [
+      { icon:'💪', label:'胸 / 三頭', sub:'重訓A' },
+      { icon:'🦵', label:'腿 / 臀', sub:'重訓B' },
+      { icon:'😴', label:'休息', sub:'主動恢復' },
+      { icon:'🔙', label:'背 / 二頭', sub:'重訓C' },
+      { icon:'🎯', label:'肩 / 核心', sub:'重訓D' },
+      { icon:'😴', label:'休息', sub:'主動恢復' },
+      { icon:'😴', label:'完全休息', sub:'肌肉在長' },
+    ],
+    maintain: [
+      { icon:'🏋️', label:'全身訓練', sub:'A組' },
+      { icon:'🏃', label:'有氧', sub:'輕鬆跑' },
+      { icon:'😴', label:'休息', sub:'伸展即可' },
+      { icon:'🏋️', label:'全身訓練', sub:'B組' },
+      { icon:'🏃', label:'有氧', sub:'自由選擇' },
+      { icon:'🎯', label:'核心', sub:'20分鐘' },
+      { icon:'😴', label:'完全休息', sub:'好好恢復' },
+    ],
+  };
+
+  const week = plans[goal] || plans.fat_loss;
+  // Rotate so today is index 0 (Mon=1, mapped to array 0)
+  const startDay = today === 0 ? 6 : today - 1; // Mon-based
+
+  return (
+    <div style={{marginBottom:20}}>
+      <p style={{fontSize:13,fontWeight:700,color:'var(--sub)',letterSpacing:.5,margin:'0 0 10px',textTransform:'uppercase'}}>本週課表</p>
+      <div style={{display:'flex',gap:10,overflowX:'auto',paddingBottom:6,scrollbarWidth:'none'}}>
+        {week.map((d, i) => {
+          const dayIdx = (startDay + i) % 7;
+          const isToday = i === 0;
+          const isRest = d.label.includes('休息');
+          return (
+            <div key={i} style={{
+              flexShrink:0, width:84, borderRadius:16,
+              background: isToday ? 'var(--orange)' : isRest ? 'var(--bg)' : 'var(--card)',
+              padding:'14px 10px', textAlign:'center',
+              boxShadow: isToday ? '0 4px 16px rgba(249,115,22,.35)' : 'var(--shadow)',
+              transform: isToday ? 'translateY(-4px)' : 'none',
+              transition:'all .2s',
+            }}>
+              <div style={{fontSize:10,fontWeight:700,
+                color: isToday ? 'rgba(255,255,255,.8)' : 'var(--sub)',
+                marginBottom:6}}>
+                週{dayNames[dayIdx]}
+                {isToday && <span style={{marginLeft:3,background:'rgba(255,255,255,.25)',padding:'1px 5px',borderRadius:99,fontSize:9}}>今天</span>}
+              </div>
+              <div style={{fontSize:26,marginBottom:4}}>{d.icon}</div>
+              <div style={{fontSize:11,fontWeight:700,
+                color: isToday ? '#fff' : 'var(--text)',
+                lineHeight:1.3, marginBottom:2}}>
+                {d.label}
+              </div>
+              <div style={{fontSize:10,
+                color: isToday ? 'rgba(255,255,255,.7)' : 'var(--sub)'}}>
+                {d.sub}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // ── HOME PAGE ─────────────────────────────────────────────────────────────
 function HomePage({ profile, records, dietLog, affection, setPage, onSleepOpen }) {
   const todayStr = today();
@@ -2687,6 +2767,9 @@ function HomePage({ profile, records, dietLog, affection, setPage, onSleepOpen }
           <button className="btn-primary" onClick={()=>setPage('train')}>開始訓練</button>
         </div>
       )}
+
+      {/* Week schedule strip */}
+      <WeekScheduleStrip goal={profile?.goal || 'fat_loss'}/>
 
       {/* Night mode CTA */}
       {isNight && (
@@ -4050,27 +4133,107 @@ function ProfileSetup({ onDone }) {
   );
 }
 
+// ── BEAR NAV ICONS (SVG illustrations) ────────────────────────────────────
+function BearNavIcon({ type, active }) {
+  const c = active ? 'var(--orange)' : '#94a3b8';
+  const bc = active ? '#8B5E3C' : '#9ca3af'; // bear body color
+
+  // Eating bear
+  if (type === 'eat') return (
+    <svg width="36" height="36" viewBox="0 0 36 36">
+      {/* Body */}
+      <circle cx="18" cy="22" r="11" fill={bc}/>
+      {/* Head */}
+      <circle cx="18" cy="12" r="9" fill={bc}/>
+      {/* Ears */}
+      <circle cx="11" cy="5" r="4" fill={bc}/><circle cx="11" cy="5" r="2.2" fill={active?'#C49A3C':'#c4b5a0'}/>
+      <circle cx="25" cy="5" r="4" fill={bc}/><circle cx="25" cy="5" r="2.2" fill={active?'#C49A3C':'#c4b5a0'}/>
+      {/* Eyes */}
+      <circle cx="15" cy="11" r="1.5" fill="#1a1a1a"/>
+      <circle cx="21" cy="11" r="1.5" fill="#1a1a1a"/>
+      {/* Muzzle */}
+      <ellipse cx="18" cy="15" rx="4" ry="3" fill={active?'#A07830':'#b5a090'}/>
+      {/* Smile with food */}
+      <path d="M15,15.5 Q18,18 21,15.5" stroke="#1a1a1a" strokeWidth="1" fill="none" strokeLinecap="round"/>
+      {/* Bowl / chopsticks */}
+      <ellipse cx="18" cy="29" rx="7" ry="3" fill={active?'rgba(249,115,22,.3)':'rgba(0,0,0,.1)'}/>
+      <line x1="14" y1="22" x2="12" y2="18" stroke={active?'var(--orange)':'#9ca3af'} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="16" y1="22" x2="14" y2="18" stroke={active?'var(--orange)':'#9ca3af'} strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  );
+
+  // Sleeping bear
+  if (type === 'sleep') return (
+    <svg width="36" height="36" viewBox="0 0 36 36">
+      {/* Zzz */}
+      <text x="22" y="10" fontSize="8" fill={active?'#6366f1':'#9ca3af'} fontWeight="700">z</text>
+      <text x="26" y="6" fontSize="6" fill={active?'#818cf8':'#9ca3af'} fontWeight="700">z</text>
+      {/* Head (eyes closed) */}
+      <circle cx="16" cy="18" r="9" fill={bc}/>
+      <circle cx="9" cy="11" r="4" fill={bc}/><circle cx="9" cy="11" r="2.2" fill={active?'#C49A3C':'#c4b5a0'}/>
+      <circle cx="23" cy="11" r="4" fill={bc}/><circle cx="23" cy="11" r="2.2" fill={active?'#C49A3C':'#c4b5a0'}/>
+      {/* Closed eyes */}
+      <line x1="12.5" y1="17" x2="16" y2="17" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="16" y1="17" x2="19.5" y2="17" stroke="#1a1a1a" strokeWidth="1.5" strokeLinecap="round"/>
+      {/* Muzzle */}
+      <ellipse cx="16" cy="22" rx="4" ry="3" fill={active?'#A07830':'#b5a090'}/>
+      <path d="M14,22 Q16,24 18,22" stroke="#1a1a1a" strokeWidth="1" fill="none" strokeLinecap="round"/>
+      {/* Pillow */}
+      <ellipse cx="16" cy="31" rx="12" ry="4" fill={active?'rgba(99,102,241,.25)':'rgba(0,0,0,.08)'} rx="6"/>
+    </svg>
+  );
+
+  // Training bear
+  if (type === 'train') return (
+    <svg width="36" height="36" viewBox="0 0 36 36">
+      {/* Barbell */}
+      <rect x="2" y="17" width="32" height="3" rx="1.5" fill={active?'#64748b':'#d1d5db'}/>
+      <rect x="1" y="13" width="5" height="11" rx="2" fill={active?'var(--orange)':'#9ca3af'}/>
+      <rect x="30" y="13" width="5" height="11" rx="2" fill={active?'var(--orange)':'#9ca3af'}/>
+      {/* Bear lifting */}
+      <circle cx="18" cy="10" r="7" fill={bc}/>
+      <circle cx="13" cy="4.5" r="3" fill={bc}/><circle cx="13" cy="4.5" r="1.6" fill={active?'#C49A3C':'#c4b5a0'}/>
+      <circle cx="23" cy="4.5" r="3" fill={bc}/><circle cx="23" cy="4.5" r="1.6" fill={active?'#C49A3C':'#c4b5a0'}/>
+      {/* Eyes excited */}
+      <circle cx="15.5" cy="9" r="1.5" fill="#1a1a1a"/>
+      <circle cx="20.5" cy="9" r="1.5" fill="#1a1a1a"/>
+      <circle cx="15.9" cy="8.6" r="0.5" fill="white"/>
+      <circle cx="20.9" cy="8.6" r="0.5" fill="white"/>
+      {/* Big smile */}
+      <path d="M14,12 Q18,15.5 22,12" stroke="#1a1a1a" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+      {/* Arms */}
+      <line x1="11" y1="14" x2="6" y2="18" stroke={bc} strokeWidth="3" strokeLinecap="round"/>
+      <line x1="25" y1="14" x2="30" y2="18" stroke={bc} strokeWidth="3" strokeLinecap="round"/>
+    </svg>
+  );
+
+  return <span style={{fontSize:22}}>🐻</span>;
+}
+
 // ── NAVBAR ─────────────────────────────────────────────────────────────────
 function NavBar({ page, setPage }) {
   const items = [
-    {id:'eat',  icon:'🍱', label:'吃'},
-    {id:'home', icon:'🐻', label:'熊大大', isBear:true},
-    {id:'sleep',icon:'😴', label:'睡'},
-    {id:'train',icon:'💪', label:'練'},
+    { id:'eat',   label:'吃',  type:'eat' },
+    { id:'home',  label:'熊大大', isBear:true },
+    { id:'sleep', label:'睡',  type:'sleep' },
+    { id:'train', label:'練',  type:'train' },
   ];
   return (
     <nav className="nav-bar" style={{height:'var(--nav-h)'}}>
       {items.map(item => item.isBear ? (
         <div key={item.id} className="nav-bear" onClick={()=>setPage(item.id)}>
-          <div className={`nav-bear-bubble ${page===item.id?'pulse-ring':''}`} style={{background:page===item.id?'var(--orange)':'#475569'}}>
+          <div className={`nav-bear-bubble ${page===item.id?'pulse-ring':''}`}
+            style={{background:page===item.id?'var(--orange)':'#334155',transition:'background .2s'}}>
             <span style={{fontSize:28}}>🐻</span>
           </div>
-          <span style={{fontSize:10,color:page===item.id?'var(--orange)':'var(--sub)',marginTop:32,fontWeight:page===item.id?600:400}}>{item.label}</span>
+          <span style={{fontSize:10,color:page===item.id?'var(--orange)':'var(--sub)',marginTop:32,fontWeight:page===item.id?700:400}}>{item.label}</span>
         </div>
       ) : (
-        <div key={item.id} className={`nav-item ${page===item.id?'active':''}`} onClick={()=>setPage(item.id)}>
-          <span style={{fontSize:22}}>{item.icon}</span>
-          <span style={{fontWeight:page===item.id?600:400}}>{item.label}</span>
+        <div key={item.id} className={`nav-item ${page===item.id?'active':''}`}
+          onClick={()=>setPage(item.id)}
+          style={{gap:2,transition:'all .15s',transform:page===item.id?'scale(1.08)':'scale(1)'}}>
+          <BearNavIcon type={item.type} active={page===item.id}/>
+          <span style={{fontSize:11,fontWeight:page===item.id?700:400}}>{item.label}</span>
         </div>
       ))}
     </nav>

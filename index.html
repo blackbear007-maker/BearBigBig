@@ -4310,8 +4310,68 @@ async function fetchGoogleFitSleep(accessToken) {
 }
 
 // ── DATA SETTINGS ──────────────────────────────────────────────────────────
-function DataSettings({ open, onClose, records, setRecords }) {
-  const [tab, setTab] = React.useState('backup');
+function ProfileSettingsTab({ profile, setProfile }) {
+  const def = { name:'熊友', gender:'male', age:25, height:170, weight:65, goal:'fat_loss', activity:'moderate' };
+  const p = profile || def;
+  const [form, setForm] = React.useState(p);
+  const set = (k, v) => setForm(f => ({...f, [k]: v}));
+
+  function save() {
+    setProfile({ ...form, age: Number(form.age), height: Number(form.height), weight: Number(form.weight) });
+  }
+
+  return (
+    <div style={{display:'flex',flexDirection:'column',gap:12}}>
+      <BearBubble msg="填一下你的資料，我幫你算得更準！不填也沒關係，之後隨時可以改。" mood="happy"/>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+        <div>
+          <label style={{fontSize:12,color:'var(--sub)',display:'block',marginBottom:4}}>暱稱</label>
+          <input value={form.name} onChange={e=>set('name',e.target.value)} placeholder="你叫什麼？"/>
+        </div>
+        <div>
+          <label style={{fontSize:12,color:'var(--sub)',display:'block',marginBottom:4}}>性別</label>
+          <select value={form.gender} onChange={e=>set('gender',e.target.value)}>
+            <option value="male">男</option><option value="female">女</option>
+          </select>
+        </div>
+        <div>
+          <label style={{fontSize:12,color:'var(--sub)',display:'block',marginBottom:4}}>年齡</label>
+          <input type="number" value={form.age} onChange={e=>set('age',e.target.value)} min="10" max="100"/>
+        </div>
+        <div>
+          <label style={{fontSize:12,color:'var(--sub)',display:'block',marginBottom:4}}>身高 (cm)</label>
+          <input type="number" value={form.height} onChange={e=>set('height',e.target.value)} min="100" max="250"/>
+        </div>
+        <div>
+          <label style={{fontSize:12,color:'var(--sub)',display:'block',marginBottom:4}}>體重 (kg)</label>
+          <input type="number" value={form.weight} onChange={e=>set('weight',e.target.value)} min="30" max="300"/>
+        </div>
+        <div>
+          <label style={{fontSize:12,color:'var(--sub)',display:'block',marginBottom:4}}>目標</label>
+          <select value={form.goal} onChange={e=>set('goal',e.target.value)}>
+            <option value="fat_loss">減脂</option>
+            <option value="muscle">增肌</option>
+            <option value="maintain">維持</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label style={{fontSize:12,color:'var(--sub)',display:'block',marginBottom:4}}>活動量</label>
+        <select value={form.activity} onChange={e=>set('activity',e.target.value)}>
+          <option value="sedentary">久坐（辦公室）</option>
+          <option value="light">輕度（每週1-2次）</option>
+          <option value="moderate">中度（每週3-4次）</option>
+          <option value="active">高度（每週5-6次）</option>
+          <option value="very">非常活躍（每天）</option>
+        </select>
+      </div>
+      <button className="btn-primary" onClick={save}>儲存</button>
+    </div>
+  );
+}
+
+function DataSettings({ open, onClose, records, setRecords, profile, setProfile }) {
+  const [tab, setTab] = React.useState('profile');
   const [importStatus, setImportStatus] = React.useState(null);
   const [healthStatus, setHealthStatus] = React.useState(null);
   const [gfClientId, setGfClientId] = useLS('bear_gfit_client', '');
@@ -4386,14 +4446,17 @@ function DataSettings({ open, onClose, records, setRecords }) {
         <div style={{width:40,height:4,background:'var(--border)',borderRadius:99,margin:'0 auto 16px'}}/>
 
         {/* Tabs */}
-        <div style={{display:'flex',gap:8,marginBottom:20}}>
-          {[['backup','📦 備份'],['health','🏥 健康資料']].map(([id,label])=>(
+        <div style={{display:'flex',gap:6,marginBottom:20}}>
+          {[['profile','👤 我的資料'],['backup','📦 備份'],['health','🏥 健康']].map(([id,label])=>(
             <button key={id} onClick={()=>{setTab(id);setImportStatus(null);setHealthStatus(null);}}
-              style={{flex:1,padding:'10px',borderRadius:10,border:`1.5px solid ${tab===id?'#6366f1':'var(--border)'}`,background:tab===id?'#6366f115':'var(--card)',color:tab===id?'#6366f1':'var(--text)',cursor:'pointer',fontSize:14,fontWeight:tab===id?600:400}}>
+              style={{flex:1,padding:'9px 4px',borderRadius:10,border:`1.5px solid ${tab===id?'var(--orange)':'var(--border)'}`,background:tab===id?'rgba(249,115,22,.1)':'var(--card)',color:tab===id?'var(--orange)':'var(--text)',cursor:'pointer',fontSize:12,fontWeight:tab===id?700:400}}>
               {label}
             </button>
           ))}
         </div>
+
+        {/* Profile Tab */}
+        {tab === 'profile' && <ProfileSettingsTab profile={profile} setProfile={setProfile}/>}
 
         {/* Backup Tab */}
         {tab === 'backup' && <>
@@ -4462,20 +4525,25 @@ function App() {
   const [records, setRecords] = useLS('gym_records', []);
   const [dietLog, setDietLog] = useLS('gym_diet', {});
   const [page, setPage] = useState('home');
-  const [darkMode, setDarkMode] = useLS('bear_dark', null); // null=auto
+  const [darkMode, setDarkMode] = useLS('bear_dark', true); // true=dark default
   const [showSettings, setShowSettings] = useState(false);
 
-  // Auto dark based on time or saved preference
+  // Dark mode: saved preference, default true
   const isNight = timeOfDay() === 'night';
-  const dark = darkMode !== null ? darkMode : isNight;
+  const dark = darkMode;
 
   useEffect(() => {
     document.body.classList.toggle('dark', dark);
   }, [dark]);
 
-  const toggleDark = () => setDarkMode(d => d===null ? !isNight : !d);
+  const toggleDark = () => setDarkMode(d => !d);
 
-  if (!profile) return <><ProfileSetup onDone={p=>setProfile(p)}/></>;
+  // 預設 profile，讓使用者直接進 App
+  const activeProfile = profile || {
+    name: '熊友', gender: 'male', age: 25,
+    height: 170, weight: 65, goal: 'fat_loss', activity: 'moderate'
+  };
+
 
   return (
     <>
@@ -4483,9 +4551,9 @@ function App() {
       <button onClick={()=>setShowSettings(true)} style={{position:'fixed',top:14,left:16,zIndex:150,background:'var(--card)',border:'1px solid var(--border)',borderRadius:99,width:38,height:38,fontSize:18,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 6px rgba(0,0,0,.1)'}}>
         ⚙️
       </button>
-      <DataSettings open={showSettings} onClose={()=>setShowSettings(false)} records={records} setRecords={setRecords}/>
-      {page === 'home'  && <HomePage profile={profile} records={records} dietLog={dietLog} affection={70} setPage={setPage} onSleepOpen={()=>setPage('sleep')}/>}
-      {page === 'eat'   && <EatPage profile={profile} dietLog={dietLog} setDietLog={setDietLog}/>}
+      <DataSettings open={showSettings} onClose={()=>setShowSettings(false)} records={records} setRecords={setRecords} profile={profile} setProfile={setProfile}/>
+      {page === 'home'  && <HomePage profile={activeProfile} records={records} dietLog={dietLog} affection={70} setPage={setPage} onSleepOpen={()=>setPage('sleep')}/>}
+      {page === 'eat'   && <EatPage profile={activeProfile} dietLog={dietLog} setDietLog={setDietLog}/>}
       {page === 'sleep' && <SleepPage records={records} setRecords={setRecords}/>}
       {page === 'train' && <TrainPage records={records} setRecords={setRecords}/>}
       <NavBar page={page} setPage={setPage}/>

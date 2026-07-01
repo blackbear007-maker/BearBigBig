@@ -16,32 +16,34 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overscroll-behavior:none}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overscroll-behavior:none;line-height:1.8}
 :root{
   --bg:#f8fafc;--card:#fff;--text:#1e293b;--sub:#64748b;--border:#e2e8f0;
   --orange:#f97316;--green:#22c55e;--red:#ef4444;--yellow:#eab308;
   --nav-h:68px;
+  --shadow:0 2px 12px rgba(0,0,0,0.06);
+  --fs-title:20px;--fs-body:15px;--fs-caption:12px;
 }
 .dark{
   --bg:#0f172a;--card:#1e293b;--text:#f1f5f9;--sub:#94a3b8;--border:#334155;
 }
 body{background:var(--bg);color:var(--text);min-height:100dvh}
-.card{background:var(--card);border-radius:16px;border:1px solid var(--border)}
+.card{background:var(--card);border-radius:16px;box-shadow:var(--shadow)}
 .page{padding:16px;padding-bottom:calc(var(--nav-h) + 16px);max-width:430px;margin:0 auto;min-height:100dvh}
 .chip{padding:6px 14px;border-radius:99px;font-size:13px;font-weight:500;border:none;cursor:pointer;transition:all .15s}
 .chip-active{background:var(--orange);color:#fff}
 .chip-inactive{background:var(--border);color:var(--text)}
-.btn-primary{background:var(--orange);color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:15px;font-weight:600;cursor:pointer;width:100%;transition:opacity .15s}
+.btn-primary{background:var(--orange);color:#fff;border:none;border-radius:14px;padding:16px 24px;font-size:16px;font-weight:700;cursor:pointer;width:100%;transition:opacity .15s;letter-spacing:.3px}
 .btn-primary:active{opacity:.8}
-.btn-secondary{background:transparent;color:var(--orange);border:2px solid var(--orange);border-radius:12px;padding:10px 24px;font-size:15px;font-weight:600;cursor:pointer;width:100%}
+.btn-secondary{background:transparent;color:var(--orange);border:2px solid var(--orange);border-radius:14px;padding:12px 24px;font-size:15px;font-weight:600;cursor:pointer;width:100%}
 input,select{background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:15px;outline:none;width:100%}
 input:focus,select:focus{border-color:var(--orange)}
-.nav-bar{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav-bar{position:fixed;bottom:0;left:0;right:0;background:var(--card);box-shadow:0 -1px 0 var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0;cursor:pointer;font-size:11px;color:var(--sub);transition:color .15s;gap:3px}
 .nav-item.active{color:var(--orange)}
 .nav-bear{flex:1.2;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0;cursor:pointer}
 .nav-bear-bubble{position:absolute;top:-2px;width:58px;height:58px;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(249,115,22,.4)}
-.bear-sleep-btn{position:fixed;bottom:calc(var(--nav-h) + 16px);right:16px;width:48px;height:48px;border-radius:50%;background:var(--card);border:2px solid var(--border);font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.1);z-index:99}
+.bear-sleep-btn{position:fixed;bottom:calc(var(--nav-h) + 16px);right:16px;width:48px;height:48px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:99}
 @keyframes fade-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fade{animation:fade-in .3s ease}
 @keyframes bear-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
@@ -49,11 +51,11 @@ input:focus,select:focus{border-color:var(--orange)}
 @keyframes pulse-ring{0%{transform:scale(1);opacity:.8}100%{transform:scale(1.4);opacity:0}}
 .pulse-ring::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid var(--orange);animation:pulse-ring 1.8s ease-out infinite}
 /* Sound player */
-.sound-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;border-radius:14px;border:2px solid var(--border);cursor:pointer;transition:all .2s;font-size:12px;color:var(--sub)}
-.sound-btn.playing{border-color:var(--orange);background:rgba(249,115,22,.08);color:var(--orange)}
+.sound-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;border-radius:14px;background:var(--bg);cursor:pointer;transition:all .2s;font-size:12px;color:var(--sub)}
+.sound-btn.playing{background:rgba(249,115,22,.08);color:var(--orange)}
 /* Sleep slider */
 .sleep-range{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:99px;outline:none;cursor:pointer}
-.sleep-range::-webkit-slider-thumb{-webkit-appearance:none;width:36px;height:36px;border-radius:50%;background:var(--orange);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(249,115,22,.4)}
+.sleep-range::-webkit-slider-thumb{-webkit-appearance:none;width:36px;height:36px;border-radius:50%;background:var(--orange);cursor:pointer;box-shadow:0 2px 8px rgba(249,115,22,.4)}
 /* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:flex-end}
 .modal-sheet{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-height:90dvh;overflow-y:auto;padding:20px}
@@ -64,13 +66,20 @@ input:focus,select:focus{border-color:var(--orange)}
 .badge-orange{background:rgba(249,115,22,.15);color:#ea580c}
 .badge-blue{background:rgba(59,130,246,.15);color:#2563eb}
 .badge-purple{background:rgba(168,85,247,.15);color:#9333ea}
+/* Bear bubble */
+.bear-bubble{background:var(--card);border-radius:20px 20px 20px 4px;padding:14px 18px;box-shadow:var(--shadow);position:relative;font-size:14px;line-height:1.7;color:var(--text)}
+.bear-bubble::before{content:'🐻';position:absolute;bottom:-10px;left:-4px;font-size:20px}
+/* Sleep page dark theme */
+.sleep-page{background:#0d1117;min-height:100dvh;color:#e2e8f0}
+.sleep-page .card{background:#161b22;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.sleep-page .btn-primary{background:#6366f1}
 </style>
   <!-- Health sync libs -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://accounts.google.com/gsi/client" async></script>
 </head>
 <body>
-<div id="root"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100dvh;gap:16px;color:#f97316"><div style="font-size:64px">🐻</div><div style="font-size:16px;color:#64748b">熊大大正在準備中…</div></div></div>
+<div id="root"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100dvh;gap:20px;background:#f8fafc"><div style="font-size:72px;animation:bear-bounce 2s ease-in-out infinite">🐻</div><div style="font-size:20px;font-weight:700;color:#1e293b">熊大大</div><div style="font-size:14px;color:#f97316;font-weight:500">陪你吃、睡、練</div></div></div>
 <script type="text/babel" data-presets="react">
 const {useState,useEffect,useRef,useCallback,useMemo}=React;
 
@@ -2547,6 +2556,17 @@ function BearFace({ mood = 'happy', size = 120, animate = false }) {
   );
 }
 
+// ── BEAR BUBBLE (全域對話框) ───────────────────────────────────────────────
+function BearBubble({ msg, mood = 'happy' }) {
+  if (!msg) return null;
+  return (
+    <div style={{display:'flex',gap:12,alignItems:'flex-end',marginBottom:20}}>
+      <BearFace mood={mood} size={52}/>
+      <div className="bear-bubble" style={{flex:1}}>{msg}</div>
+    </div>
+  );
+}
+
 // ── HOME PAGE ─────────────────────────────────────────────────────────────
 function HomePage({ profile, records, dietLog, affection, setPage, onSleepOpen }) {
   const todayStr = today();
@@ -2610,42 +2630,32 @@ function HomePage({ profile, records, dietLog, affection, setPage, onSleepOpen }
   return (
     <div className="page fade" style={{paddingTop:24}}>
       {/* Greeting */}
-      <div style={{textAlign:'center',marginBottom:8}}>
-        <p style={{color:'var(--sub)',fontSize:13,marginBottom:4}}>{new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric',weekday:'short'})}</p>
-        <h1 style={{fontSize:22,fontWeight:700,margin:0}}>{greeting(profile?.name)}</h1>
+      <div style={{marginBottom:4}}>
+        <p style={{color:'var(--sub)',fontSize:12,margin:'0 0 2px'}}>{new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric',weekday:'short'})}</p>
+        <h1 style={{fontSize:24,fontWeight:700,margin:0}}>{greeting(profile?.name)}</h1>
       </div>
 
-      {/* Bear face hero */}
-      <div style={{display:'flex',justifyContent:'center',margin:'20px 0',position:'relative'}}>
-        <div className={isNight?'':'pulse-ring'} style={{position:'relative',width:140,height:140,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center'}}>
-          <BearFace mood={bearMood} size={140} animate={!isNight}/>
-        </div>
-      </div>
-
-      {/* Bear speech bubble */}
-      <div className="card p-4 mb-4" style={{background:'rgba(249,115,22,.06)',borderColor:'rgba(249,115,22,.2)',textAlign:'center',position:'relative'}}>
-        <div style={{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',width:20,height:12,overflow:'hidden'}}>
-          <div style={{width:16,height:16,background:'rgba(249,115,22,.1)',border:'1px solid rgba(249,115,22,.2)',transform:'rotate(45deg)',marginLeft:2,marginTop:4}}/>
-        </div>
-        <p style={{fontSize:15,margin:0,lineHeight:1.6,color:'var(--text)'}}>{bearMsg}</p>
+      {/* Bear bubble */}
+      <div style={{margin:'20px 0'}}>
+        <BearBubble msg={bearMsg} mood={bearMood}/>
       </div>
 
       {/* 3 quick stats */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:16}}>
         <div className="card p-3" style={{textAlign:'center',cursor:'pointer'}} onClick={()=>setPage('sleep')}>
-          <div style={{fontSize:24,marginBottom:4}}>{sleepH>=7&&sleepH<=9?'😴':sleepH>0?'😪':'❓'}</div>
-          <div style={{fontSize:20,fontWeight:700,color:sleepColor(sleepH)}}>{sleepH||'—'}{sleepH?'h':''}</div>
-          <div style={{fontSize:11,color:'var(--sub)'}}>睡眠</div>
+          <div style={{fontSize:22,marginBottom:2}}>{sleepH>=7&&sleepH<=9?'🌙':sleepH>0?'💤':'🌙'}</div>
+          <div style={{fontSize:18,fontWeight:700,color:sleepColor(sleepH)}}>{sleepH||'—'}{sleepH?'h':''}</div>
+          <div style={{fontSize:11,color:'var(--sub)'}}>昨晚睡眠</div>
         </div>
         <div className="card p-3" style={{textAlign:'center',cursor:'pointer'}} onClick={()=>setPage('eat')}>
-          <div style={{fontSize:24,marginBottom:4}}>🍱</div>
-          <div style={{fontSize:20,fontWeight:700,color:'var(--orange)'}}>{todayCals}</div>
-          <div style={{fontSize:11,color:'var(--sub)'}}>卡路里</div>
+          <div style={{fontSize:22,marginBottom:2}}>🍱</div>
+          <div style={{fontSize:18,fontWeight:700,color:'var(--orange)'}}>{todayCals}</div>
+          <div style={{fontSize:11,color:'var(--sub)'}}>今日熱量</div>
         </div>
         <div className="card p-3" style={{textAlign:'center',cursor:'pointer'}} onClick={()=>setPage('train')}>
-          <div style={{fontSize:24,marginBottom:4}}>{trainedToday?'💪':'🛋️'}</div>
-          <div style={{fontSize:20,fontWeight:700,color:trainedToday?'var(--green)':'var(--sub)'}}>{trainedToday?'完成':'未練'}</div>
-          <div style={{fontSize:11,color:'var(--sub)'}}>訓練</div>
+          <div style={{fontSize:22,marginBottom:2}}>{trainedToday?'🔥':'💪'}</div>
+          <div style={{fontSize:18,fontWeight:700,color:trainedToday?'var(--green)':'var(--orange)'}}>{trainedToday?'完成！':'出發'}</div>
+          <div style={{fontSize:11,color:'var(--sub)'}}>今日訓練</div>
         </div>
       </div>
 
@@ -2656,29 +2666,35 @@ function HomePage({ profile, records, dietLog, affection, setPage, onSleepOpen }
             <span style={{fontSize:14,fontWeight:600}}>今日熱量</span>
             <span style={{fontSize:14,color:'var(--sub)'}}>{todayCals} / {targetCals} kcal</span>
           </div>
-          <div style={{height:8,background:'var(--border)',borderRadius:99,overflow:'hidden'}}>
+          <div style={{height:6,background:'var(--bg)',borderRadius:99,overflow:'hidden'}}>
             <div style={{height:'100%',width:`${calPct}%`,background:calPct>110?'var(--red)':calPct>85?'var(--orange)':'var(--green)',borderRadius:99,transition:'width .5s'}}/>
           </div>
+          {calPct >= 90 && <p style={{fontSize:12,color:'var(--orange)',margin:'8px 0 0'}}>熊大大說：今天吃得不錯！蛋白質記得補夠 💪</p>}
         </div>
       )}
 
-      {/* Recommended workout */}
+      {/* Recommended workout — main CTA */}
       {!trainedToday && recWorkout && (
-        <div className="card p-4 mb-4" style={{borderLeft:'3px solid var(--orange)'}}>
-          <p style={{fontSize:12,color:'var(--orange)',fontWeight:600,margin:'0 0 6px'}}>🐻 熊大大推薦</p>
-          <p style={{fontSize:16,fontWeight:700,margin:'0 0 4px'}}>{recWorkout.name}</p>
-          <p style={{fontSize:13,color:'var(--sub)',margin:'0 0 12px'}}>{recWorkout.target} · {recWorkout.duration}</p>
-          <button className="btn-primary" onClick={()=>setPage('train')}>開始訓練 💪</button>
+        <div className="card p-5 mb-4">
+          <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:14}}>
+            <span style={{fontSize:36}}>{recWorkout.icon||'💪'}</span>
+            <div>
+              <p style={{fontSize:12,color:'var(--orange)',fontWeight:600,margin:'0 0 2px'}}>今天就練這個</p>
+              <p style={{fontSize:18,fontWeight:700,margin:0}}>{recWorkout.name}</p>
+              <p style={{fontSize:13,color:'var(--sub)',margin:0}}>{recWorkout.target} · {recWorkout.duration} 分鐘</p>
+            </div>
+          </div>
+          <button className="btn-primary" onClick={()=>setPage('train')}>開始訓練</button>
         </div>
       )}
 
       {/* Night mode CTA */}
       {isNight && (
-        <div className="card p-4" style={{background:'linear-gradient(135deg,#1e1b4b,#312e81)',border:'none',textAlign:'center'}}>
-          <p style={{fontSize:24,margin:'0 0 8px'}}>🌙</p>
-          <p style={{fontSize:16,fontWeight:600,color:'#e0e7ff',margin:'0 0 4px'}}>準備睡覺了嗎？</p>
-          <p style={{fontSize:13,color:'#a5b4fc',margin:'0 0 14px'}}>讓熊大大陪你放鬆入睡</p>
-          <button onClick={onSleepOpen} style={{background:'#818cf8',color:'#fff',border:'none',borderRadius:12,padding:'10px 24px',fontSize:15,fontWeight:600,cursor:'pointer'}}>進入睡眠模式</button>
+        <div className="card p-5" style={{background:'#1e1b4b',textAlign:'center'}}>
+          <p style={{fontSize:28,margin:'0 0 8px'}}>🌙</p>
+          <p style={{fontSize:18,fontWeight:700,color:'#e0e7ff',margin:'0 0 4px'}}>睡覺時間到了</p>
+          <p style={{fontSize:13,color:'#a5b4fc',margin:'0 0 18px'}}>讓熊大大陪你放鬆入睡</p>
+          <button onClick={onSleepOpen} style={{background:'#6366f1',color:'#fff',border:'none',borderRadius:14,padding:'14px 24px',fontSize:16,fontWeight:700,cursor:'pointer',width:'100%'}}>進入睡眠模式</button>
         </div>
       )}
     </div>
@@ -2786,7 +2802,7 @@ function NovelPlayer() {
     fetch(STORY_URL)
       .then(r => r.json())
       .then(data => setChapters(data))
-      .catch(() => setError('故事載入失敗，請重新整理'));
+      .catch(() => setError('熊大大找不到故事檔案，請重新整理一下'));
   }, []);
 
   // Morning banner: if there's a saved sleep bookmark from yesterday
@@ -2933,10 +2949,10 @@ function NovelPlayer() {
           currentPi++;
           playNext();
         };
-        audio.onerror = () => { setError('音訊播放失敗'); stopPlayback(); };
-        audio.play().catch(() => { setError('瀏覽器阻擋自動播放，請點一下頁面再試'); stopPlayback(); });
+        audio.onerror = () => { setError('聲音出了點問題，等一下再試試？'); stopPlayback(); };
+        audio.play().catch(() => { setError('請先點一下畫面，讓熊大大開口說話 🐻'); stopPlayback(); });
       } catch (e) {
-        setError('TTS 服務暫時無法使用：' + e.message);
+        setError('聲音服務暫時睡著了，稍後再試 😴');
         stopPlayback();
         setLoading(false);
       }
@@ -2975,91 +2991,80 @@ function NovelPlayer() {
   const timerFmt = timerLeft > 0 ? `${Math.floor(timerLeft/60)}:${String(timerLeft%60).padStart(2,'0')}` : '';
 
   return (
-    <div className="card p-4" style={{marginBottom:80}}>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
-        <p style={{fontSize:15,fontWeight:700,margin:0}}>🎙️ 有聲故事</p>
-        <span style={{fontSize:11,color:'var(--sub)'}}>熊大大說故事・助眠版</span>
-      </div>
+    <div className="card p-4" style={{marginBottom:80,background:'#161b22'}}>
+      <p style={{fontSize:13,color:'#6366f1',fontWeight:600,margin:'0 0 14px',letterSpacing:.5}}>🎙 有聲故事</p>
 
       {/* Morning banner */}
       {morningBanner && (
-        <div style={{background:'#312e81',borderRadius:10,padding:'10px 14px',marginBottom:14,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+        <div style={{background:'#1e1b4b',borderRadius:12,padding:'12px 16px',marginBottom:14,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
           <div>
-            <div style={{fontSize:12,color:'#a5b4fc',marginBottom:2}}>🌅 昨晚聽到這裡</div>
+            <div style={{fontSize:11,color:'#a5b4fc',marginBottom:2}}>昨晚聽到這裡</div>
             <div style={{fontSize:13,fontWeight:600,color:'#e0e7ff'}}>{morningBanner.chapterTitle}</div>
           </div>
           <button onClick={()=>goToBookmark(morningBanner)}
-            style={{background:'#6366f1',color:'#fff',border:'none',borderRadius:8,padding:'6px 12px',fontSize:12,cursor:'pointer'}}>
-            繼續聽
+            style={{background:'#6366f1',color:'#fff',border:'none',borderRadius:10,padding:'8px 14px',fontSize:12,fontWeight:600,cursor:'pointer'}}>
+            繼續
           </button>
         </div>
       )}
 
-      {/* Voice selector */}
-      <div style={{display:'flex',gap:8,marginBottom:14,flexWrap:'wrap'}}>
-        {VOICES.map(v => (
-          <button key={v.id} onClick={()=>{ stopPlayback(); setVoiceId(v.id); }}
-            style={{flex:1,padding:'8px 4px',borderRadius:10,border:`2px solid ${voiceId===v.id?'#6366f1':'var(--border)'}`,
-              background:voiceId===v.id?'#eef2ff':'var(--card)',cursor:'pointer',minWidth:90}}>
-            <div style={{fontSize:16}}>{v.label.slice(0,2)}</div>
-            <div style={{fontSize:11,fontWeight:600,color:voiceId===v.id?'#4338ca':'var(--text)'}}>{v.label.slice(2)}</div>
-            <div style={{fontSize:10,color:'var(--sub)'}}>{v.desc}</div>
+      {/* Cover + title + play — main UI */}
+      <div style={{textAlign:'center',padding:'20px 0'}}>
+        <div style={{fontSize:64,marginBottom:14}}>🐻</div>
+        <div style={{fontSize:11,color:'#475569',marginBottom:4}}>第 {chapIdx+1} / {(chapters?.length||'...')} 章</div>
+        <div style={{fontSize:16,fontWeight:700,color:'#e2e8f0',marginBottom:4,minHeight:24}}>
+          {chapters ? chapter?.title : '載入中…'}
+        </div>
+        <div style={{fontSize:12,color:'#475569',marginBottom:20}}>熊大大說故事</div>
+
+        {/* Progress bar */}
+        <div style={{height:3,background:'#21262d',borderRadius:2,marginBottom:20,overflow:'hidden'}}>
+          <div style={{height:'100%',width:`${progress}%`,background:'#6366f1',borderRadius:2,transition:'width .3s'}}/>
+        </div>
+
+        {/* Controls */}
+        <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:24,marginBottom:20}}>
+          <button onClick={prevChap} style={{background:'none',border:'none',fontSize:22,cursor:'pointer',opacity:chapIdx===0?.3:1,color:'#94a3b8'}}>⏮</button>
+          <button onClick={togglePlay}
+            style={{width:64,height:64,borderRadius:'50%',background:'#6366f1',border:'none',
+              fontSize:26,color:'#fff',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',
+              boxShadow:'0 4px 20px rgba(99,102,241,.5)',transition:'transform .1s'}}
+            onMouseDown={e=>e.currentTarget.style.transform='scale(.94)'}
+            onMouseUp={e=>e.currentTarget.style.transform='scale(1)'}>
+            {loading ? '…' : playing ? '⏸' : '▶'}
           </button>
-        ))}
+          <button onClick={nextChap} style={{background:'none',border:'none',fontSize:22,cursor:'pointer',opacity:!chapters||chapIdx===chapters.length-1?.3:1,color:'#94a3b8'}}>⏭</button>
+        </div>
+
+        {/* Voice selector */}
+        <div style={{display:'flex',gap:8,justifyContent:'center'}}>
+          {VOICES.map(v => (
+            <button key={v.id} onClick={()=>{ stopPlayback(); setVoiceId(v.id); }}
+              style={{padding:'6px 12px',borderRadius:20,border:'none',
+                background:voiceId===v.id?'#6366f1':'rgba(255,255,255,.06)',
+                cursor:'pointer',fontSize:11,color:voiceId===v.id?'#fff':'#94a3b8',fontWeight:voiceId===v.id?600:400}}>
+              {v.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Error */}
-      {error && <div style={{background:'#fef2f2',color:'#dc2626',padding:'8px 12px',borderRadius:8,fontSize:12,marginBottom:10}}>{error}</div>}
-
-      {/* Now playing */}
-      {chapters && (
-        <div style={{background:'var(--bg)',borderRadius:10,padding:'12px 14px',marginBottom:14}}>
-          <div style={{fontSize:11,color:'var(--sub)',marginBottom:4}}>
-            第 {chapIdx+1} / {chapters.length} 章
-          </div>
-          <div style={{fontSize:14,fontWeight:600,marginBottom:8,color:'var(--text)'}}>{chapter?.title}</div>
-          {/* Progress bar */}
-          <div style={{height:4,background:'var(--border)',borderRadius:2,marginBottom:8,overflow:'hidden'}}>
-            <div style={{height:'100%',width:`${progress}%`,background:'#6366f1',borderRadius:2,transition:'width .3s'}}/>
-          </div>
-          <div style={{fontSize:11,color:'var(--sub)'}}>段落 {paraIdx+1} / {totalParas}</div>
-          {/* Current paragraph preview */}
-          {chapter?.paragraphs?.[paraIdx] && (
-            <div style={{fontSize:12,color:'var(--sub)',marginTop:8,lineHeight:1.6,
-              maxHeight:60,overflow:'hidden',textOverflow:'ellipsis',
-              display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical'}}>
-              {chapter.paragraphs[paraIdx]}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Controls */}
-      <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:20,marginBottom:14}}>
-        <button onClick={prevChap} style={{background:'none',border:'none',fontSize:24,cursor:'pointer',opacity:chapIdx===0?.4:1}}>⏮</button>
-        <button onClick={togglePlay}
-          style={{width:56,height:56,borderRadius:'50%',background:'#6366f1',border:'none',
-            fontSize:24,color:'#fff',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',
-            boxShadow:'0 4px 12px rgba(99,102,241,.4)'}}>
-          {loading ? '⏳' : playing ? '⏸' : '▶'}
-        </button>
-        <button onClick={nextChap} style={{background:'none',border:'none',fontSize:24,cursor:'pointer',opacity:!chapters||chapIdx===chapters.length-1?.4:1}}>⏭</button>
-        <button onClick={addManualBookmark} style={{background:'none',border:'none',fontSize:20,cursor:'pointer'}} title="加書籤">🔖</button>
-      </div>
+      {error && <div style={{background:'rgba(239,68,68,.1)',color:'#f87171',padding:'10px 14px',borderRadius:10,fontSize:12,marginBottom:10,textAlign:'center'}}>{error}</div>}
 
       {/* Chapter list toggle */}
       <button onClick={()=>setShowChapList(v=>!v)}
-        style={{width:'100%',padding:'8px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:8,
-          fontSize:13,cursor:'pointer',marginBottom:8,color:'var(--text)'}}>
-        📖 章節列表 {showChapList?'▲':'▼'}
+        style={{width:'100%',padding:'10px',background:'rgba(255,255,255,.04)',border:'none',borderRadius:10,
+          fontSize:13,cursor:'pointer',marginBottom:8,color:'#94a3b8',textAlign:'left'}}>
+        章節列表 {showChapList?'▲':'▼'}
       </button>
       {showChapList && chapters && (
-        <div style={{maxHeight:200,overflowY:'auto',borderRadius:8,border:'1px solid var(--border)',marginBottom:8}}>
+        <div style={{maxHeight:200,overflowY:'auto',borderRadius:10,background:'rgba(255,255,255,.04)',marginBottom:8}}>
           {chapters.map((ch,i) => (
             <div key={i} onClick={()=>{ setShowChapList(false); stopPlayback(); setChapIdx(i); setParaIdx(0); }}
-              style={{padding:'10px 14px',fontSize:13,borderBottom:'1px solid var(--border)',cursor:'pointer',
-                background:i===chapIdx?'#eef2ff':'transparent',
-                color:i===chapIdx?'#4338ca':'var(--text)',fontWeight:i===chapIdx?600:400}}>
+              style={{padding:'10px 14px',fontSize:13,borderBottom:'1px solid rgba(255,255,255,.05)',cursor:'pointer',
+                background:i===chapIdx?'rgba(99,102,241,.2)':'transparent',
+                color:i===chapIdx?'#a5b4fc':'#94a3b8',fontWeight:i===chapIdx?600:400}}>
               {ch.title}
             </div>
           ))}
@@ -3257,27 +3262,27 @@ function SleepPage({ records, setRecords }) {
   const nextScript = () => setScriptIdx(i=>(i+1)%BEAR_SLEEP_SCRIPTS.length);
 
   return (
-    <div className="page fade" style={{paddingTop:20}}>
-      <h2 style={{fontSize:20,fontWeight:700,margin:'0 0 20px'}}>😴 睡眠</h2>
+    <div className="page sleep-page fade" style={{paddingTop:20}}>
+      <h2 style={{fontSize:20,fontWeight:700,margin:'0 0 16px',color:'#e2e8f0'}}>睡眠</h2>
+
+      {/* Bear bubble */}
+      <div style={{marginBottom:20}}>
+        <BearBubble msg={
+          hours>=7&&hours<=9?`哇！睡了 ${hours} 小時，狀態超好的！今天的訓練一定很爽 💪`:
+          hours<6?`只睡 ${hours} 小時？熊大大擔心你啦，今天訓練輕一點，早點睡！`:
+          `睡了 ${hours} 小時，還不錯喔，繼續維持！`
+        } mood={mood}/>
+      </div>
 
       {/* Sleep check-in */}
       <div className="card p-5 mb-4">
-        <p style={{fontSize:15,fontWeight:600,margin:'0 0 6px'}}>🐻 昨晚睡幾小時？</p>
-        <p style={{fontSize:13,color:'var(--sub)',margin:'0 0 20px'}}>拖動滑桿，看熊大大的反應！</p>
+        <p style={{fontSize:15,fontWeight:600,margin:'0 0 4px',color:'#e2e8f0'}}>昨晚睡幾小時？</p>
+        <p style={{fontSize:12,color:'#94a3b8',margin:'0 0 20px'}}>拖動滑桿記錄</p>
 
-        {/* Bear face + hours display */}
-        <div style={{display:'flex',alignItems:'center',gap:20,marginBottom:20}}>
-          <BearFace mood={mood} size={90}/>
-          <div>
-            <div style={{fontSize:40,fontWeight:800,color:color,lineHeight:1}}>{hours}</div>
-            <div style={{fontSize:14,color:color,fontWeight:500}}>小時</div>
-            <div style={{fontSize:12,color:'var(--sub)',marginTop:4}}>{
-              hours>=7&&hours<=9?'睡眠品質優秀！':
-              hours===6||hours===10?'還可以，再調整一下':
-              hours<6?'睡太少了，今天輕鬆點':
-              '睡太多，注意一下作息'
-            }</div>
-          </div>
+        {/* Hours display */}
+        <div style={{textAlign:'center',marginBottom:20}}>
+          <div style={{fontSize:52,fontWeight:800,color:color,lineHeight:1}}>{hours}</div>
+          <div style={{fontSize:16,color:color,fontWeight:500,marginTop:4}}>小時</div>
         </div>
 
         {/* Slider */}
@@ -3293,8 +3298,8 @@ function SleepPage({ records, setRecords }) {
         </div>
 
         {saved ? (
-          <div style={{textAlign:'center',padding:'10px',background:'rgba(34,197,94,.1)',borderRadius:10,color:'var(--green)',fontWeight:600}}>
-            ✅ 已記錄 {hours} 小時！
+          <div style={{textAlign:'center',padding:'12px',background:'rgba(34,197,94,.15)',borderRadius:12,color:'#22c55e',fontWeight:600}}>
+            記錄成功！睡了 {hours} 小時 🐻
           </div>
         ) : (
           <button className="btn-primary" onClick={saveSleep}>記錄睡眠</button>
@@ -3302,40 +3307,41 @@ function SleepPage({ records, setRecords }) {
       </div>
 
       {/* Bear coaching monologue */}
-      <div className="card p-4 mb-4" style={{background:'linear-gradient(135deg,rgba(99,102,241,.08),rgba(168,85,247,.08))',borderColor:'rgba(99,102,241,.2)'}}>
+      <div className="card p-4 mb-4">
         <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
-          <p style={{fontSize:15,fontWeight:600,margin:0}}>🐻 熊大大碎唸</p>
-          <button onClick={()=>setShowScript(s=>!s)} style={{background:'var(--border)',border:'none',borderRadius:8,padding:'4px 10px',fontSize:12,cursor:'pointer',color:'var(--text)'}}>
+          <p style={{fontSize:15,fontWeight:600,margin:0,color:'#e2e8f0'}}>熊大大說晚安</p>
+          <button onClick={()=>setShowScript(s=>!s)} style={{background:'rgba(255,255,255,.1)',border:'none',borderRadius:8,padding:'4px 10px',fontSize:12,cursor:'pointer',color:'#94a3b8'}}>
             {showScript?'收起':'展開'}
           </button>
         </div>
         {showScript && (
           <>
-            <p style={{fontSize:14,lineHeight:1.8,color:'var(--text)',margin:'0 0 12px',fontStyle:'italic'}}>
+            <p style={{fontSize:14,lineHeight:1.8,color:'#cbd5e1',margin:'0 0 12px',fontStyle:'italic'}}>
               「{BEAR_SLEEP_SCRIPTS[scriptIdx]}」
             </p>
-            <button onClick={nextScript} style={{background:'transparent',border:'1px solid rgba(99,102,241,.3)',borderRadius:8,padding:'6px 14px',fontSize:12,cursor:'pointer',color:'#6366f1'}}>換一段 →</button>
+            <button onClick={nextScript} style={{background:'rgba(99,102,241,.2)',border:'none',borderRadius:8,padding:'6px 14px',fontSize:12,cursor:'pointer',color:'#818cf8'}}>換一段 →</button>
           </>
         )}
-        {!showScript && <p style={{fontSize:13,color:'var(--sub)',margin:0}}>點展開聽熊大大說晚安故事</p>}
+        {!showScript && <p style={{fontSize:13,color:'#64748b',margin:0}}>點展開聽熊大大說晚安</p>}
       </div>
 
       {/* Sound player */}
       <div className="card p-4 mb-4">
-        <p style={{fontSize:15,fontWeight:600,margin:'0 0 14px'}}>🎵 助眠音效</p>
+        <p style={{fontSize:15,fontWeight:600,margin:'0 0 14px',color:'#e2e8f0'}}>助眠音效</p>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
           {sounds.map(s => (
-            <button key={s.id} className={`sound-btn ${playingSound===s.id?'playing':''}`} onClick={()=>playSound(s.id)}>
+            <button key={s.id} className={`sound-btn ${playingSound===s.id?'playing':''}`}
+              onClick={()=>playSound(s.id)}
+              style={{background:playingSound===s.id?'rgba(249,115,22,.15)':'rgba(255,255,255,.05)'}}>
               <span style={{fontSize:28}}>{s.icon}</span>
-              <span>{s.label}</span>
-              {playingSound===s.id && <span style={{fontSize:10,color:'var(--orange)'}}>播放中 ●</span>}
+              <span style={{color:playingSound===s.id?'var(--orange)':'#94a3b8'}}>{s.label}</span>
+              {playingSound===s.id && <span style={{fontSize:10,color:'var(--orange)'}}>● 播放中</span>}
             </button>
           ))}
         </div>
         {playingSound && (
-          <button onClick={stopSound} className="btn-secondary" style={{marginTop:12}}>⏹ 停止音效</button>
+          <button onClick={stopSound} className="btn-secondary" style={{marginTop:12,borderColor:'#475569',color:'#94a3b8'}}>停止音效</button>
         )}
-        <p style={{fontSize:11,color:'var(--sub)',margin:'10px 0 0',textAlign:'center'}}>建議配合睡眠計時器使用</p>
       </div>
 
       {/* 7-day sleep trend */}
@@ -3350,16 +3356,16 @@ function SleepPage({ records, setRecords }) {
 
       {/* Sleep tips */}
       <div className="card p-4 mb-4">
-        <p style={{fontSize:15,fontWeight:600,margin:'0 0 12px'}}>💡 睡眠小貼士</p>
+        <p style={{fontSize:15,fontWeight:600,margin:'0 0 12px',color:'#e2e8f0'}}>熊大大的睡眠秘訣</p>
         {[
-          {icon:'🌡️', tip:'保持室溫 18-22°C，最好入睡'},
-          {icon:'📱', tip:'睡前 30 分鐘遠離藍光屏幕'},
-          {icon:'🕙', tip:'固定時間上床，建立身體節律'},
-          {icon:'🍵', tip:'睡前 4 小時避免咖啡因'},
+          {icon:'🌡️', tip:'室溫 18-22°C 最容易睡著'},
+          {icon:'📱', tip:'睡前 30 分鐘放下手機'},
+          {icon:'🕙', tip:'固定時間上床，身體會記住'},
+          {icon:'🍵', tip:'睡前 4 小時不喝咖啡'},
         ].map((t,i) => (
           <div key={i} style={{display:'flex',gap:12,marginBottom:10,alignItems:'flex-start'}}>
             <span style={{fontSize:18}}>{t.icon}</span>
-            <span style={{fontSize:13,color:'var(--sub)',lineHeight:1.5}}>{t.tip}</span>
+            <span style={{fontSize:13,color:'#94a3b8',lineHeight:1.6}}>{t.tip}</span>
           </div>
         ))}
       </div>
@@ -3591,7 +3597,7 @@ function EatPage({ profile, dietLog, setDietLog }) {
       {todayEntries.length === 0 && !showAdd && (
         <div style={{textAlign:'center',padding:'40px 0',color:'var(--sub)'}}>
           <p style={{fontSize:32,margin:'0 0 8px'}}>🍽️</p>
-          <p>今天還沒有記錄，去吃點東西吧！</p>
+          <BearBubble msg="今天還沒吃東西？快去補充能量，熊大大等你回報！" mood="worried"/>
         </div>
       )}
     </div>
@@ -3784,18 +3790,31 @@ function ProgressPage({ records, setRecords }) {
 
   return (
     <div className="page fade" style={{paddingTop:20}}>
-      <h2 style={{fontSize:20,fontWeight:700,margin:'0 0 16px'}}>📊 進度</h2>
+      <h2 style={{fontSize:20,fontWeight:700,margin:'0 0 16px'}}>進度</h2>
+
+      {/* Bear bubble achievement */}
+      {workouts.length > 0 && (
+        <div style={{marginBottom:16}}>
+          <BearBubble msg={
+            streak >= 7 ? `連續訓練 ${streak} 天！你已經超越大多數人了 🔥` :
+            streak >= 3 ? `連續 ${streak} 天！習慣正在養成中，別停下來！` :
+            workouts.length > 0 ? `你已經完成了 ${workouts.length} 次訓練，每一次都算數 💪` :
+            '第一次訓練永遠是最難的，今天就開始吧！'
+          } mood={streak>=7?'excited':streak>=3?'happy':'neutral'}/>
+        </div>
+      )}
 
       {/* Stats row */}
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:16}}>
         {[
-          {label:'總訓練',val:workouts.length,unit:'次',color:'var(--orange)'},
-          {label:'本週',val:workouts.filter(r=>{const d=new Date(r.date),now=new Date();return (now-d)<7*86400000;}).length,unit:'次',color:'var(--green)'},
-          {label:'連續天',val:streak,unit:'天',color:'var(--yellow)'},
+          {label:'完成訓練',val:workouts.length,unit:'次',color:'var(--orange)',icon:'🏆'},
+          {label:'本週',val:workouts.filter(r=>{const d=new Date(r.date),now=new Date();return (now-d)<7*86400000;}).length,unit:'次',color:'var(--green)',icon:'📅'},
+          {label:'連續天數',val:streak,unit:'天',color:'var(--yellow)',icon:'🔥'},
         ].map((s,i)=>(
           <div key={i} className="card p-3" style={{textAlign:'center'}}>
-            <div style={{fontSize:26,fontWeight:800,color:s.color}}>{s.val}</div>
-            <div style={{fontSize:11,color:'var(--sub)'}}>{s.label} {s.unit}</div>
+            <div style={{fontSize:20,marginBottom:2}}>{s.icon}</div>
+            <div style={{fontSize:24,fontWeight:800,color:s.color}}>{s.val}</div>
+            <div style={{fontSize:11,color:'var(--sub)'}}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -3878,7 +3897,7 @@ function TrainPage({ records, setRecords }) {
   if (subPage==='equip') return (
     <div className="page fade" style={{paddingTop:20}}>
       <h2 style={{fontSize:20,fontWeight:700,margin:'0 0 14px'}}>💪 練</h2>
-      <div style={{display:'flex',gap:0,marginBottom:20,background:'var(--card)',borderRadius:12,padding:4,border:'0.5px solid var(--border)'}}>
+      <div style={{display:'flex',gap:0,marginBottom:20,background:'var(--bg)',borderRadius:12,padding:4}}>
         {[{id:'workouts',icon:'📋',label:'課表'},{id:'equip',icon:'🏋️',label:'器材百科'},{id:'progress',icon:'📊',label:'進度'}].map(t=>(
           <button key={t.id} onClick={()=>setSubPage(t.id)}
             style={{flex:1,padding:'9px 4px',border:'none',borderRadius:9,cursor:'pointer',fontSize:12,fontWeight:t.id==='equip'?600:400,
@@ -3895,7 +3914,7 @@ function TrainPage({ records, setRecords }) {
   if (subPage==='progress') return (
     <div className="page fade" style={{paddingTop:20}}>
       <h2 style={{fontSize:20,fontWeight:700,margin:'0 0 14px'}}>💪 練</h2>
-      <div style={{display:'flex',gap:0,marginBottom:20,background:'var(--card)',borderRadius:12,padding:4,border:'0.5px solid var(--border)'}}>
+      <div style={{display:'flex',gap:0,marginBottom:20,background:'var(--bg)',borderRadius:12,padding:4}}>
         {[{id:'workouts',icon:'📋',label:'課表'},{id:'equip',icon:'🏋️',label:'器材百科'},{id:'progress',icon:'📊',label:'進度'}].map(t=>(
           <button key={t.id} onClick={()=>setSubPage(t.id)}
             style={{flex:1,padding:'9px 4px',border:'none',borderRadius:9,cursor:'pointer',fontSize:12,fontWeight:t.id==='progress'?600:400,
@@ -3917,7 +3936,7 @@ function TrainPage({ records, setRecords }) {
       <h2 style={{fontSize:20,fontWeight:700,margin:'0 0 14px'}}>💪 練</h2>
 
       {/* 三 Tab 分頁 */}
-      <div style={{display:'flex',gap:0,marginBottom:20,background:'var(--card)',borderRadius:12,padding:4,border:'0.5px solid var(--border)'}}>
+      <div style={{display:'flex',gap:0,marginBottom:20,background:'var(--bg)',borderRadius:12,padding:4}}>
         {[
           {id:'workouts', icon:'📋', label:'課表'},
           {id:'equip',    icon:'🏋️', label:'器材百科'},
@@ -3935,9 +3954,8 @@ function TrainPage({ records, setRecords }) {
 
       {/* Bear recommendation */}
       {!trainedToday && lastWorkout && (
-        <div className="card p-3 mb-4" style={{display:'flex',gap:10,alignItems:'center',borderLeft:'3px solid var(--orange)'}}>
-          <BearFace mood="happy" size={44}/>
-          <p style={{fontSize:13,margin:0,color:'var(--sub)'}}>上次練了 <strong>{lastWorkout.target}</strong>，今天可以換個部位</p>
+        <div style={{marginBottom:16}}>
+          <BearBubble msg={`上次練了 ${lastWorkout.target}，今天換個部位，讓肌肉均衡發展！`} mood="happy"/>
         </div>
       )}
       {trainedToday && (
@@ -3971,8 +3989,8 @@ function TrainPage({ records, setRecords }) {
       {/* Workout cards */}
       {workouts.length===0 && (
         <div style={{textAlign:'center',padding:'40px 0',color:'var(--sub)'}}>
-          <p>找不到「{muscleFilter}」相關課表</p>
-          <button onClick={()=>{setMuscleFilter('全部');setDiffFilter('全部')}} className="chip chip-inactive" style={{marginTop:8}}>清除篩選</button>
+          <BearBubble msg={`熊大大找不到「${muscleFilter}」的課表，換個部位試試？`} mood="thinking"/>
+          <button onClick={()=>{setMuscleFilter('全部');setDiffFilter('全部')}} className="chip chip-inactive" style={{marginTop:8,display:'block',margin:'8px auto 0'}}>清除篩選</button>
         </div>
       )}
       {workouts.map((w,i) => (

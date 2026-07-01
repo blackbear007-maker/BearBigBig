@@ -1,0 +1,4325 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="熊大大"/>
+<meta name="theme-color" content="#f97316"/>
+<title>熊大大 — 陪你吃、睡、練</title>
+<link rel="manifest" href="./manifest.json"/>
+<script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;overscroll-behavior:none}
+:root{
+  --bg:#f8fafc;--card:#fff;--text:#1e293b;--sub:#64748b;--border:#e2e8f0;
+  --orange:#f97316;--green:#22c55e;--red:#ef4444;--yellow:#eab308;
+  --nav-h:68px;
+}
+.dark{
+  --bg:#0f172a;--card:#1e293b;--text:#f1f5f9;--sub:#94a3b8;--border:#334155;
+}
+body{background:var(--bg);color:var(--text);min-height:100dvh}
+.card{background:var(--card);border-radius:16px;border:1px solid var(--border)}
+.page{padding:16px;padding-bottom:calc(var(--nav-h) + 16px);max-width:430px;margin:0 auto;min-height:100dvh}
+.chip{padding:6px 14px;border-radius:99px;font-size:13px;font-weight:500;border:none;cursor:pointer;transition:all .15s}
+.chip-active{background:var(--orange);color:#fff}
+.chip-inactive{background:var(--border);color:var(--text)}
+.btn-primary{background:var(--orange);color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:15px;font-weight:600;cursor:pointer;width:100%;transition:opacity .15s}
+.btn-primary:active{opacity:.8}
+.btn-secondary{background:transparent;color:var(--orange);border:2px solid var(--orange);border-radius:12px;padding:10px 24px;font-size:15px;font-weight:600;cursor:pointer;width:100%}
+input,select{background:var(--card);color:var(--text);border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:15px;outline:none;width:100%}
+input:focus,select:focus{border-color:var(--orange)}
+.nav-bar{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0;cursor:pointer;font-size:11px;color:var(--sub);transition:color .15s;gap:3px}
+.nav-item.active{color:var(--orange)}
+.nav-bear{flex:1.2;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0;cursor:pointer}
+.nav-bear-bubble{position:absolute;top:-2px;width:58px;height:58px;background:var(--orange);border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(249,115,22,.4)}
+.bear-sleep-btn{position:fixed;bottom:calc(var(--nav-h) + 16px);right:16px;width:48px;height:48px;border-radius:50%;background:var(--card);border:2px solid var(--border);font-size:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.1);z-index:99}
+@keyframes fade-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade{animation:fade-in .3s ease}
+@keyframes bear-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.bear-bounce{animation:bear-bounce 2s ease-in-out infinite}
+@keyframes pulse-ring{0%{transform:scale(1);opacity:.8}100%{transform:scale(1.4);opacity:0}}
+.pulse-ring::after{content:'';position:absolute;inset:0;border-radius:50%;border:2px solid var(--orange);animation:pulse-ring 1.8s ease-out infinite}
+/* Sound player */
+.sound-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;border-radius:14px;border:2px solid var(--border);cursor:pointer;transition:all .2s;font-size:12px;color:var(--sub)}
+.sound-btn.playing{border-color:var(--orange);background:rgba(249,115,22,.08);color:var(--orange)}
+/* Sleep slider */
+.sleep-range{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:99px;outline:none;cursor:pointer}
+.sleep-range::-webkit-slider-thumb{-webkit-appearance:none;width:36px;height:36px;border-radius:50%;background:var(--orange);cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(249,115,22,.4)}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:flex-end}
+.modal-sheet{background:var(--card);border-radius:20px 20px 0 0;width:100%;max-height:90dvh;overflow-y:auto;padding:20px}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
+.badge-green{background:rgba(34,197,94,.15);color:#16a34a}
+.badge-yellow{background:rgba(234,179,8,.15);color:#ca8a04}
+.badge-red{background:rgba(239,68,68,.15);color:#dc2626}
+.badge-orange{background:rgba(249,115,22,.15);color:#ea580c}
+.badge-blue{background:rgba(59,130,246,.15);color:#2563eb}
+.badge-purple{background:rgba(168,85,247,.15);color:#9333ea}
+</style>
+  <!-- Health sync libs -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async></script>
+</head>
+<body>
+<div id="root"><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100dvh;gap:16px;color:#f97316"><div style="font-size:64px">🐻</div><div style="font-size:16px;color:#64748b">熊大大正在準備中…</div></div></div>
+<script type="text/babel" data-presets="react">
+const {useState,useEffect,useRef,useCallback,useMemo}=React;
+
+// ── DATA ──────────────────────────────────────────────────────────────────
+const HOME_WORKOUTS = [
+  {
+    id: 'hw1', name: '居家上肢訓練', level: '入門', duration: 20, target: '胸、肩、三頭', icon: '💪',
+    exercises: [
+      { name: '伏地挺身', sets: 3, reps: '8-10', rest: 60, tip: '手掌略比肩寬，身體保持一直線，核心收緊不塌腰' },
+      { name: '鑽石伏地挺身', sets: 3, reps: '6-8', rest: 60, tip: '雙手靠近成菱形，主要訓練三頭肌，初學者可跪姿進行' },
+      { name: '肩推（裝水瓶）', sets: 3, reps: '12-15', rest: 45, tip: '坐姿或站姿皆可，水瓶舉至肩膀高度後向上推舉' },
+      { name: '撐體（椅子）', sets: 3, reps: '8-12', rest: 60, tip: '雙手撐於椅背，身體向下至手肘90度，感受三頭肌收縮' },
+    ]
+  },
+  {
+    id: 'hw2', name: '居家下肢訓練', level: '入門', duration: 25, target: '臀、腿', icon: '🦵',
+    exercises: [
+      { name: '徒手深蹲', sets: 4, reps: '15-20', rest: 60, tip: '雙腳與肩同寬，腳尖微微外開，膝蓋不超過腳尖太多，臀部往後坐' },
+      { name: '保加利亞分腿蹲', sets: 3, reps: '10/邊', rest: 60, tip: '後腳放椅上，前腳向前一大步，上半身挺直垂直下降' },
+      { name: '臀橋', sets: 4, reps: '15-20', rest: 45, tip: '仰躺屈膝，腳跟貼地，臀部用力往上推，頂點停留1秒' },
+      { name: '相撲深蹲', sets: 3, reps: '12-15', rest: 60, tip: '雙腳大步開立，腳尖外開45度，訓練內收肌與臀部' },
+      { name: '跳躍深蹲', sets: 3, reps: '10', rest: 90, tip: '有氧強化版，落地時輕柔彎膝吸震，膝蓋不鎖死' },
+    ]
+  },
+  {
+    id: 'hw3', name: '居家核心訓練', level: '入門', duration: 15, target: '腹、核心', icon: '🎯',
+    exercises: [
+      { name: '平板支撐', sets: 3, reps: '30-60秒', rest: 45, tip: '手肘在肩膀正下方，臀部不可翹高或下沉，全程腹部收緊' },
+      { name: '捲腹', sets: 3, reps: '15-20', rest: 45, tip: '雙手放耳旁，只抬起肩胛骨，不要拉脖子，感受上腹收縮' },
+      { name: '登山者', sets: 3, reps: '20/邊', rest: 45, tip: '平板姿勢，快速交替抬膝，腰部不可上下晃動' },
+      { name: '側平板', sets: 3, reps: '20-30秒/邊', rest: 30, tip: '手肘在肩膀正下方，身體側面呈一直線，不可塌腰' },
+    ]
+  },
+  {
+    id: 'hw4', name: '居家全身燃脂', level: '入門', duration: 20, target: '全身', icon: '🔥',
+    exercises: [
+      { name: '開合跳', sets: 3, reps: '30秒', rest: 30, tip: '暖身動作，保持輕鬆節奏，落地腳尖先著地減少衝擊' },
+      { name: '波比跳', sets: 4, reps: '8', rest: 60, tip: '最有效的全身動作之一：深蹲→伏地挺身→跳起，量力而為' },
+      { name: '高抬腿', sets: 3, reps: '30秒', rest: 30, tip: '原地跑步抬高膝蓋至腰部，手臂配合擺動' },
+      { name: '深蹲跳', sets: 3, reps: '10', rest: 60, tip: '深蹲後起身跳起，增加有氧強度' },
+    ]
+  },
+,
+  // ── 居家 中級 ──────────────────────────────────────────────────────────────
+  {
+    id: 'hw5', name: '居家上肢中級', level: '中級', duration: 30, target: '胸、三頭、肩', icon: '💪',
+    exercises: [
+      { name: '寬距伏地挺身', sets: 4, reps: '12-15', rest: 60, tip: '雙手比肩再寬一個拳頭，下放至胸部微觸地，訓練胸肌外側' },
+      { name: '窄距伏地挺身', sets: 3, reps: '10-12', rest: 60, tip: '雙手與肩同寬，手肘貼身下放，三頭肌佔主導，感受後臂燃燒' },
+      { name: '撐椅三頭伸展', sets: 3, reps: '12-15', rest: 60, tip: '背對椅子撐手，雙腿伸直難度更高，感受三頭肌底部收縮' },
+      { name: '伏地挺身肩推式', sets: 3, reps: '8-10', rest: 75, tip: '做完一下伏地挺身後，臀部向上呈倒V字，垂直向下點頭壓肩，前三角肌強烈刺激' },
+      { name: '俯身Y字運動', sets: 3, reps: '12', rest: 45, tip: '俯臥地面，雙臂向斜前方舉起成Y字，感受後三角和中背收縮' },
+    ]
+  },
+  {
+    id: 'hw6', name: '居家下肢中級', level: '中級', duration: 35, target: '臀、腿後側', icon: '🦵',
+    exercises: [
+      { name: '單腳臀橋', sets: 4, reps: '12/邊', rest: 60, tip: '仰躺單腳懸空，另一腳踩地推臀，頂點停留2秒感受單側臀大肌燒' },
+      { name: '保加利亞分腿蹲', sets: 4, reps: '10/邊', rest: 75, tip: '後腳抬高於椅上，前腳向前大步，上半身挺直垂直下降至膝蓋近地' },
+      { name: '羅馬尼亞硬舉（徒手）', sets: 3, reps: '12', rest: 60, tip: '雙手持水瓶，髖關節往後推，背打直往前傾，感受大腿後側強烈拉伸' },
+      { name: '側弓箭步', sets: 3, reps: '10/邊', rest: 60, tip: '向一側跨大步，蹲低感受內收肌和臀部，另一腿伸直，回正再換邊' },
+      { name: '臀部脈衝', sets: 3, reps: '20', rest: 45, tip: '臀橋頂點位置做小幅度上下脈衝，持續肌肉張力，最後幾下感受極度燒灼' },
+    ]
+  },
+  {
+    id: 'hw7', name: '居家核心中級', level: '中級', duration: 25, target: '全核心、腹斜肌', icon: '🎯',
+    exercises: [
+      { name: '登山式（快速）', sets: 4, reps: '30秒', rest: 30, tip: '平板姿勢快速交替抬膝，腰部不晃動，速度越快心率越高' },
+      { name: '側棒式', sets: 3, reps: '30秒/邊', rest: 30, tip: '手肘在肩正下方，身體側面成一直線，進階可抬起上方腿' },
+      { name: '空中腳踏車', sets: 3, reps: '20/邊', rest: 45, tip: '仰躺雙手輕扶耳旁，交替抬膝同時轉動對側肩膀，感受腹斜肌扭轉' },
+      { name: '反向捲腹', sets: 3, reps: '15', rest: 45, tip: '仰躺雙腿舉起，用腹肌下段將臀部捲離地面，不要用腿甩動借力' },
+      { name: '死蟲式', sets: 3, reps: '8/邊', rest: 45, tip: '仰躺四肢舉起，對側手腳同時向下伸展保持腰背貼地，脊椎穩定性訓練精華' },
+    ]
+  },
+  {
+    id: 'hw8', name: '居家HIIT中級', level: '中級', duration: 25, target: '全身有氧 + 爆發力', icon: '🔥',
+    exercises: [
+      { name: '波比跳進階', sets: 4, reps: '10', rest: 75, tip: '深蹲→伏地挺身→跳起，每下都要做完整伏地挺身，不偷懶' },
+      { name: '跳躍分腿蹲', sets: 4, reps: '8/邊', rest: 60, tip: '前後腿弓箭步站姿，跳起在空中換腳，落地立即吸震再跳' },
+      { name: '熊爬', sets: 3, reps: '10步', rest: 60, tip: '四肢著地膝蓋離地5cm，保持身體水平向前爬，核心全程收緊不晃腰' },
+      { name: '蜘蛛式伏地挺身', sets: 3, reps: '6/邊', rest: 60, tip: '做伏地挺身時同步將膝蓋提向同側手肘，核心和胸肌同步訓練' },
+      { name: '高抬腿衝刺', sets: 4, reps: '20秒', rest: 40, tip: '原地最高速抬腿，腿抬至腰部，腳踝放鬆快速彈跳，訓練快縮肌纖維' },
+    ]
+  },
+  // ── 居家 進階 ──────────────────────────────────────────────────────────────
+  {
+    id: 'hw9', name: '居家進階推力訓練', level: '進階', duration: 35, target: '胸、肩、三頭（爆發力）', icon: '⚡',
+    exercises: [
+      { name: '爆發性伏地挺身', sets: 5, reps: '6', rest: 90, tip: '推起時雙手離地，落地立即吸震再推，訓練快縮肌和上肢爆發力，量力而為' },
+      { name: '弓箭手伏地挺身', sets: 4, reps: '5/邊', rest: 90, tip: '單手做伏地挺身，另一手向側伸直貼地，比單手版更容易，是單手的前置訓練' },
+      { name: '超慢速伏地挺身', sets: 3, reps: '5', rest: 75, tip: '下放5秒→頂端撐5秒→推起5秒，超慢速讓肌肉在整個動作範圍都承受張力' },
+      { name: '後倒三頭伸展', sets: 4, reps: '8', rest: 75, tip: '跪姿雙手前伸貼地，身體像斜板一樣向後倒，只用三頭肌煞停，極高強度' },
+      { name: '俯臥撐跳箱（替代：沙發）', sets: 3, reps: '5', rest: 90, tip: '雙手撐在較高平面做伏地挺身，降低難度練習爆發伏地挺身的感覺' },
+    ]
+  },
+  {
+    id: 'hw10', name: '居家進階全身爆發', level: '進階', duration: 30, target: '全身複合爆發力', icon: '🚀',
+    exercises: [
+      { name: '波比跳全力版', sets: 5, reps: '8', rest: 90, tip: '每一下都全力跳起雙手過頭拍掌，不能偷懶跳矮一點，追求最大爆發高度' },
+      { name: '跳躍深蹲（最大高度）', sets: 4, reps: '8', rest: 90, tip: '每次都盡可能跳到最高，蹲下到大腿平行再起跳，不要半蹲應付' },
+      { name: '伏地挺身拍手', sets: 4, reps: '6', rest: 90, tip: '爆發推起雙手離地在胸前拍掌，落地立即吸震，單手拍掌是更進階版本' },
+      { name: '單腳跳箱（替代：沙發邊）', sets: 3, reps: '5/邊', rest: 75, tip: '單腳起跳單腳落地，訓練每條腿的爆發力和穩定性，落地膝蓋微彎吸震' },
+      { name: '衝刺式熊爬', sets: 3, reps: '15步', rest: 75, tip: '最快速度熊爬，膝蓋離地，身體保持水平，心率拉到最高' },
+    ]
+  },
+];
+const GYM_WORKOUTS = [
+  {
+    id: 'gw1', name: '健身房推的訓練', level: '入門', duration: 45, target: '胸、肩、三頭', icon: '🏋️',
+    exercises: [
+      { name: '槓鈴臥推', sets: 4, reps: '8-10', rest: 90, tip: '躺於椅上，眼睛在槓鈴正下方，握距略比肩寬，槓鈴下放至胸肌中段' },
+      { name: '啞鈴飛鳥', sets: 3, reps: '12-15', rest: 60, tip: '雙臂伸展如擁抱姿勢，感受胸肌拉伸，手肘微彎不鎖死' },
+      { name: '肩推機', sets: 3, reps: '12', rest: 60, tip: '坐姿固定，垂直向上推舉，不要借助身體搖晃' },
+      { name: '滑輪下壓（三頭）', sets: 3, reps: '15', rest: 45, tip: '上臂固定貼身，只動前臂向下壓，感受三頭肌收縮' },
+    ]
+  },
+  {
+    id: 'gw2', name: '健身房拉的訓練', level: '入門', duration: 45, target: '背、肱二頭', icon: '🏋️',
+    exercises: [
+      { name: '滑輪下拉', sets: 4, reps: '10-12', rest: 75, tip: '握距略比肩寬，往胸口方向拉，感受背闊肌收縮，身體微微後仰' },
+      { name: '坐姿划船機', sets: 3, reps: '12', rest: 75, tip: '挺胸直背，手肘向後拉至側腰，感受背部肌肉擠壓' },
+      { name: '二頭彎舉（啞鈴）', sets: 3, reps: '12-15', rest: 60, tip: '上臂固定不晃動，旋轉前臂舉起，頂點停留1秒感受肌肉收縮' },
+      { name: '反握下拉', sets: 3, reps: '12', rest: 60, tip: '窄握反握拉下，同時訓練背肌與二頭肌' },
+    ]
+  },
+  {
+    id: 'gw3', name: '健身房腿部訓練', level: '入門', duration: 50, target: '腿、臀', icon: '🦵',
+    exercises: [
+      { name: '槓鈴深蹲', sets: 4, reps: '8-10', rest: 120, tip: '槓鈴置於斜方肌，雙腳與肩同寬，深蹲至大腿平行地面，全程保持中立脊椎' },
+      { name: '腿推機', sets: 3, reps: '12-15', rest: 90, tip: '腳掌置於踏板上半部，下放至膝蓋90度，推起時不鎖死膝蓋' },
+      { name: '腿伸展機', sets: 3, reps: '15', rest: 60, tip: '坐正靠背，頂點收縮停頓，感受股四頭肌燃燒' },
+      { name: '腿彎舉機', sets: 3, reps: '15', rest: 60, tip: '俯臥腿彎舉，感受膕繩肌後側收縮，速度不要過快' },
+      { name: '臀推機', sets: 3, reps: '15', rest: 60, tip: '腰部貼墊，腳踩踏板，臀部用力向上推，頂點夾緊臀大肌' },
+    ]
+  },
+  // ── 健身房 中級 ────────────────────────────────────────────────────────────
+  {
+    id: 'gw4', name: '健身房胸肌中級', level: '中級', duration: 55, target: '上/中/下胸全面', icon: '💪',
+    exercises: [
+      { name: '上斜槓鈴臥推', sets: 4, reps: '8-10', rest: 90, tip: '椅背45度，鍛鍊上胸（鎖骨下方），重量比平推輕10-20%是正常' },
+      { name: '下斜啞鈴臥推', sets: 3, reps: '10-12', rest: 75, tip: '頭低腳高，槓鈴下放至胸肌下緣，訓練胸肌下段輪廓' },
+      { name: '繩索夾胸（中位）', sets: 3, reps: '15', rest: 60, tip: '滑輪調至中間高度，雙手在胸前夾合感受胸肌內側收縮，不要聳肩' },
+      { name: '上斜啞鈴飛鳥', sets: 3, reps: '12', rest: 60, tip: '椅背30度，雙臂如擁抱展開，感受胸肌上段完整拉伸' },
+      { name: '伏地挺身（加重背心）', sets: 3, reps: '12', rest: 75, tip: '穿背心讓每下都更有效，動作控制比速度重要，感受肌肉張力' },
+    ]
+  },
+  {
+    id: 'gw5', name: '健身房背部中級', level: '中級', duration: 55, target: '背闊肌、中背、後束', icon: '🏋️',
+    exercises: [
+      { name: '槓鈴俯身划船', sets: 4, reps: '8-10', rest: 90, tip: '上身前傾45度，槓鈴拉至下腹部，感受背部擠壓，不要借腰甩動' },
+      { name: '單手啞鈴划船', sets: 3, reps: '10/邊', rest: 75, tip: '手膝跪在椅上，另一手將啞鈴拉至腰側，手肘貼近身體拉到頂' },
+      { name: 'T槓划船', sets: 3, reps: '10', rest: 90, tip: '雙手握槓夾緊，胸口靠墊，純粹用背部力量拉，不借助腿彈' },
+      { name: '直臂下壓', sets: 3, reps: '15', rest: 60, tip: '滑輪高位，雙臂伸直弧線向下壓，感受背闊肌完整收縮，針對V形身材' },
+      { name: '輔助引體向上', sets: 3, reps: '8', rest: 90, tip: '使用引體向上輔助機，膝蓋跪上降低難度，目標是練到不需要輔助' },
+    ]
+  },
+  {
+    id: 'gw6', name: '健身房腿臀中級', level: '中級', duration: 60, target: '臀大肌、膕繩肌', icon: '🦵',
+    exercises: [
+      { name: '槓鈴羅馬尼亞硬舉', sets: 4, reps: '8-10', rest: 90, tip: '膝蓋微彎，髖往後推同時槓鈴貼腿下滑，感受大腿後側強烈拉伸後收回' },
+      { name: '槓鈴臀推', sets: 4, reps: '12', rest: 75, tip: '上背靠長椅，槓鈴跨在髖部加護墊，全力夾臀向上推，頂點停2秒' },
+      { name: '分腿蹲（啞鈴）', sets: 3, reps: '10/邊', rest: 75, tip: '雙手持啞鈴，前後腳分立，上半身保持直立，強調前腳臀腿用力' },
+      { name: '腿彎舉（坐姿）', sets: 3, reps: '12', rest: 60, tip: '坐姿腿彎舉對膕繩肌上段刺激更好，搭配俯臥版做到完整訓練' },
+      { name: '深蹲暫停版', sets: 3, reps: '8', rest: 90, tip: '蹲到底部停頓3秒，消除彈力輔助，純靠肌力站起，強化薄弱點' },
+    ]
+  },
+  {
+    id: 'gw7', name: '健身房肩膀中級', level: '中級', duration: 50, target: '前中後三角肌全面', icon: '🎯',
+    exercises: [
+      { name: '啞鈴肩推', sets: 4, reps: '10', rest: 75, tip: '坐姿，啞鈴從肩膀高度垂直推起，在頂點兩個啞鈴輕碰，不要完全鎖死手肘' },
+      { name: '側平舉', sets: 4, reps: '12-15', rest: 60, tip: '雙手持啞鈴，拇指側略低，手臂弧線向外舉至平行地面，不要聳肩借力' },
+      { name: '前平舉（交替）', sets: 3, reps: '12/邊', rest: 60, tip: '交替向前舉起，到肩膀高度停頓，訓練前三角肌，速度要慢' },
+      { name: '俯身後束飛鳥', sets: 4, reps: '15', rest: 60, tip: '俯身幾乎平行地面，啞鈴向兩側展開至肩膀高度，訓練常被忽略的後三角肌' },
+      { name: '直立划船', sets: 3, reps: '12', rest: 60, tip: '槓鈴或繩索，沿身體垂直拉至下巴高度，手肘高於手腕，肩膀和上背共同發力' },
+    ]
+  },
+  // ── 健身房 進階 ────────────────────────────────────────────────────────────
+  {
+    id: 'gw8', name: '健身房大三項', level: '進階', duration: 75, target: '全身肌力基礎', icon: '🏆',
+    exercises: [
+      { name: '槓鈴深蹲（大重量）', sets: 5, reps: '5', rest: 180, tip: '這是神聖的動作，技術優先於重量。背部繃緊、腹部充氣、蹲到底部、起身全力站起' },
+      { name: '槓鈴臥推（大重量）', sets: 5, reps: '5', rest: 180, tip: '肩胛骨收緊下壓建立穩固基礎，拱背（自然弓背）合法，腳踩地借力輔助穩定' },
+      { name: '槓鈴硬舉', sets: 3, reps: '3-5', rest: 240, tip: '大重量硬舉一週最多一次。腹部充氣繃緊，背打直不圓背，推地板而不是拉槓鈴的感覺' },
+      { name: '臥推輔助：啞鈴飛鳥', sets: 3, reps: '12', rest: 60, tip: '大重量訓練後的輔助動作，輕重量讓胸肌充血，補足大重量動作不到的孤立刺激' },
+    ]
+  },
+  {
+    id: 'gw9', name: '健身房引體向上專項', level: '進階', duration: 50, target: '背闊肌、肱二頭、核心', icon: '⚡',
+    exercises: [
+      { name: '標準引體向上', sets: 5, reps: '最大次數', rest: 120, tip: '全幅度：手臂完全伸展到下巴過橫槓，不要只做半程，每組都做到完全力竭' },
+      { name: '加重引體向上', sets: 3, reps: '5-6', rest: 150, tip: '腰帶掛槓片或夾啞鈴在腳踝，讓引體向上變成真正的力量訓練' },
+      { name: '反握引體向上（Chin-up）', sets: 3, reps: '8', rest: 120, tip: '手心朝自己，更多二頭肌參與，通常次數比正握多，訓練背和手臂' },
+      { name: '懸吊抬腿', sets: 3, reps: '12', rest: 75, tip: '引體向上橫槓懸掛，雙腿伸直抬至90度，核心進階訓練，不能甩腿' },
+      { name: '澳洲式引體（反向划船）', sets: 3, reps: '12', rest: 75, tip: '躺於槓下，反握斜拉身體，是引體向上的輔助訓練，調整角度改變難度' },
+    ]
+  },
+  {
+    id: 'gw10', name: '健身房全身爆發力', level: '進階', duration: 60, target: '全身快縮肌、運動表現', icon: '🚀',
+    exercises: [
+      { name: '壺鈴擺盪', sets: 5, reps: '15', rest: 75, tip: '臀部爆炸性向前推，壺鈴靠慣性飛起，不是手臂舉起，背永遠打直' },
+      { name: '跳箱', sets: 4, reps: '6', rest: 90, tip: '選擇能讓你輕鬆跳上的高度，落地吸震後立即回到起跳姿勢，訓練反應速度' },
+      { name: '槓鈴爆發式上搏（Power Clean）', sets: 4, reps: '4', rest: 120, tip: '技術複雜，輕重量先學好動作。用腿部爆發力把槓鈴彈至肩膀高度，不要用手拉' },
+      { name: '藥球拋牆', sets: 4, reps: '10', rest: 60, tip: '雙手持藥球深蹲後爆發站起，同時將球高速拋至牆壁，訓練下肢到上肢的力量傳遞' },
+      { name: '短衝刺（20m往返）', sets: 6, reps: '1趟', rest: 90, tip: '每趟全力衝刺，不能保留，爆發力訓練最後用全速衝刺讓神經系統完全激活' },
+    ]
+  },
+];
+const FOOD_DB = [
+  // ── 主食 ────────────────────────────────────────────────
+  { name: '白米飯（1碗）', kcal: 280, prot: 5, carb: 62, fat: 0.5 },
+  { name: '糙米飯（1碗）', kcal: 216, prot: 5, carb: 45, fat: 1.8 },
+  { name: '藜麥（熟100g）', kcal: 120, prot: 4.4, carb: 22, fat: 1.9 },
+  { name: '全麥吐司（1片）', kcal: 70, prot: 4, carb: 12, fat: 1 },
+  { name: '燕麥片（50g）', kcal: 188, prot: 6.5, carb: 34, fat: 3.2 },
+  { name: '麵條（熟100g）', kcal: 155, prot: 5, carb: 32, fat: 0.9 },
+  { name: '冬粉（熟100g）', kcal: 84, prot: 0.1, carb: 21, fat: 0 },
+  // ── 蛋白質 ─────────────────────────────────────────────
+  { name: '雞胸肉（100g）', kcal: 165, prot: 31, carb: 0, fat: 3.6 },
+  { name: '雞腿去皮（100g）', kcal: 185, prot: 28, carb: 0, fat: 8 },
+  { name: '雞蛋（1顆）', kcal: 70, prot: 6, carb: 0.5, fat: 5 },
+  { name: '水煮蛋（1顆）', kcal: 78, prot: 6.3, carb: 0.6, fat: 5.3 },
+  { name: '豬里肌（100g）', kcal: 143, prot: 23, carb: 0, fat: 5 },
+  { name: '鮭魚（100g）', kcal: 208, prot: 20, carb: 0, fat: 13 },
+  { name: '鮪魚罐頭水煮（100g）', kcal: 116, prot: 26, carb: 0, fat: 1 },
+  { name: '蝦子（100g）', kcal: 99, prot: 24, carb: 0, fat: 0.3 },
+  { name: '豆腐（100g）', kcal: 76, prot: 8, carb: 1.9, fat: 4.2 },
+  { name: '納豆（50g）', kcal: 97, prot: 8.3, carb: 6, fat: 5 },
+  { name: '希臘優格（150g）', kcal: 100, prot: 17, carb: 6, fat: 0.7 },
+  // ── 蔬果 ────────────────────────────────────────────────
+  { name: '花椰菜（100g）', kcal: 25, prot: 2, carb: 5, fat: 0.3 },
+  { name: '菠菜（100g）', kcal: 23, prot: 2.9, carb: 3.6, fat: 0.4 },
+  { name: '秋葵（100g）', kcal: 31, prot: 2, carb: 7, fat: 0.1 },
+  { name: '番茄（1顆）', kcal: 22, prot: 1.1, carb: 4.8, fat: 0.2 },
+  { name: '地瓜（100g）', kcal: 86, prot: 1.6, carb: 20, fat: 0.1 },
+  { name: '酪梨（半顆）', kcal: 160, prot: 2, carb: 9, fat: 15 },
+  { name: '蘋果（1顆）', kcal: 72, prot: 0.4, carb: 19, fat: 0.2 },
+  { name: '香蕉（1根）', kcal: 90, prot: 1.1, carb: 23, fat: 0.3 },
+  { name: '梨子（1顆）', kcal: 58, prot: 0.4, carb: 15, fat: 0.1 },
+  { name: '草莓（100g）', kcal: 33, prot: 0.7, carb: 7.7, fat: 0.3 },
+  { name: '藍莓（100g）', kcal: 57, prot: 0.7, carb: 14, fat: 0.3 },
+  // ── 堅果油脂 ─────────────────────────────────────────────
+  { name: '杏仁（30g）', kcal: 174, prot: 6, carb: 6, fat: 15 },
+  { name: '核桃（30g）', kcal: 196, prot: 4.6, carb: 4, fat: 19.5 },
+  { name: '花生醬（1匙）', kcal: 94, prot: 4, carb: 3, fat: 8 },
+  // ── 豆類 ────────────────────────────────────────────────
+  { name: '黑豆（熟100g）', kcal: 132, prot: 8.9, carb: 24, fat: 0.5 },
+  { name: '鷹嘴豆（熟100g）', kcal: 164, prot: 8.9, carb: 27, fat: 2.6 },
+  // ── 乳製品飲品 ─────────────────────────────────────────
+  { name: '牛奶（250ml）', kcal: 153, prot: 8, carb: 12, fat: 8 },
+  { name: '低脂牛奶（250ml）', kcal: 102, prot: 9, carb: 12, fat: 2.5 },
+  { name: '無糖豆漿（250ml）', kcal: 83, prot: 7, carb: 7, fat: 2.5 },
+  { name: '乳清蛋白（1匙30g）', kcal: 120, prot: 24, carb: 3, fat: 1.5 },
+  // ── 🏪 便利商店 ─────────────────────────────────────────
+  { name: '🏪 茶葉蛋（1顆）', kcal: 77, prot: 6.7, carb: 1.5, fat: 4.8 },
+  { name: '🏪 鮭魚御飯糰', kcal: 190, prot: 7, carb: 36, fat: 2.5 },
+  { name: '🏪 鮪魚御飯糰', kcal: 185, prot: 7, carb: 35, fat: 2.5 },
+  { name: '🏪 梅子御飯糰', kcal: 168, prot: 3, carb: 38, fat: 0.5 },
+  { name: '🏪 昆布御飯糰', kcal: 173, prot: 3, carb: 39, fat: 0.5 },
+  { name: '🏪 納豆御飯糰', kcal: 178, prot: 5, carb: 36, fat: 2 },
+  { name: '🏪 水煮雞胸肉包（100g）', kcal: 113, prot: 24, carb: 0, fat: 1.5 },
+  { name: '🏪 雞胸肉沙拉', kcal: 100, prot: 17, carb: 4, fat: 2 },
+  { name: '🏪 沙拉雞（FamilyMart）', kcal: 110, prot: 21, carb: 2, fat: 2.5 },
+  { name: '🏪 烤雞翅（1支）', kcal: 152, prot: 13, carb: 2, fat: 10 },
+  { name: '🏪 關東煮滷豆腐（1塊）', kcal: 87, prot: 8, carb: 3, fat: 5 },
+  { name: '🏪 關東煮蘿蔔（1塊）', kcal: 23, prot: 0.6, carb: 5, fat: 0.1 },
+  { name: '🏪 關東煮貢丸（3顆）', kcal: 90, prot: 7, carb: 7, fat: 3.5 },
+  { name: '🏪 關東煮蒟蒻（1塊）', kcal: 10, prot: 0.1, carb: 2.5, fat: 0 },
+  { name: '🏪 烤地瓜（1條120g）', kcal: 115, prot: 2, carb: 27, fat: 0.1 },
+  { name: '🏪 雞蛋三明治', kcal: 255, prot: 12, carb: 31, fat: 9 },
+  { name: '🏪 無糖美式咖啡', kcal: 5, prot: 0.3, carb: 0.8, fat: 0 },
+  { name: '🏪 無糖綠茶（600ml）', kcal: 0, prot: 0, carb: 0, fat: 0 },
+  { name: '🏪 無糖豆漿（450ml）', kcal: 149, prot: 12.6, carb: 12.6, fat: 4.5 },
+  { name: '🏪 低GI燕麥棒', kcal: 120, prot: 3, carb: 21, fat: 3.5 },
+  // ── 主食（補充）─────────────────────────────────────────
+  { name: '雜糧麵包（1片）', kcal: 90, prot: 4, carb: 16, fat: 1.5 },
+  { name: '義大利麵（熟100g）', kcal: 158, prot: 5.8, carb: 31, fat: 0.9 },
+  { name: '馬鈴薯（100g）', kcal: 77, prot: 2, carb: 17, fat: 0.1 },
+  { name: '玉米（1根）', kcal: 132, prot: 4.7, carb: 29, fat: 1.8 },
+  { name: '山藥（100g）', kcal: 66, prot: 1.5, carb: 15, fat: 0.2 },
+  { name: '地瓜粥（1碗）', kcal: 140, prot: 2.5, carb: 33, fat: 0.3 },
+  { name: '米漿（250ml）', kcal: 170, prot: 2, carb: 36, fat: 2 },
+  // ── 蛋白質（補充）───────────────────────────────────────
+  { name: '雞蛋白（1顆）', kcal: 17, prot: 3.6, carb: 0.2, fat: 0 },
+  { name: '牛里肌（100g）', kcal: 170, prot: 26, carb: 0, fat: 7 },
+  { name: '牛腱（100g）', kcal: 151, prot: 28, carb: 0, fat: 4.2 },
+  { name: '豬腱（100g）', kcal: 121, prot: 21, carb: 0, fat: 3.8 },
+  { name: '毛豆（100g）', kcal: 121, prot: 11, carb: 9, fat: 5 },
+  { name: '帆立貝（100g）', kcal: 88, prot: 17, carb: 3, fat: 0.8 },
+  { name: '鯖魚（100g）', kcal: 205, prot: 19, carb: 0, fat: 14 },
+  { name: '秋刀魚（100g）', kcal: 254, prot: 19, carb: 0, fat: 19 },
+  { name: '豆干（1塊40g）', kcal: 59, prot: 6.4, carb: 1.4, fat: 3 },
+  { name: '雞腿帶皮（100g）', kcal: 215, prot: 26, carb: 0, fat: 12 },
+  { name: '板豆腐（100g）', kcal: 72, prot: 7, carb: 2, fat: 4 },
+  // ── 蔬果（補充）─────────────────────────────────────────
+  { name: '高麗菜（100g）', kcal: 24, prot: 1.3, carb: 5.5, fat: 0.1 },
+  { name: '甜椒（100g）', kcal: 26, prot: 1, carb: 6, fat: 0.3 },
+  { name: '小黃瓜（1條）', kcal: 16, prot: 0.7, carb: 3.6, fat: 0.1 },
+  { name: '西瓜（200g）', kcal: 60, prot: 1.2, carb: 15, fat: 0.2 },
+  { name: '奇異果（1顆）', kcal: 61, prot: 1.1, carb: 15, fat: 0.5 },
+  { name: '柳橙（1顆）', kcal: 62, prot: 1.2, carb: 15, fat: 0.2 },
+  { name: '葡萄（100g）', kcal: 69, prot: 0.7, carb: 18, fat: 0.2 },
+  // ── 堅果油脂（補充）─────────────────────────────────────
+  { name: '腰果（30g）', kcal: 164, prot: 4.4, carb: 9, fat: 13 },
+  { name: '奇亞籽（15g）', kcal: 69, prot: 2.4, carb: 6, fat: 4.4 },
+  { name: '橄欖油（1湯匙）', kcal: 119, prot: 0, carb: 0, fat: 13.5 },
+  { name: '黑芝麻（15g）', kcal: 86, prot: 2.7, carb: 3.4, fat: 7.5 },
+  // ── 乳製品（補充）───────────────────────────────────────
+  { name: '茅屋起司（100g）', kcal: 98, prot: 11, carb: 3, fat: 4.3 },
+  { name: '起司片（1片）', kcal: 66, prot: 4.4, carb: 0.4, fat: 5.4 },
+  { name: '無糖優格（150g）', kcal: 75, prot: 9, carb: 7, fat: 0 },
+  // ── 補給品 ──────────────────────────────────────────────
+  { name: 'BCAA（1份8g）', kcal: 28, prot: 7, carb: 0, fat: 0 },
+  { name: '肌酸（1匙5g）', kcal: 0, prot: 0, carb: 0, fat: 0 },
+  { name: '電解質運動飲料（500ml）', kcal: 80, prot: 0, carb: 20, fat: 0 },
+  // ── 🏪 便利商店（補充）──────────────────────────────────
+  { name: '🏪 茄汁鯖魚罐頭（100g）', kcal: 154, prot: 15, carb: 7, fat: 7 },
+  { name: '🏪 優格（130g）', kcal: 104, prot: 4.5, carb: 16, fat: 2.5 },
+  { name: '🏪 水煮花椰菜（一盒150g）', kcal: 40, prot: 4.5, carb: 8, fat: 0.5 },
+  { name: '🏪 即食毛豆（100g）', kcal: 121, prot: 11, carb: 9, fat: 5 },
+  { name: '🏪 高蛋白乳清飲（350ml）', kcal: 156, prot: 30, carb: 5, fat: 2 },
+  { name: '🏪 香蕉（1根）', kcal: 90, prot: 1.1, carb: 23, fat: 0.3 },
+  { name: '🏪 黑豆漿無糖（250ml）', kcal: 78, prot: 8, carb: 7, fat: 2.5 },
+  { name: '🏪 舒跑電解質飲（500ml）', kcal: 100, prot: 0, carb: 25, fat: 0 },
+  { name: '🏪 鮭魚沙拉（1盒）', kcal: 130, prot: 15, carb: 5, fat: 6 },
+  { name: '🏪 高蛋白餅乾（1包）', kcal: 160, prot: 15, carb: 14, fat: 5 },
+  { name: '🏪 即食雞胸肉（80g）', kcal: 90, prot: 19, carb: 0, fat: 1.2 },
+  // ── 🏪 即食蛋白質 ───────────────────────────────────────
+  { name: '🏪 雞胸肉棒（1條60g）', kcal: 65, prot: 13, carb: 1, fat: 1 },
+  { name: '🏪 鹽水雞（100g）', kcal: 130, prot: 24, carb: 1, fat: 3.5 },
+  { name: '🏪 溏心蛋（1顆）', kcal: 80, prot: 6.5, carb: 2, fat: 5 },
+  { name: '🏪 水煮蛋（2顆）', kcal: 156, prot: 12.6, carb: 1.2, fat: 10.6 },
+  { name: '🏪 滷豆干（1包100g）', kcal: 158, prot: 16, carb: 4, fat: 8.5 },
+  { name: '🏪 蒸黑豆（1包100g）', kcal: 132, prot: 8.9, carb: 24, fat: 0.5 },
+  { name: '🏪 即食鮭魚片（50g）', kcal: 104, prot: 10, carb: 0, fat: 7 },
+  { name: '🏪 鮪魚沙拉（1包90g）', kcal: 95, prot: 16, carb: 2, fat: 3 },
+  { name: '🏪 雞肉棒棒腿（1支）', kcal: 142, prot: 16, carb: 2, fat: 8 },
+  { name: '🏪 蒸豆腐（1盒200g）', kcal: 152, prot: 16, carb: 4, fat: 8 },
+  { name: '🏪 雞胸肉丁（1包100g）', kcal: 110, prot: 23, carb: 0, fat: 1.8 },
+  // ── 🏪 關東煮（補充）───────────────────────────────────
+  { name: '🏪 關東煮竹輪（1條）', kcal: 55, prot: 5, carb: 6, fat: 1 },
+  { name: '🏪 關東煮魚板（1塊）', kcal: 50, prot: 5, carb: 5.5, fat: 0.5 },
+  { name: '🏪 關東煮昆布（1片）', kcal: 15, prot: 0.5, carb: 3, fat: 0.1 },
+  { name: '🏪 關東煮牛筋（1串）', kcal: 85, prot: 14, carb: 2, fat: 2.5 },
+  { name: '🏪 關東煮香菇（1朵）', kcal: 18, prot: 1.5, carb: 3, fat: 0.2 },
+  // ── 🏪 三明治/主食 ──────────────────────────────────────
+  { name: '🏪 燻雞三明治', kcal: 270, prot: 18, carb: 30, fat: 8 },
+  { name: '🏪 鮪魚三明治', kcal: 265, prot: 14, carb: 32, fat: 8 },
+  { name: '🏪 生菜雞肉捲', kcal: 220, prot: 15, carb: 28, fat: 5 },
+  { name: '🏪 雞肉飯糰（1個）', kcal: 195, prot: 9, carb: 35, fat: 3 },
+  { name: '🏪 燕麥杯（加熱）', kcal: 180, prot: 5, carb: 35, fat: 3 },
+  { name: '🏪 雞肉便當（7-11）', kcal: 580, prot: 28, carb: 80, fat: 16 },
+  // ── 🏪 沙拉蔬菜 ─────────────────────────────────────────
+  { name: '🏪 綜合蔬菜沙拉（1盒150g）', kcal: 30, prot: 2, carb: 6, fat: 0.3 },
+  { name: '🏪 玉米沙拉（1盒）', kcal: 90, prot: 2.5, carb: 18, fat: 1.5 },
+  { name: '🏪 生菜雞胸沙拉（1盒）', kcal: 140, prot: 18, carb: 8, fat: 4 },
+  // ── 🏪 低GI零食堅果 ─────────────────────────────────────
+  { name: '🏪 綜合堅果包（30g）', kcal: 175, prot: 5, carb: 6, fat: 15 },
+  { name: '🏪 杏仁果（1包25g）', kcal: 145, prot: 5, carb: 5, fat: 12.5 },
+  { name: '🏪 高蛋白能量棒', kcal: 200, prot: 20, carb: 20, fat: 5 },
+  { name: '🏪 無調味海苔（1包）', kcal: 25, prot: 1.5, carb: 1.5, fat: 1.5 },
+  // ── 🏪 飲品（補充）──────────────────────────────────────
+  { name: '🏪 低脂鮮奶（200ml）', kcal: 92, prot: 7, carb: 10, fat: 2.4 },
+  { name: '🏪 高蛋白鮮奶（350ml）', kcal: 175, prot: 21, carb: 15, fat: 3.5 },
+  { name: '🏪 無糖拿鐵（350ml）', kcal: 35, prot: 3, carb: 4, fat: 1 },
+  { name: '🏪 無糖紅茶（600ml）', kcal: 0, prot: 0, carb: 0, fat: 0 },
+  { name: '🏪 雙重蛋白飲（350ml）', kcal: 140, prot: 25, carb: 8, fat: 2 },
+  { name: '🏪 無糖燕麥奶（250ml）', kcal: 110, prot: 2, carb: 20, fat: 2.5 },
+];
+const EQUIPMENT_LIST = [
+  // ── 複合器材 ───────────────────────────────────────────────────────────────
+  {
+    id: 'eq1', name: '史密斯機', category: '複合器材', icon: '🏗️',
+    difficulty: '入門', intensity: 3, danger: 2,
+    muscles: '胸肌、股四頭肌、三角肌（依動作而定）',
+    desc: '史密斯機是固定軌道的槓鈴架，槓鈴沿著垂直鋼軌滑動，對新手非常友善。可安全進行深蹲、臥推、肩推等主要複合動作，不需擔心槓鈴失衡，是初學者學習多關節動作的最佳起點。',
+    uses: ['深蹲', '臥推', '肩推', '彎腰划船', '保加利亞分腿蹲'],
+    steps: [
+      '確認槓鈴安全卡扣為鎖定狀態後，調整槓鈴高度至肩膀略下方',
+      '站到槓鈴正下方（深蹲）或坐上臥推椅（臥推），確認身體位置',
+      '雙手握槓，間距依動作決定（臥推略寬於肩，深蹲寬肩距）',
+      '核心收緊，輕轉槓鈴即可解開卡扣，讓槓鈴滑動',
+      '依動作完成下沉與上推，全程保持控制，不要讓槓鈴快速下落',
+      '動作結束後，確實將槓鈴轉回卡扣鎖定，聽到「喀」聲為止',
+    ],
+    tips: [
+      '每次使用前，先確認卡扣能正常鎖定',
+      '軌道是垂直固定路徑，對部分人膝蓋可能不舒適，有任何疼痛立即停止',
+      '不建議長期只用史密斯機，應搭配自由重量訓練穩定肌群',
+      '結束動作後切忌忘記轉回卡扣，這是史密斯機最常見的意外',
+    ],
+  },
+  {
+    id: 'eq2', name: '槓鈴架（自由深蹲架）', category: '自由重量', icon: '🔧',
+    difficulty: '中級', intensity: 5, danger: 4,
+    muscles: '股四頭肌、臀大肌、背闊肌、胸大肌（全身複合）',
+    desc: '自由槓鈴架是訓練效果最全面的器材之一，可進行深蹲、硬舉、臥推等最高效的複合動作。因為槓鈴完全自由移動，對穩定肌群和核心的要求極高，是進階訓練者的核心器材，但也需要最嚴格的安全意識。',
+    uses: ['背蹲舉', '前蹲舉', '槓鈴臥推', '槓鈴划船', '硬舉', '肩推'],
+    steps: [
+      '先設定槓鈴架的高度：取槓時槓鈴應在胸口高度（深蹲）或胸口偏低（臥推）',
+      '最重要：設定安全桿（Safety Bar）高度，比動作最低點再低 5cm',
+      '在空槓狀態下試做幾次動作，確認路徑和姿勢正確',
+      '加重量前確認兩側插銷都已扣上，重量片不會滑落',
+      '執行動作時核心全程收緊，背部保持中立位',
+      '失敗組時讓槓鈴落在安全桿上，不要強行完成危險動作',
+    ],
+    tips: [
+      '⚠️ 大重量深蹲和臥推必須有訓練夥伴保護，這不是建議而是安全守則',
+      '安全桿高度設定錯誤是最常見的重傷原因，每次都要確認',
+      '初學者在有人指導前，重量不超過自身體重的 50%',
+      '腰帶可在大重量時保護脊椎，但輕重量時不要依賴腰帶',
+      '每次加重量最多增加 5–10%，不要躁進',
+    ],
+  },
+  // ── 固定軌道機器 ──────────────────────────────────────────────────────────
+  {
+    id: 'eq3', name: '滑輪機（Cable）', category: '固定軌道機器', icon: '⚙️',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '可針對全身各部位（依握把高度和動作決定）',
+    desc: '滑輪機透過鋼索傳遞阻力，在動作的全程都維持恆定張力，對關節非常友善。可調整滑輪高度和握把種類，做出幾十種不同動作，是對新手和進階者都極為實用的器材。',
+    uses: ['滑輪下壓（三頭）', '滑輪下拉', '繩索飛鳥', '滑輪划船', '腹部下壓', '單側訓練'],
+    steps: [
+      '根據動作需求調整滑輪高度（高位下拉、中位飛鳥、低位下壓等）',
+      '選擇適合動作的握把（直棒、繩索、D型環、直握把）',
+      '調整重量，第一次使用建議從輕重量開始',
+      '站穩，核心收緊，不要用身體晃動來借力',
+      '動作中保持感受目標肌肉收縮，控制回程不要讓重量砸落',
+      '一組結束後，緩慢讓重量回到原位',
+    ],
+    tips: [
+      '離心（回程）速度要控制，不要讓重量自由落下',
+      '站離機器太近或太遠都會影響動作角度，找到最佳距離',
+      '滑輪機非常適合做單側動作，可以發現並修正左右肌力差異',
+      '換握把或調整高度時，確認插銷已穩固定位再使用',
+    ],
+  },
+  {
+    id: 'eq5', name: '坐姿划船機', category: '固定軌道機器', icon: '🚣',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '背闊肌、菱形肌、後三角肌、肱二頭肌',
+    desc: '坐姿划船機是針對背部訓練設計的固定機器，坐姿穩定、動作路徑固定，新手很容易感受到背部肌肉收縮。是建立背部厚度和肌力的入門首選，對脊椎壓力極小。',
+    uses: ['背部划船', '菱形肌訓練', '後三角肌訓練'],
+    steps: [
+      '調整胸墊高度至胸口位置，坐穩並讓胸部靠在胸墊上',
+      '雙腳踩上腳踏平台，確認脚踝舒適',
+      '選擇握把：寬握練背闊肌，窄握練背中部',
+      '挺胸直背，肩胛骨稍微夾緊，這是關鍵準備動作',
+      '吐氣，雙手將握把拉向腰部，手肘緊貼身體兩側',
+      '頂點停留 1 秒，感受背部夾緊，然後緩慢控制回程',
+    ],
+    tips: [
+      '不要用手臂的力量拉，應該感覺是用背把手肘往後帶',
+      '圓肩（肩膀向前縮）是最常見的錯誤，全程保持挺胸',
+      '回程讓背部稍微伸展，增加動作範圍效果更好',
+      '若感覺只有手臂在用力，減輕重量重新專注感受背部',
+    ],
+  },
+  {
+    id: 'eq6', name: '腿推機（Leg Press）', category: '固定軌道機器', icon: '🦵',
+    difficulty: '入門', intensity: 4, danger: 2,
+    muscles: '股四頭肌、臀大肌、膕繩肌（依腳位決定比例）',
+    desc: '腿推機讓你在不需要把重量扛在背上的情況下訓練腿部，對下背的壓力極小，適合腿部訓練初學者或有下背問題的人。可透過腳的位置調整訓練重心，靈活性高。',
+    uses: ['腿部主力訓練', '臀部訓練（高腳位）', '股四頭肌訓練（低腳位）', '單腿訓練'],
+    steps: [
+      '坐上座椅，背部完整貼合靠背，確認腰部有支撐',
+      '雙腳踩上踏板，間距與肩同寬（可依需求調整）',
+      '腳位越高，臀部和膕繩肌出力越多；腳位越低，股四頭肌出力越多',
+      '推開安全桿，緩慢彎曲膝蓋讓踏板下降，膝蓋不超過腳尖',
+      '膝蓋彎曲到 90 度後，發力推回，不要完全鎖死膝蓋',
+      '一組結束後，先卡回安全桿再下機器',
+    ],
+    tips: [
+      '絕對不要讓膝蓋完全伸直鎖死，關節鎖死加大重量非常危險',
+      '重量要先關安全桿再站起來，很多人因急著起身而受傷',
+      '初學者腿部力量往往比想像大，但膝蓋和韌帶未必跟上，不要超重',
+      '如果腰部開始離開靠背，代表重量太重或動作幅度太大',
+    ],
+  },
+  {
+    id: 'eq13', name: '腿彎舉機', category: '固定軌道機器', icon: '🦿',
+    difficulty: '入門', intensity: 3, danger: 2,
+    muscles: '膕繩肌（大腿後側）、臀大肌下段',
+    desc: '腿彎舉機專門針對大腿後側（膕繩肌）進行孤立訓練。膕繩肌是最容易被忽略但最容易受傷的肌群，透過這台機器可以安全、有針對性地強化。分為俯臥式（Lying）和坐姿式（Seated）兩種。',
+    uses: ['俯臥腿彎舉', '坐姿腿彎舉', '單腿腿彎舉（修正不平衡）'],
+    steps: [
+      '坐上或趴上機器，調整腳踝墊讓其落在腳踝正上方（約腳跟後方 3cm）',
+      '大腿完整貼合座墊（坐姿）或腿部貼合臥墊（俯臥）',
+      '選擇適合重量，建議先用輕重量找到感覺',
+      '吐氣，收縮膕繩肌，讓腳跟向臀部方向彎曲',
+      '到最高點時停留 1 秒，感受後側肌肉最大收縮',
+      '緩慢控制回程，不要讓重量完全放鬆彈回',
+    ],
+    tips: [
+      '離心（放下）要比向心（彎曲）慢，膕繩肌的離心傷害是拉傷主因',
+      '臀部不要在動作中抬起（俯臥式），這是借力作弊',
+      '膕繩肌拉傷很常見，重量超過能控制的範圍就立即降重',
+      '建議搭配腿伸展機做超級組，同日訓練前後側達到平衡',
+    ],
+  },
+  {
+    id: 'eq14', name: '腿伸展機', category: '固定軌道機器', icon: '🦵',
+    difficulty: '入門', intensity: 3, danger: 2,
+    muscles: '股四頭肌（大腿前側）',
+    desc: '腿伸展機是針對股四頭肌的孤立訓練器材，動作直觀，初學者可以快速感受到大腿前側的收縮感。適合搭配深蹲等複合動作來完整訓練腿部前側，或是膝蓋復健期的輕度訓練。',
+    uses: ['股四頭肌訓練', '膝蓋復健輔助（輕重量）', '單腿伸展（修正差異）'],
+    steps: [
+      '坐上座椅，背部貼合靠背，調整椅背讓膝蓋關節對準機器轉軸',
+      '調整腳踝墊至腳踝正上方',
+      '雙手握住兩側扶手保持穩定',
+      '吐氣，收縮股四頭肌，緩慢將腿完全伸直',
+      '頂點停留 1–2 秒，感受大腿前側最大收縮',
+      '吸氣，緩慢控制腿部彎回，不超過 90 度為止',
+    ],
+    tips: [
+      '膝蓋有問題的人使用前請先諮詢醫生或物理治療師',
+      '不要突然衝擊完全伸直，會造成膝蓋韌帶壓力',
+      '腿伸展機只是輔助，不應取代深蹲等複合動作',
+      '如果膝蓋在動作中有喀喀聲或疼痛，立即停止',
+    ],
+  },
+  {
+    id: 'eq15', name: '胸部蝴蝶機（Pec Deck）', category: '固定軌道機器', icon: '🦋',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '胸大肌（整體），特別是胸肌中縫線',
+    desc: '蝴蝶機專門針對胸肌進行孤立訓練，動作軌道固定，新手容易找到胸肌的收縮感。比起需要穩定的啞鈴飛鳥，蝴蝶機更安全，適合胸肌訓練初學者或作為臥推後的孤立補強。',
+    uses: ['胸部夾胸（整體胸肌）', '胸肌線條雕塑', '臥推後的補強孤立訓練'],
+    steps: [
+      '坐上座椅，調整座高讓手臂抓握點與胸口平行',
+      '背部完整貼合靠背，雙腳踩地保持穩定',
+      '雙手抓住握把（或前臂靠在臂墊上），起始位置讓胸肌有輕微伸展感',
+      '吐氣，用胸肌的力量將雙臂向中間夾',
+      '雙臂在胸前最近點停留 1 秒，感受胸肌最大收縮',
+      '緩慢控制雙臂回到起始位置，不要讓重量砸落',
+    ],
+    tips: [
+      '不要讓雙臂回到超過肩膀水平線的位置，對肩關節壓力過大',
+      '動作中肩膀不要聳肩，保持肩胛下沉',
+      '感覺胸肌沒有用到？試著想像「用兩個手肘夾住一顆橘子」',
+      '蝴蝶機重量不等於實際力量水平，不同品牌阻力差異很大',
+    ],
+  },
+  // ── 自由重量 ──────────────────────────────────────────────────────────────
+  {
+    id: 'eq4', name: '啞鈴', category: '自由重量', icon: '🏋️',
+    difficulty: '入門', intensity: 4, danger: 2,
+    muscles: '全身各部位（依動作而定）',
+    desc: '啞鈴是最萬用的訓練器材之一，從 1kg 到 100kg 都有，幾乎所有肌肉部位都能訓練。雙手各拿一個的單側訓練特別適合發現並修正左右力量不平衡。居家訓練的首選。',
+    uses: ['啞鈴臥推', '啞鈴划船', '二頭彎舉', '側平舉（肩）', '前平舉', '深蹲', '弓步蹲'],
+    steps: [
+      '選擇適合重量：能完成目標次數，最後 2–3 下有挑戰感但能維持姿勢',
+      '確認啞鈴兩端螺旋鎖（可調式）或重量片（固定式）安全固定',
+      '握住啞鈴，握力中等，不要過度緊握導致手腕緊繃',
+      '執行動作前先確認站穩或坐穩，核心收緊',
+      '動作過程中保持控制，不要讓啞鈴甩動',
+      '使用完後將啞鈴放回原架，不要丟在地上（尤其橡膠地墊以外的地方）',
+    ],
+    tips: [
+      '可調式啞鈴每次使用前確認兩端鎖緊，搖晃就代表沒鎖好',
+      '啞鈴動作對核心和穩定肌群要求高，比機器更消耗能量',
+      '不同品牌重量標示可能有誤差，先試幾下確認',
+      '搬運啞鈴時用腿部力量蹲下再取，避免彎腰傷背',
+    ],
+  },
+  {
+    id: 'eq12', name: '壺鈴', category: '自由重量', icon: '⚫',
+    difficulty: '中級', intensity: 4, danger: 3,
+    muscles: '全身，特別是後鏈肌群（臀大肌、膕繩肌、豎脊肌）',
+    desc: '壺鈴獨特的把手設計讓重心在手掌外側，非常適合擺盪和旋轉類動作，能在短時間內同時訓練心肺和肌力。壺鈴擺盪（Swing）是公認效率最高的全身動作之一，但學習曲線較高。',
+    uses: ['壺鈴擺盪（Swing）', '土耳其起立（TGU）', '壺鈴深蹲', '單手推舉（Press）', '搖擺硬舉'],
+    steps: [
+      '雙腳略寬於肩站立，壺鈴放在身體前方 30cm 處',
+      '微蹲，雙手握住壺鈴把手，先做一次「爬架（Hike）」：將壺鈴像美式足球一樣向後甩動',
+      '臀部向前頂，利用髖關節爆發力將壺鈴向前擺起，手臂只是引導',
+      '壺鈴擺到肩膀高度時，靠慣性維持，不要用手臂向上舉',
+      '控制壺鈴向下落回，準備進行下一次擺盪',
+      '結束時讓壺鈴向後下方落回地板，不要讓壺鈴砸到前方地板',
+    ],
+    tips: [
+      '壺鈴擺盪的動力來自「髖關節伸展」，不是深蹲！最常見的錯誤',
+      '建議先上課或看完整教學影片再使用，徒手學壞姿勢很難糾正',
+      '手掌水泡是正常的，建議戴舉重手套或包布',
+      '周圍要留出足夠空間，擺盪範圍至少前後各 1.5 公尺',
+    ],
+  },
+  // ── 徒手器材 ──────────────────────────────────────────────────────────────
+  {
+    id: 'eq7', name: '臥推椅', category: '複合器材', icon: '🛋️',
+    difficulty: '入門', intensity: 4, danger: 3,
+    muscles: '胸大肌、三角肌前束、三頭肌',
+    desc: '搭配槓鈴或啞鈴使用，是訓練胸肌最直接有效的器材。角度可調整（平躺、上斜、下斜）讓你訓練胸肌不同部位。平躺臥推是最常見的訓練動作之一，但需要正確姿勢和保護才能安全執行。',
+    uses: ['平躺臥推（中胸）', '上斜臥推 30°（上胸）', '下斜臥推（下胸）', '啞鈴飛鳥', '啞鈴臥推'],
+    steps: [
+      '先調整椅子角度（平躺為 0°，上斜建議 30–45°，下斜約 -15°）',
+      '躺上椅子，眼睛對準槓鈴正下方，頭、肩、臀三點貼椅',
+      '肩胛骨收緊向下沉（想像把肩胛骨擠進後口袋），這是最重要的保護姿勢',
+      '雙腳踩地保持穩定，不要踮腳或架起來',
+      '取槓後手腕保持中立（不要過度後折），槓鈴下放到胸口碰觸，不反彈',
+      '發力推起，確認雙側同步，避免一側先到達頂點',
+    ],
+    tips: [
+      '⚠️ 做中、大重量臥推，一定要有人保護！槓鈴壓住喉嚨或胸口非常危險',
+      '不要向上撐起弓腰（Extreme Arch），短期加重但長期傷腰',
+      '新手先熟悉啞鈴臥推，建立肌肉連結後再進入槓鈴',
+      '取槓時先從一側確認重量平衡，避免一側過重翻倒',
+    ],
+  },
+  {
+    id: 'eq8', name: '引體向上架', category: '徒手器材', icon: '🔝',
+    difficulty: '中級', intensity: 4, danger: 2,
+    muscles: '背闊肌、肱二頭肌、菱形肌、核心',
+    desc: '引體向上被稱為「上半身深蹲」，是訓練背部和二頭肌效率最高的徒手動作。需要一定的基礎力量，初學者可先用輔助引體機或彈力帶。一旦能做標準引體向上，它能提供的訓練效益非常全面。',
+    uses: ['正手引體向上（寬握練背）', '反手引體向上（窄握練二頭）', '窄握中立引體', '懸掛抬腿（練核心）'],
+    steps: [
+      '雙手握住橫槓，間距略寬於肩（正手引體），或與肩同寬（反手）',
+      '手臂完全伸直懸掛，肩膀稍微收緊（不完全放鬆），核心微收',
+      '吐氣，用背部的力量將胸口向橫槓拉近，手肘向下向後帶',
+      '下巴超過橫槓為一個完整動作',
+      '吸氣，控制緩慢放下，手臂完全伸展後再做下一下',
+      '不要用甩動身體的方式完成動作（Kipping），初學者先做標準動作',
+    ],
+    tips: [
+      '做不到一下引體？先練「反向引體（Negative）」：從高點緩慢放下',
+      '完全伸展後再上拉，能獲得最大的動作幅度和效益',
+      '握力不足時，可以戴拉力帶輔助，避免手掌先放棄',
+      '懸掛時確認橫槓穩固，尤其是可拆卸式或門框引體向上架',
+    ],
+  },
+  {
+    id: 'eq16', name: 'TRX 懸吊訓練系統', category: '輔助器材', icon: '🪢',
+    difficulty: '中級', intensity: 4, danger: 2,
+    muscles: '全身，核心為訓練重心',
+    desc: '利用自身體重和重力做全身訓練，高度靈活可調。透過改變身體傾斜角度來調整難度，新手降低角度（更直立），進階者增加傾斜。核心全程需要保持穩定是 TRX 最大的特色和挑戰。',
+    uses: ['TRX 划船（背部）', 'TRX 伏地挺身（胸部）', 'TRX 深蹲', 'TRX 登山者（核心）', 'TRX 弓步蹲'],
+    steps: [
+      '確認 TRX 的固定點（門框、天花板錨點、槓鈴架）能承受你的體重，至少 150kg 以上',
+      '調整繩長：一般訓練讓手把落在腰部到胸口高度',
+      '雙手握住手把，身體向後傾斜建立張力，這時會感受到 TRX 在拉你',
+      '核心收緊、全身保持一條直線（從頭到腳）是 TRX 所有動作的基礎',
+      '執行動作時不要讓臀部下沉或拱起，保持整體穩定',
+      '結束後確保 TRX 手把不要突然甩動，緩慢放開',
+    ],
+    tips: [
+      '固定點的牢固度最重要，門框錨點要確認門框夠厚，定期確認螺絲緊度',
+      '身體越傾斜（越平行地面），難度越高，初學者先從淺角度開始',
+      '核心無力是大多數人使用 TRX 動作走樣的原因，先練核心',
+      '濕滑地面要特別注意腳的穩定，可以加止滑墊',
+    ],
+  },
+  // ── 有氧器材 ──────────────────────────────────────────────────────────────
+  {
+    id: 'eq9', name: '跑步機', category: '有氧器材', icon: '🏃',
+    difficulty: '入門', intensity: 3, danger: 2,
+    muscles: '腿部肌群、心肺系統',
+    desc: '最普遍的室內有氧器材，可精確控制速度和坡度。無論是慢走暖身、穩定有氧，還是高強度間歇都能完成。對戶外跑步來說較為單調，但在天氣不佳時是最佳替代選擇。',
+    uses: ['慢走暖身（5–10 分鐘）', '穩定有氧（30–60 分鐘）', 'HIIT 間歇（快慢交替）', '爬坡訓練（設定坡度）'],
+    steps: [
+      '確認緊急停止繩夾在衣服上，這是最重要的安全設定',
+      '從靜止開始，先站上兩側踏板，再按啟動讓跑帶先慢速動起來',
+      '踏上跑帶後，先從步行速度開始（約 4–5 km/h），適應跑帶節奏',
+      '逐漸提升速度，達到目標強度後維持穩定',
+      '訓練結束前，先降速到步行 1–2 分鐘，讓心跳緩降',
+      '完全停止後再踏下跑帶，不要跳離移動中的跑步機',
+    ],
+    tips: [
+      '不要只靠扶把，這會減少卡路里消耗並可能讓姿勢歪斜',
+      '跑姿要像在地面跑步，不要在跑步機上步伐過大',
+      '坡度 1–2% 更接近戶外跑步的感覺（補償室內無空氣阻力）',
+      '頭暈或心跳超過 220-年齡 的 85% 時立即降速',
+    ],
+  },
+  {
+    id: 'eq10', name: '飛輪車（固定式自行車）', category: '有氧器材', icon: '🚴',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '股四頭肌、臀部、心肺系統（膝關節友善）',
+    desc: '低衝擊有氧器材，對膝關節的壓力遠小於跑步，適合任何體能狀態和年齡層。可做低強度長時間燃脂，也可做高強度短時間 HIIT。膝蓋有問題者的首選有氧工具。',
+    uses: ['低強度脂肪燃燒（60–70% 最大心率）', '高強度間歇訓練', '訓練前暖身', '膝蓋復健期有氧'],
+    steps: [
+      '調整座椅高度：踩到最低點時膝蓋微彎（約 5–10 度），不完全伸直也不過度彎曲',
+      '調整把手高度：一般訓練與座椅同高，室內單車課可略低',
+      '調整座椅前後位置：踩踏最低點時，膝蓋應在踏板正上方',
+      '從低阻力開始，讓關節熱身 2–3 分鐘',
+      '增加阻力訓練肌力，提高踩踏頻率訓練有氧心肺',
+      '訓練後伸展股四頭肌和臀部，因為坐姿讓這些肌肉長時間縮短',
+    ],
+    tips: [
+      '座椅高度是最關鍵的設定，太高傷髖，太低傷膝',
+      '高阻力慢踩 = 腿部力量訓練；低阻力快踩 = 心肺有氧訓練',
+      '若感到膝蓋疼痛立即停止，通常是座椅高度設定問題',
+      '長時間騎乘建議使用有護墊的短褲，減少臀部不適',
+    ],
+  },
+  {
+    id: 'eq18', name: '跳繩', category: '有氧器材', icon: '🪃',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '小腿肌群、腿部、核心、協調性與節奏感',
+    desc: '最便宜且燃脂效率極高的有氧工具，10 分鐘跳繩的消耗約等於 8 分鐘慢跑。同時訓練協調性、節奏感和心肺功能。重量輕、攜帶方便，出差旅遊也能使用。',
+    uses: ['訓練前暖身（5 分鐘）', '燃脂有氧（10–20 分鐘）', 'HIIT 衝刺間歇', '協調性和節奏訓練'],
+    steps: [
+      '繩長調整：雙腳踩住繩的中點，兩側握把拉起應到達腋下高度',
+      '站在平坦地面，建議橡膠地板或木地板（不要水泥地，對膝蓋衝擊較大）',
+      '從基本雙腳跳開始：每次繩子過腳下時雙腳同時離地，落地在前腳掌',
+      '保持手肘靠近身體，主要用手腕的轉動帶動跳繩，不是整個手臂',
+      '節奏穩定後，可以嘗試交替腳跳或單腳跳增加難度',
+      '每組 30–60 秒，休息 30 秒，重複 5–10 組',
+    ],
+    tips: [
+      '落地一定在前腳掌，不要用腳跟落地，衝擊是膝蓋的 3 倍以上',
+      '初學者先抓穩節奏，不急著加快速度',
+      '頭頂有足夠空間（至少 30cm），別在天花板太低的地方跳',
+      '繩子纏住腳是正常的，放慢速度從頭再來',
+    ],
+  },
+  // ── 輔助器材 ──────────────────────────────────────────────────────────────
+  {
+    id: 'eq11', name: '彈力帶', category: '輔助器材', icon: '🟠',
+    difficulty: '入門', intensity: 2, danger: 1,
+    muscles: '依動作而定，常見：臀部、肩膀、核心',
+    desc: '超便宜又多用途的訓練輔助器材，顏色越深阻力越大。可做幾十種動作，旅行出差也能帶。適合暖身激活、輔助引體向上、增加深蹲臀部阻力，也適合老年人或復健期使用。',
+    uses: ['臀肌激活暖身', '輔助引體向上', '肩膀旋轉袖訓練', '彈力帶深蹲', '胸部伸展'],
+    steps: [
+      '根據動作選擇合適阻力的彈力帶（入門建議黃色或綠色輕阻力）',
+      '檢查彈力帶是否有裂縫或破洞，有損傷的彈力帶彈出可能傷人',
+      '固定點要確認穩固，或踩在腳下固定',
+      '動作中保持彈力帶在肌肉的適當對應位置',
+      '不要讓彈力帶突然彈回，要控制放鬆的速度',
+      '使用完後鬆開固定，不要讓彈力帶長時間保持張力狀態（影響彈性）',
+    ],
+    tips: [
+      '彈力帶有使用壽命，橡膠老化後要更換，不要繼續使用裂化的彈力帶',
+      '避免在粗糙邊緣固定，會割傷彈力帶縮短壽命',
+      '彈力帶的阻力不是線性的，拉越長阻力越大，注意動作末段的阻力',
+      '很適合放在家裡做訓練前的 5 分鐘關節激活和暖身',
+    ],
+  },
+  {
+    id: 'eq17', name: '泡棉滾筒（Foam Roller）', category: '輔助器材', icon: '🌀',
+    difficulty: '入門', intensity: 1, danger: 1,
+    muscles: '全身筋膜（以下肢、背部、IT束為主）',
+    desc: '泡棉滾筒透過「自我肌筋膜放鬆（SMR）」原理，幫助訓練後的肌肉放鬆、減少延遲性肌肉酸痛（DOMS）。建議每次訓練後使用 5–10 分鐘，是最划算的恢復工具之一。',
+    uses: ['大腿前側（股四頭）放鬆', '大腿後側（膕繩肌）放鬆', 'IT束放鬆', '小腿放鬆', '背部放鬆'],
+    steps: [
+      '將滾筒放在地板上，身體重量壓上目標部位（如大腿放在滾筒上方）',
+      '用手臂或對側腳支撐，控制壓在滾筒上的力道',
+      '緩慢滾動，找到最痠痛的「痛點（Trigger Point）」',
+      '在痛點位置暫停，深呼吸，停留 10–30 秒讓肌肉放鬆',
+      '可以搭配腳踝轉動或膝蓋彎曲來增加筋膜放鬆效果',
+      '每個部位花 30–60 秒，整個流程不超過 10 分鐘',
+    ],
+    tips: [
+      '有一定的疼痛感是正常的，但不應超過「舒服的酸痛」，劇烈疼痛立即停止',
+      '脊椎正中央不要直接滾，應該放在椎旁肌肉上',
+      '受傷急性期（24 小時內的扭傷或拉傷）不要使用滾筒',
+      '硬度越高的滾筒效果越強，初學者先從軟質泡棉開始',
+    ],
+  },
+  // ── 新增 12 種（共 30 種） ────────────────────────────────────────────────
+  {
+    id: 'eq19', name: '橢圓機', category: '有氧器材', icon: '🔄',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '腿部、臀部、上肢（雙臂推拉型）、心肺',
+    desc: '橢圓機模擬跑步動作但幾乎零衝擊，對膝蓋和踝關節極為友善，適合所有年齡層。雙手把手可同步推拉，讓上下半身一起參與訓練，30 分鐘可燃燒 250–350 大卡。',
+    uses: ['低衝擊有氧', '全身協調訓練', '膝蓋復健期有氧', 'HIIT 間歇', '暖身'],
+    steps: [
+      '踏上踏板，雙手握住把手（固定把手或可動把手皆可）',
+      '以舒適步伐開始踩踏，確認踏板軌跡讓膝蓋感覺自然',
+      '設定阻力和速度，以能持續對話的強度為有氧基準',
+      '可以嘗試反向踩踏（後退方向），訓練臀部和膕繩肌',
+      '結束前降低阻力緩和 3–5 分鐘，讓心率逐漸回落',
+    ],
+    tips: [
+      '身體保持直立，不要過度前傾依賴把手支撐',
+      '步伐不要太小（像踮腳走路），要有完整的橢圓軌跡',
+      '若感覺膝蓋不舒適，可調整踏板角度或縮小步距',
+      '比跑步機更適合體重較重或關節有問題的訓練者',
+    ],
+  },
+  {
+    id: 'eq20', name: '划船機（Concept2）', category: '有氧器材', icon: '🚣',
+    difficulty: '中級', intensity: 4, danger: 2,
+    muscles: '背部（60%）、腿部（20%）、手臂核心（20%）——幾乎全身',
+    desc: '划船機是效率最高的有氧器材之一，一個划槳動作涵蓋全身約 86% 的肌肉。Concept2 是健身房最常見品牌，有完整數據顯示。正確技術是關鍵，錯誤姿勢容易傷下背。',
+    uses: ['全身有氧訓練', 'HIIT 間歇（500m/1000m 衝刺）', '低強度熱身', '耐力賽（2000m 計時）'],
+    steps: [
+      '坐上座椅，雙腳踩入腳踏固定帶，調整至腳背舒適位置',
+      '起始姿勢（Catch）：膝蓋彎曲前傾，雙手握槳，背部微前傾但保持挺直',
+      '發力順序：腿→背→手，先蹬腿讓身體向後，背部稍後仰，最後手臂拉到腹部',
+      '回程順序：手→背→腿，雙手先伸出，身體前傾，最後讓膝蓋彎曲滑回起始',
+      '控制阻力飛輪設定（1–10，初學者建議 3–5），確認螢幕顯示節奏（每分鐘划槳次數）',
+    ],
+    tips: [
+      '最常見錯誤：彎腰圓背發力，這會傷害腰椎。背部全程保持中立位',
+      '80% 的力量應來自腿部蹬地，不是用手臂硬拉',
+      '剛開始先練習「慢而正確」，速度可以後來再提升',
+      '每次划槳完整伸展和完整收縮，不要划到一半就回去',
+    ],
+  },
+  {
+    id: 'eq21', name: '高位下拉機', category: '固定軌道機器', icon: '⬇️',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '背闊肌、菱形肌、肱二頭肌、後三角肌',
+    desc: '高位下拉機模擬引體向上的動作模式，讓還無法做到引體向上的訓練者也能有效訓練背部。透過換握把（寬握/窄握/反手）可以刺激背部不同部位，是背部訓練入門首選機器。',
+    uses: ['寬握下拉（背闊肌寬度）', '窄握下拉（背闊肌厚度）', '反手下拉（二頭肌參與）', '單手下拉（修正不對稱）'],
+    steps: [
+      '調整大腿固定墊，讓大腿能穩固夾住避免身體被拉起來',
+      '選擇握把：寬握練背部寬度，窄握或反手握練厚度',
+      '雙手握住握把後，身體略微後仰約 15 度（不是大幅後仰）',
+      '吐氣，用背闊肌的力量將握把拉向胸口，手肘向下向後帶',
+      '到達胸口後停留一秒感受背部夾緊，再緩慢控制回到起始位置',
+    ],
+    tips: [
+      '最常見錯誤：只用手臂拉。試著想像「把手肘插進褲袋」來感受背部',
+      '握把不需要拉到腹部，拉到鎖骨位置就已足夠',
+      '不要過度後仰借力，這樣等於把下拉動作變成划船',
+      '重量選擇：下拉 12 下最後 2–3 下有挑戰感的重量',
+    ],
+  },
+  {
+    id: 'eq22', name: '爬梯機（StairMaster）', category: '有氧器材', icon: '🪜',
+    difficulty: '入門', intensity: 4, danger: 2,
+    muscles: '臀大肌、股四頭肌、膕繩肌、小腿、心肺',
+    desc: '爬梯機模擬爬樓梯動作，對臀部和腿部的刺激遠超過一般有氧器材。燃脂效率極高，30 分鐘可消耗 300–400 大卡，同時有效雕塑下半身線條，是深受健美選手喜愛的賽前有氧工具。',
+    uses: ['臀腿雕塑有氧', '燃脂訓練', '心肺耐力訓練', '賽前減脂'],
+    steps: [
+      '踏上側邊台階，按啟動後先讓踏板慢速轉動',
+      '雙腳踩上踏板，雙手輕放扶手（不要靠著扶手支撐體重）',
+      '以完整的踩踏動作：腳跟向下踩，讓臀肌充分參與',
+      '速度從最低開始（1–2 級），適應節奏後再提升',
+      '結束時先降速到最低，讓踏板停止後再下機',
+    ],
+    tips: [
+      '不要靠在扶手上！這是最常見的錯誤，大幅降低效率且可能讓腰部受傷',
+      '腳尖點地踩法讓小腿參與多；腳底踩法讓臀肌參與多',
+      '頭暈或腿部感覺沉重時立即降速，這台機器強度比外表看起來高',
+      '踏板移動中嚴禁跳上跳下，必須等停止後再上下機器',
+    ],
+  },
+  {
+    id: 'eq23', name: '雙槓（Dip Station）', category: '徒手器材', icon: '🤸',
+    difficulty: '中級', intensity: 4, danger: 3,
+    muscles: '胸大肌下段、三頭肌、三角肌前束',
+    desc: '雙槓下推（Dips）是徒手訓練中對胸肌和三頭肌效果最強的動作。身體前傾越多，胸肌參與越多；身體越直立，三頭肌參與越多。需要一定的肩膀穩定性，肩膀有傷的人需謹慎。',
+    uses: ['胸部雙槓下推（前傾）', '三頭肌雙槓下推（直立）', '懸吊抬膝（核心）', '輔助雙槓（機器輔助版）'],
+    steps: [
+      '雙手握住雙槓，撐起身體，手臂伸直，確認肩膀穩定不聳起',
+      '胸部訓練：身體前傾約 30 度，雙腳可交叉在身後',
+      '吸氣，緩慢彎曲手肘讓身體下沉，下沉到肩膀感覺輕微伸展即可（不超過平行）',
+      '吐氣，發力撐起身體回到起始位置，手臂不需完全鎖死',
+      '若無法完成標準動作，先使用「輔助雙槓機（Assisted Dip Machine）」建立力量',
+    ],
+    tips: [
+      '⚠️ 肩膀下沉過深（超過手肘水平線）對肩關節壓力極大，容易受傷',
+      '肩膀有既往傷病或夾擠症候群的人，不建議做這個動作',
+      '初學者先在輔助機器上練習，能做 3 組 8 下標準動作再換無輔助',
+      '不要讓身體搖晃，動作控制越穩定效果越好',
+    ],
+  },
+  {
+    id: 'eq24', name: '腹肌輪（Ab Roller）', category: '核心訓練', icon: '⭕',
+    difficulty: '中級', intensity: 4, danger: 3,
+    muscles: '腹直肌（整體）、腹橫肌、腰椎穩定肌群、肩膀',
+    desc: '腹肌輪是最有效的核心強化工具之一，一個簡單的滾動動作對腹肌的啟動遠超過仰臥起坐。但對腰椎的要求極高，下背無力者需先建立基礎核心肌力再使用，否則容易造成腰傷。',
+    uses: ['跪姿滾輪（入門）', '站姿滾輪（進階）', '側向滾輪（腹斜肌）'],
+    steps: [
+      '在地墊上跪姿，雙手握住腹肌輪的把手，輪子在膝蓋正前方',
+      '核心用力收緊（想像有人要打你的肚子，把腹部硬起來）',
+      '緩慢將輪子向前滾，身體跟著往前延伸，腰部不要塌陷',
+      '延伸到腹肌感覺快要撐不住時（初學者約 45 度），停住一秒',
+      '用腹肌的力量將輪子收回，不是靠手臂拉，回到起始位置',
+    ],
+    tips: [
+      '⚠️ 腰部一旦下塌（塌腰）就停止，這是下背受傷的主要原因',
+      '初學者先只滾到 30–45 度，慢慢增加距離，不要第一次就全程滾到地板',
+      '跪姿墊子下方記得放保護墊，膝蓋長時間壓迫地板會不舒適',
+      '能做 3 組 10 下跪姿後再嘗試站姿版本',
+    ],
+  },
+  {
+    id: 'eq25', name: '穩定球（Swiss Ball）', category: '核心訓練', icon: '🔵',
+    difficulty: '入門', intensity: 2, danger: 1,
+    muscles: '核心穩定肌群、臀部、下背（依動作而定）',
+    desc: '穩定球透過不穩定的球面，讓所有動作都需要核心額外參與穩定。可以取代臥推椅做更多核心參與的動作，也可以做各種伸展和復健動作。是物理治療和功能訓練中的常用器材。',
+    uses: ['球上仰臥起坐', '球上橋式（臀橋）', '球上伏地挺身（加難度）', '下背伸展', '坐姿核心穩定訓練'],
+    steps: [
+      '選擇適合身高的球：坐在球上時大腿應平行地面（膝蓋約 90 度）',
+      '初次使用先坐在球上，雙腳踩地感受平衡',
+      '做球上仰臥起坐：躺在球上，球支撐下背，雙腳踩地，做捲腹動作',
+      '做球上橋式：上背靠在球上，臀部抬起，形成橋式姿勢',
+      '所有動作速度放慢，讓身體適應不穩定表面帶來的平衡挑戰',
+    ],
+    tips: [
+      '球的充氣程度影響難度，越飽越難，初學者可稍微放氣增加接觸面積',
+      '旁邊保留足夠空間，以防滑落時有地方跌落',
+      '不要站在球上，非常危險，很多人因此摔傷',
+      '球面破裂或有裂縫時立即更換，不要繼續使用',
+    ],
+  },
+  {
+    id: 'eq26', name: '平衡半球（BOSU Ball）', category: '輔助器材', icon: '🌓',
+    difficulty: '中級', intensity: 2, danger: 2,
+    muscles: '踝關節穩定肌群、核心、下肢協調肌群',
+    desc: 'BOSU（Both Sides Up）是一種半球型平衡訓練器，可以平面朝上或半球朝上使用。能有效訓練本體感覺、踝關節穩定性和核心協調能力，廣泛用於運動傷害預防和復健訓練。',
+    uses: ['單腳站立平衡訓練', 'BOSU 深蹲（半球朝上）', 'BOSU 伏地挺身（平面朝上）', '核心捲腹', '踝關節復健'],
+    steps: [
+      '平面朝下（半球朝上）使用：踩上時先以一腳試探，找到平衡再踩上另一腳',
+      '單腳站立訓練：踩上後提起一腳，保持平衡 10–30 秒',
+      'BOSU 深蹲：雙腳站在半球上，雙腳與肩同寬，緩慢深蹲',
+      '平面朝上使用：做伏地挺身或捲腹，不穩定表面增加核心難度',
+      '所有動作優先控制，速度慢且有控制才有訓練效果',
+    ],
+    tips: [
+      '第一次踩上時旁邊要有人或靠近牆壁，以防站不穩摔倒',
+      '站在半球頂端時重心要保持在腳的正中心，不要偏前或偏後',
+      '踝關節有傷的人復健使用時，阻力要輕，循序漸進',
+      '地面要乾燥，BOSU 底部的吸盤要確實吸附地面',
+    ],
+  },
+  {
+    id: 'eq27', name: '跳箱（Plyo Box）', category: '爆發力訓練', icon: '📦',
+    difficulty: '中級', intensity: 4, danger: 3,
+    muscles: '股四頭肌、臀大肌、小腿、核心（爆發力訓練）',
+    desc: '跳箱是增強式訓練（Plyometrics）的核心器材，透過爆發性的跳躍動作訓練下肢爆發力和快速收縮能力。除了跳上，也可以用來做深蹲跳、單腳訓練等多種動作。常見高度有 20"、24"、30"。',
+    uses: ['箱式跳躍（Box Jump）', '箱式深蹲跳（Jump Squat）', '上階登階訓練', '單腳箱跳', '箱式後跨步蹲'],
+    steps: [
+      '選擇適合高度的跳箱（初學者從 20" 或更低開始）',
+      '站在跳箱前約半步距離，雙腳與肩同寬',
+      '預備動作：快速下蹲（半蹲），雙手向後擺',
+      '爆發起跳：雙腳用力蹬地，雙手向前向上擺動，帶動身體騰空',
+      '落地時雙腳同時輕柔落在箱子上，膝蓋微彎吸收衝擊，不要鎖死',
+      '踏下時用腳踩下（不要跳下），回到起始位置',
+    ],
+    tips: [
+      '⚠️ 跳上失敗時會造成小腿嚴重擦傷（最常見的跳箱傷害），先練低箱',
+      '落地穩定後再跳下，不要落地不穩就急著做下一下',
+      '木製跳箱比泡棉跳箱更滑，落地時要特別注意腳的位置',
+      '連續訓練前要充分暖身，冷肌肉爆發跳容易拉傷',
+    ],
+  },
+  {
+    id: 'eq28', name: '戰繩（Battle Ropes）', category: '爆發力訓練', icon: '🌊',
+    difficulty: '入門', intensity: 5, danger: 1,
+    muscles: '肩膀、手臂、背部、核心（全身心肺）',
+    desc: '戰繩是強度極高的心肺和肌耐力訓練工具，透過不斷甩動重繩製造波浪，短短 30 秒就能讓心率飆升。對關節衝擊小，幾乎任何人都能安全使用，是 HIIT 訓練的絕佳選擇。',
+    uses: ['雙波浪（雙手同時）', '交替波浪（兩手交替）', '側向波浪', '繩索深蹲甩', 'HIIT 間歇訓練'],
+    steps: [
+      '將繩子固定在穩固的錨點（牆上、柱子或重型器材），高度約 50cm',
+      '雙手各握一端，站立，距離錨點讓繩子有輕微弧度（不完全鬆弛）',
+      '雙腳與肩同寬，微蹲站立，保持核心收緊',
+      '雙手同時上下快速甩動（雙波浪），讓繩子持續產生波浪',
+      '建議以 30 秒工作／30 秒休息為一組，做 5–8 組',
+    ],
+    tips: [
+      '繩子的固定錨點要絕對穩固，如果滑脫繩子會猛力彈回',
+      '手握繩端不要太緊，放鬆握法才能持久且不傷手腕',
+      '核心全程收緊，不要只靠手臂甩，身體也要略微參與',
+      '戰繩訓練強度驚人，初次使用先做 15 秒感受強度再決定時間',
+    ],
+  },
+  {
+    id: 'eq29', name: '藥球（Medicine Ball）', category: '爆發力訓練', icon: '🏐',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '核心、全身爆發力肌群（依動作而定）',
+    desc: '藥球是訓練爆發力和全身協調的傳統器材，重量從 1kg 到 20kg 都有。可做投擲、砸地、旋轉等爆發性動作，也可作為增加重量的訓練工具用於仰臥起坐、深蹲等。',
+    uses: ['砸地（Slam Ball）', '牆壁投擲（Wall Ball）', '旋轉拋接（搭配夥伴）', '藥球仰臥起坐', '過頭砸地'],
+    steps: [
+      '選擇適合重量：動作仍能爆發有力但不影響姿勢的重量（通常 4–8kg）',
+      '砸地動作：雙手舉過頭，全力將球砸向地面，核心發力帶動',
+      '牆壁投擲：站在牆壁 1–2 公尺外，雙手持球蹲下，起身時爆發性將球投向牆壁目標高度',
+      '接住彈回的球，順著動力下蹲，準備下一次',
+      '每組 10–15 次，動作之間完全發力，不要省力',
+    ],
+    tips: [
+      '砸地用的藥球（Slam Ball）不會彈起，而普通藥球會反彈，使用前確認類型',
+      '投擲時周圍確認沒有其他人，球彈回方向不定',
+      '腰部旋轉動作要確認核心夠力，否則容易扭傷腰椎',
+      '地板材質影響使用：橡膠地墊最合適，磁磚地不建議砸地動作',
+    ],
+  },
+  {
+    id: 'eq30', name: '背部伸展椅（羅馬椅）', category: '固定軌道機器', icon: '🪑',
+    difficulty: '入門', intensity: 3, danger: 2,
+    muscles: '豎脊肌、臀大肌、膕繩肌（後鏈肌群）',
+    desc: '背部伸展椅（又稱羅馬椅）是訓練下背、臀部和大腿後側的專用器材。透過身體前後的延伸動作，有效強化後鏈肌群，是預防下背疼痛最重要的訓練動作之一，也是硬舉的輔助訓練。',
+    uses: ['背部伸展（下背）', '臀部伸展（腳向外轉練臀）', '45度超人式', '負重背部伸展（進階）'],
+    steps: [
+      '調整器材高度：前側墊應在髖骨下方，讓你能自由前傾但不卡住',
+      '雙腳踩入後側固定墊，腳踝穩固固定',
+      '雙手交叉放胸前（初學）或放頭後（進階），身體自然向下前傾',
+      '以臀部和下背發力，將身體抬升至與地面平行，不要過度後仰',
+      '頂點停留 1 秒，感受臀部和下背收縮，緩慢放下重複',
+    ],
+    tips: [
+      '不要讓身體上升超過水平線，過度後仰對腰椎壓力大',
+      '如果感覺腰部在用力而不是臀部，試著讓雙腳腳尖向外轉',
+      '進階者可在胸前抱著槓片增加阻力，但需要確保核心夠穩定',
+      '這個動作對改善「駝背」和「下背痛」非常有效，建議每週 2–3 次',
+    ],
+  },
+  // ── 新增 30 種（共 60 種） ────────────────────────────────────────────────
+  {
+    id: 'eq31', name: '坐姿肩推機', category: '固定軌道機器', icon: '🔺',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '三角肌（前束、側束）、三頭肌、上斜方肌',
+    desc: '坐姿肩推機是肩部訓練的入門首選器材，固定軌道讓動作穩定，新手容易感受到肩膀用力。相比自由重量肩推，對肩膀穩定性要求低，適合肩部力量基礎薄弱者建立力量。',
+    uses: ['肩部推舉', '肩膀前束訓練', '上胸輔助訓練'],
+    steps: [
+      '調整座椅高度：握把與肩膀同高或略低於肩膀',
+      '背部完全貼合靠背，雙腳踩穩地板，核心收緊',
+      '雙手握住握把，手腕保持中立位（不過度前屈或後折）',
+      '吐氣，向上推起，手臂接近完全伸直但不鎖死',
+      '緩慢控制放下，回到起始位置，感受肩膀完全伸展',
+    ],
+    tips: [
+      '不要聳肩完成動作，肩胛骨全程保持下沉穩定',
+      '有肩膀夾擠問題者使用前請先諮詢醫師',
+      '推起時不要靠腰部借力，若腰會離開椅背代表重量太重',
+    ],
+  },
+  {
+    id: 'eq32', name: '胸推機', category: '固定軌道機器', icon: '💪',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '胸大肌、三角肌前束、三頭肌',
+    desc: '胸推機是臥推的機器版本，動作軌道固定，無需平衡技術，讓胸肌新手快速感受到用力感。適合初學者建立胸肌連結，或受傷後復健期間安全訓練胸部。',
+    uses: ['胸肌整體訓練', '三頭肌輔助訓練', '上胸（上斜版本）'],
+    steps: [
+      '調整座椅讓握把高度與胸部中段對齊',
+      '背部貼靠背墊，雙腳踩地，肩胛骨夾緊稍微向後縮',
+      '深吸氣，雙手握住握把',
+      '吐氣，用胸肌的力量向前推，手臂伸直但不完全鎖死',
+      '吸氣，緩慢讓握把回到起始，感受胸肌充分伸展',
+    ],
+    tips: [
+      '想像把兩側手肘向中間夾，而不是只用手向前推',
+      '肩膀不要聳起，全程保持下沉穩定',
+      '比起臥推，這台機器更適合用高次數、感受肌肉泵感',
+    ],
+  },
+  {
+    id: 'eq33', name: '臀推機（Hip Thrust Machine）', category: '固定軌道機器', icon: '🍑',
+    difficulty: '入門', intensity: 4, danger: 1,
+    muscles: '臀大肌（主）、股二頭肌、臀中肌',
+    desc: '臀推機是訓練臀大肌效率最高的器材之一，相比槓鈴臀推更方便設定且更安全。臀推被研究證實是臀大肌肌電活化最高的動作，是雕塑臀型的首選訓練。',
+    uses: ['臀大肌強化', '臀型雕塑', '下肢後側鏈訓練'],
+    steps: [
+      '坐上座椅，上背靠在靠背墊上，腰帶（機器的阻力墊）置於髖骨正上方',
+      '雙腳踩穩踏板，與肩同寬，腳尖略向外',
+      '核心收緊，下背保持中立位（不過度拱腰）',
+      '吐氣，用臀部用力向上頂起，直到大腿與地面平行或略高',
+      '頂點夾緊臀部停留 1–2 秒，緩慢放下但不要完全坐回起始',
+    ],
+    tips: [
+      '頂點時要「夾緊臀部」而不只是撐起髖部，感受臀肌最大收縮',
+      '腳的位置影響訓練重點：腳越往前，臀肌參與越多',
+      '動作中下背不應該用力，若感覺腰在痠可能是動作跑掉了',
+    ],
+  },
+  {
+    id: 'eq34', name: '聳肩機（Trap Machine）', category: '固定軌道機器', icon: '🔼',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '斜方肌上段、提肩胛肌',
+    desc: '聳肩機專門訓練斜方肌上段，讓脖子到肩膀的線條更加立體厚實。對職業運動員和健美選手常見訓練項目，也可用啞鈴或槓鈴代替。',
+    uses: ['斜方肌聳肩訓練', '頸部線條雕塑'],
+    steps: [
+      '站上機器踏板，雙手握住把手，手臂自然下垂',
+      '身體直立，核心微收，眼睛直視前方',
+      '吐氣，單純用肩膀向上聳起，盡可能讓肩膀靠近耳朵',
+      '頂點停留 1 秒，感受斜方肌最大收縮',
+      '緩慢放下，讓肩膀完全下沉後再做下一下',
+    ],
+    tips: [
+      '不要轉動肩膀（向前向後轉），這不會增加效果反而增加受傷風險',
+      '下沉時讓肩膀完全放鬆，增加動作幅度',
+      '脖子有問題或椎間盤突出者使用前請先諮詢醫師',
+    ],
+  },
+  {
+    id: 'eq35', name: '坐姿舉踵機', category: '固定軌道機器', icon: '🦶',
+    difficulty: '入門', intensity: 2, danger: 1,
+    muscles: '比目魚肌（深層小腿肌）',
+    desc: '坐姿舉踵機訓練的是小腿的深層肌肉（比目魚肌），這在站姿舉踵中較難刺激到。完整的小腿訓練應該結合站姿和坐姿舉踵，才能訓練到腓腸肌和比目魚肌兩個部分。',
+    uses: ['比目魚肌（深層小腿）訓練', '小腿圍度增加'],
+    steps: [
+      '坐上座椅，膝蓋放在膝墊下方，調整阻力墊貼合大腿',
+      '腳掌前半段踩在踏板邊緣，腳跟自然懸空',
+      '放鬆讓腳跟下沉到最低點，感受小腿完全伸展',
+      '吐氣，踮起腳尖向上，到最高點時停留 1 秒',
+      '緩慢放下回到最低點，確保完整的動作範圍',
+    ],
+    tips: [
+      '重要：腳跟要下沉到低於踏板，讓肌肉充分伸展才有效果',
+      '小腿肌肉恢復快，建議使用高次數（15–20 下）訓練',
+      '腳尖方向影響刺激部位：朝前練整體，向外練內側，向內練外側',
+    ],
+  },
+  {
+    id: 'eq36', name: '站姿舉踵機', category: '固定軌道機器', icon: '👟',
+    difficulty: '入門', intensity: 2, danger: 1,
+    muscles: '腓腸肌（外層小腿肌）、比目魚肌',
+    desc: '站姿舉踵機主要訓練腓腸肌（小腿外層最明顯的肌肉），這是打造漂亮小腿線條的關鍵肌肉。站姿讓膝蓋伸直，腓腸肌能完全收縮，是站姿舉踵最有效的器材版本。',
+    uses: ['腓腸肌訓練', '小腿爆發力', '踝關節強化'],
+    steps: [
+      '站上踏板，肩墊調整至肩膀高度，雙肩頂住肩墊',
+      '腳掌前半段踩在踏板邊緣，膝蓋保持微彎（不完全鎖死）',
+      '讓腳跟下沉到最低，感受小腿充分伸展',
+      '吐氣，踮起腳尖到最高點，頂點夾緊小腿 1 秒',
+      '緩慢控制放下，不要讓腳跟突然落下',
+    ],
+    tips: [
+      '站姿舉踵可以使用較大重量，但動作品質優先於重量',
+      '高次數（15–25 下）對小腿效果比低次數好',
+      '若沒有機器，踩著台階的單腿舉踵是最好的替代方案',
+    ],
+  },
+  {
+    id: 'eq37', name: '髖外展機', category: '固定軌道機器', icon: '↔️',
+    difficulty: '入門', intensity: 2, danger: 1,
+    muscles: '臀中肌、臀小肌、闊筋膜張肌（大腿外側）',
+    desc: '髖外展機訓練臀部外側肌群（臀中肌），這對骨盆穩定和預防膝蓋受傷至關重要。跑者、登山者和任何有膝蓋問題的人，強化臀中肌是復健和預防的核心訓練。',
+    uses: ['臀中肌強化', '臀部外側線條', '骨盆穩定訓練', '膝蓋傷害預防'],
+    steps: [
+      '坐上座椅，背部貼靠背，調整腿墊讓大腿外側貼合',
+      '雙腳踩穩，核心微收，背部直立不前傾',
+      '吐氣，雙腿向外側打開，感受臀部外側肌肉用力',
+      '打開到最大角度時停留 1 秒',
+      '緩慢控制讓腿部回到中間，不讓重量拉著腿快速關閉',
+    ],
+    tips: [
+      '動作時身體不要歪向一側，保持對稱',
+      '重量不需要很重，感受臀外側肌肉的燒灼感更重要',
+      '可以在彈力帶版本（膝上彈力帶側走）中獲得類似效果',
+    ],
+  },
+  {
+    id: 'eq38', name: '髖內收機', category: '固定軌道機器', icon: '↕️',
+    difficulty: '入門', intensity: 2, danger: 1,
+    muscles: '內收肌群（大腿內側）、恥骨肌',
+    desc: '髖內收機訓練大腿內側肌群，對腿部整體線條和骨盆穩定有幫助。常與髖外展機搭配使用，保持內收外展肌力平衡，預防鼠蹊部拉傷。',
+    uses: ['大腿內側雕塑', '骨盆穩定', '鼠蹊部傷害預防'],
+    steps: [
+      '坐上座椅，調整腿墊讓大腿內側貼合，雙腳向外張開至起始位置',
+      '背部貼靠背，核心微收',
+      '吐氣，雙腿向內側夾合，感受大腿內側肌肉用力',
+      '到最窄點時停留 1 秒',
+      '緩慢讓腿部回到外開位置，保持控制',
+    ],
+    tips: [
+      '鼠蹊部（腹股溝）有傷或曾拉傷者，使用前先做熱敷和輕度伸展',
+      '不要使用過重的重量讓腿部猛然夾合，這樣容易拉傷',
+      '與髖外展機配合做超級組，同一天訓練效果更佳',
+    ],
+  },
+  {
+    id: 'eq39', name: '牧師椅臂彎舉機', category: '固定軌道機器', icon: '🦾',
+    difficulty: '入門', intensity: 2, danger: 1,
+    muscles: '肱二頭肌（完全孤立）',
+    desc: '牧師椅（Preacher Curl）透過固定上臂，完全孤立肱二頭肌，避免借力。是二頭肌訓練中感受肌肉最準確的方式，特別強調二頭肌的下段（靠近肘關節部分）。',
+    uses: ['肱二頭肌孤立訓練', '二頭肌下段強化', '手臂線條雕塑'],
+    steps: [
+      '調整座椅高度，讓上臂完整貼合斜墊，腋窩在墊子頂端',
+      '雙手握住把手，手臂完全伸直為起始位置',
+      '吐氣，彎曲手肘向上捲起，只靠二頭肌用力',
+      '到頂點時（手肘接近完全彎曲），停留 1 秒',
+      '緩慢放下，手臂完全伸展再做下一下，完整動作範圍是關鍵',
+    ],
+    tips: [
+      '上臂不要離開墊子，一離開就是在借力作弊',
+      '放下速度要慢，離心收縮對二頭肌增長同樣重要',
+      '手腕保持中立，不要過度後折承受重量',
+    ],
+  },
+  {
+    id: 'eq40', name: '三頭肌推伸機', category: '固定軌道機器', icon: '💎',
+    difficulty: '入門', intensity: 2, danger: 1,
+    muscles: '肱三頭肌（所有三個頭）',
+    desc: '三頭肌推伸機讓你以穩定且孤立的方式訓練三頭肌，相比繩索下壓能更穩定地感受三頭肌全程收縮。三頭肌佔手臂肌肉的 2/3，是手臂粗細最重要的肌群。',
+    uses: ['三頭肌孤立訓練', '手臂圍度增加', '臥推輔助訓練'],
+    steps: [
+      '坐上座椅，上臂貼合支撐墊，調整位置讓手肘關節對準機器轉軸',
+      '雙手握住握把，手肘彎曲約 90 度為起始位置',
+      '吐氣，向下推伸，讓手臂完全伸直，感受三頭肌最大收縮',
+      '頂點停留 1 秒，感受三頭肌鎖緊',
+      '緩慢讓手臂彎回起始位置，不要讓重量砸落',
+    ],
+    tips: [
+      '上臂要固定，只有前臂在動，不要讓上臂前後晃動',
+      '高次數（12–15 下）對三頭肌的效果和低次數一樣好',
+      '手腕盡量保持中立位，避免訓練時手腕承受過多壓力',
+    ],
+  },
+  {
+    id: 'eq41', name: 'EZ 彎槓', category: '自由重量', icon: '〰️',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '肱二頭肌、肱肌、前臂屈肌',
+    desc: 'EZ 彎槓的波浪形設計讓手腕在較自然的角度進行彎舉，大幅減少手腕和肘關節的壓力。相比直槓，EZ 槓對手腕更友善，特別適合手腕敏感或有手肘外上髁炎（網球肘）的訓練者。',
+    uses: ['EZ槓彎舉（二頭）', '窄握臥推（三頭）', '法式推舉（三頭）', '直立划船（肩膀）'],
+    steps: [
+      '選擇適當重量：彎舉 10 下，最後 2 下有挑戰感',
+      '雙手握住 EZ 槓的內側斜面（最常見的握距），手腕自然放鬆',
+      '站立，手臂自然下垂，肘關節貼近身體兩側',
+      '吐氣，彎曲手肘向上捲起，肘關節固定不前後移動',
+      '到頂點停留一秒，緩慢放下到完全伸展',
+    ],
+    tips: [
+      '彎舉時手肘不要向前衝（借力），固定在身體兩側',
+      '外側握距（更寬）主攻二頭長頭，內側握距主攻短頭',
+      '手腕感覺不舒適就換握距，EZ 槓的優點就是有多個角度可選',
+    ],
+  },
+  {
+    id: 'eq42', name: '六角槓（Trap Bar）', category: '自由重量', icon: '⬡',
+    difficulty: '中級', intensity: 5, danger: 2,
+    muscles: '股四頭肌、臀大肌、膕繩肌、背部（全身複合）',
+    desc: '六角槓（Trap Bar/Hex Bar）讓你站在槓鈴內部，重心更靠近身體中心，比直槓硬舉更友善於腰椎。對新手學習硬舉動作模式非常有效，也可用來做架上推舉和農夫走路。',
+    uses: ['六角槓硬舉（初學者首選）', '農夫走路', '架上推舉（Shrug）', '跳躍蹲（爆發力）'],
+    steps: [
+      '站在六角槓中心，雙腳與肩同寬，腳尖對準槓片中心',
+      '下蹲，雙手握住兩側把手，選擇高把手（新手）或低把手（進階）',
+      '挺胸，下背保持中立位（不圓背），核心收緊',
+      '深吸氣後屏息（Valsalva），雙腿用力蹬地站起',
+      '到達直立位置，髖部完全伸展，然後控制放回地面',
+    ],
+    tips: [
+      '六角槓硬舉比直槓更安全，但仍需學習「髖部鉸鏈」動作模式',
+      '重量不要輕視，六角槓可以舉起比想像中更重的重量',
+      '背部一旦圓起（貓背）就立刻放下，不要強行完成',
+    ],
+  },
+  {
+    id: 'eq43', name: '槓鈴', category: '自由重量', icon: '🏋️',
+    difficulty: '中級', intensity: 5, danger: 3,
+    muscles: '全身（依動作而定）',
+    desc: '標準奧林匹克槓鈴長 2.2 公尺、重 20kg，是健身房最核心的器材之一。幾乎所有最有效的複合動作——深蹲、臥推、硬舉、划船、肩推——都是以槓鈴為主。掌握槓鈴訓練是健身進步的必要一步。',
+    uses: ['深蹲', '臥推', '硬舉', '槓鈴划船', '肩推（軍式推舉）', '清舉（Power Clean）'],
+    steps: [
+      '確認槓鈴片兩側重量相同，插銷確實固定',
+      '依動作調整握距和站距',
+      '核心收緊，背部保持中立位，不要圓背',
+      '執行目標動作，全程控制槓鈴路徑',
+      '結束後確認槓鈴安全放回架上，再移除重量',
+    ],
+    tips: [
+      '⚠️ 大重量動作（深蹲、臥推）一定要有夥伴保護或安全桿',
+      '槓鈴動作技術複雜，強烈建議找教練學習正確動作模式',
+      '從空槓（20kg）開始熟悉動作，不要急著加重量',
+    ],
+  },
+  {
+    id: 'eq44', name: '重量背心', category: '輔助器材', icon: '🦺',
+    difficulty: '中級', intensity: 4, danger: 2,
+    muscles: '依搭配動作而定（增加所有動作的負重）',
+    desc: '重量背心透過在身體上增加額外重量，讓徒手動作（伏地挺身、引體向上、深蹲）提升難度。是進階徒手訓練者最常用的加重工具，重量通常可調整（5–30kg）。',
+    uses: ['加重引體向上', '加重伏地挺身', '加重深蹲', '加重行走', '加重慢跑（輕重量）'],
+    steps: [
+      '根據動作選擇適合重量：引體向上加 5–10kg，伏地挺身加 10–20kg',
+      '穿上背心，調整肩帶讓背心緊貼身體，不會晃動',
+      '確認重量片或沙袋都固定好，不會在動作中移位',
+      '執行目標動作，注意姿勢因額外重量可能需要微調',
+      '訓練完後，先坐下再脫背心，避免在疲勞狀態下彎腰脫背心傷腰',
+    ],
+    tips: [
+      '加重背心會增加脊椎壓力，有椎間盤問題者謹慎使用',
+      '先確認不加重時動作標準，再考慮加重',
+      '跑步使用重量背心對膝蓋衝擊成倍增加，不建議超過體重的 10%',
+    ],
+  },
+  {
+    id: 'eq45', name: '農夫走路把手', category: '自由重量', icon: '🧳',
+    difficulty: '中級', intensity: 4, danger: 2,
+    muscles: '握力、斜方肌、核心穩定肌群、腿部（行走）',
+    desc: '農夫走路是最古老、最有效的全身功能性訓練之一。雙手各持重物行走，同時訓練握力、斜方肌、核心穩定和腿部肌耐力。可用啞鈴、壺鈴代替，專用把手可負載更大重量。',
+    uses: ['握力訓練', '核心穩定強化', '斜方肌訓練', '全身肌耐力', '功能性體能訓練'],
+    steps: [
+      '選擇適合重量（雙手約體重的 30–50%），把手放在地上兩側',
+      '站在把手中間，深蹲取把，背部中立，直立站起',
+      '站直後核心收緊，肩膀向下沉穩，不聳肩',
+      '以正常步伐前進，步伐不要太大，眼睛直視前方',
+      '走完設定距離（通常 20–40 公尺）後，蹲下放回把手，不要彎腰放手',
+    ],
+    tips: [
+      '確保行走路徑清空，沒有障礙物，以防重物撞到腿部',
+      '握力先放棄時停止，強行繼續容易拉傷手腕和前臂',
+      '可以用腰帶增加安全感，但長期依賴腰帶會讓核心變弱',
+    ],
+  },
+  {
+    id: 'eq46', name: '功能性訓練架（雙滑輪）', category: '複合器材', icon: '🔗',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '全身（依動作和角度而定）',
+    desc: '功能性訓練架（Functional Trainer）有兩個可獨立調整的滑輪，可以訓練幾乎任何動作方向和角度。相比單一滑輪機，訓練自由度極高，是現代健身房的核心器材之一。',
+    uses: ['胸部飛鳥（各角度）', '對角線功能訓練', '旋轉核心訓練', '單臂划船', '肩部各向訓練'],
+    steps: [
+      '根據動作設定兩側滑輪的高度（可以相同或不同）',
+      '選擇適合的握把，調整兩側重量',
+      '站在機器中間，感受兩側拉力的對稱性',
+      '執行動作，核心收緊，避免身體被拉向一側',
+      '對角線動作（如砍樹動作）特別有效於訓練核心旋轉力量',
+    ],
+    tips: [
+      '使用前確認兩側重量設定相同（若需對稱訓練）',
+      '這台機器的訓練自由度最高，建議找教練學習各種動作',
+      '雙滑輪的「對立張力」讓核心在所有動作中都需要穩定',
+    ],
+  },
+  {
+    id: 'eq47', name: '多功能力量架（Power Rack）', category: '複合器材', icon: '🏗️',
+    difficulty: '中級', intensity: 5, danger: 3,
+    muscles: '全身複合肌群（依動作而定）',
+    desc: '多功能力量架是所有槓鈴訓練的「安全基地」，四根立柱搭配可調整的安全桿，讓你可以獨自安全進行深蹲、臥推、硬舉等所有重型訓練。是家庭健身房和商業健身房的核心設備。',
+    uses: ['深蹲', '臥推', '肩推（軍式推舉）', '架式引體向上', '懸掛訓練', '硬舉'],
+    steps: [
+      '進入力量架前，先設定好槓鈴高度',
+      '最關鍵：設定安全桿在動作最低點下方約 5cm',
+      '取槓執行訓練動作',
+      '若失敗，讓槓鈴落在安全桿上，安全出框',
+      '訓練完成後，確認槓鈴回到架上，並移除重量片',
+    ],
+    tips: [
+      '⚠️ 安全桿高度是最重要的設定，每次使用都要確認',
+      '不同品牌的力量架安全桿位置可能不同，第一次使用要試空槓確認',
+      '力量架讓你安全獨自訓練，但大重量仍建議有夥伴在旁',
+    ],
+  },
+  {
+    id: 'eq48', name: '吊環（Gymnastic Rings）', category: '徒手器材', icon: '⭕',
+    difficulty: '進階', intensity: 5, danger: 3,
+    muscles: '全身，特別是核心、胸肌、肩膀穩定肌群',
+    desc: '吊環是體操訓練的核心器材，對穩定性要求遠超過任何固定表面動作。在不穩定的圓環上做動作，需要深層的肌肉協調和核心持續參與。從基礎到奧運等級動作都可以在吊環上完成。',
+    uses: ['吊環伏地挺身', '吊環划船（反向引體）', '吊環雙槓下推', '肌肉上（Muscle Up）（進階）', '鐵十字（進階）'],
+    steps: [
+      '調整吊環高度：伏地挺身用約肩高，划船用腰到胸高',
+      '握住吊環，感受不穩定性，先保持靜止適應',
+      '吊環伏地挺身：雙手握環，體前傾，做伏地挺身但允許環在穩定範圍內旋轉',
+      '動作過程核心全程收緊，避免身體扭轉',
+      '初學者先做靜態支撐（撐在環上不動），再進展到動態動作',
+    ],
+    tips: [
+      '⚠️ 吊環非常滑（特別是木質環），手濕的時候不要使用',
+      '確認固定點和掛鉤能承受至少 3 倍你的體重',
+      '初學者先做最基礎的靜態支撐，不要直接嘗試進階技術動作',
+    ],
+  },
+  {
+    id: 'eq49', name: '空氣阻力單車（Assault Bike）', category: '有氧器材', icon: '💨',
+    difficulty: '入門', intensity: 5, danger: 1,
+    muscles: '全身（腿部+手臂+心肺同時訓練）',
+    desc: '空氣阻力單車用風扇製造阻力，越踩越重，沒有固定阻力上限。同時帶動手臂推拉，是全身有氧器材中燃脂效率最高的之一，CrossFit 圈流行的「惡魔腳踏車」正是這台。',
+    uses: ['全身 HIIT 訓練', '最大心率測試', '燃脂有氧', '心肺耐力訓練', 'CrossFit 訓練'],
+    steps: [
+      '調整座椅高度，腳踩到最低點時膝蓋微彎',
+      '雙手握住動態把手（可前後推拉的那對）',
+      '從中等速度開始，讓身體感受阻力',
+      '衝刺時全力踩踏+推拉手把，30 秒後阻力感受會非常驚人',
+      '完成後讓自己繼續慢踩 1–2 分鐘，讓心率下降',
+    ],
+    tips: [
+      '這台機器強度比外表看起來猛，第一次請保守估計',
+      '風扇越轉越快，阻力呈非線性增加，不要盲目衝刺到虛脫',
+      '手汗大的人可以戴手套，濕滑的把手會讓動作效率降低',
+    ],
+  },
+  {
+    id: 'eq50', name: '拳擊沙袋', category: '有氧器材', icon: '🥊',
+    difficulty: '入門', intensity: 4, danger: 2,
+    muscles: '上肢、核心、腿部（移步時）、心肺',
+    desc: '拳擊沙袋訓練結合了有氧、協調、力量和節奏感，在提高心肺的同時也有效釋放壓力。正確的出拳技術可以訓練核心旋轉力量，是格鬥運動員和一般訓練者的熱門選擇。',
+    uses: ['直拳組合訓練', '有氧拳擊訓練', '協調性訓練', '壓力釋放'],
+    steps: [
+      '確認沙袋固定牢固（吊掛或底座穩固），沙袋靜止再開始',
+      '先戴好拳擊手套或護手布，保護手腕和關節',
+      '出拳時從肩膀和核心旋轉帶動，不要只靠手臂的力量',
+      '保持雙腳移動（拳擊步伐），不要站著不動死打',
+      '以 30 秒打/30 秒休息為一組，做 5–8 組',
+    ],
+    tips: [
+      '⚠️ 裸拳打沙袋非常容易傷到手腕和掌骨，一定要有護手保護',
+      '先學習基本出拳技術（直拳、勾拳、上勾拳），不要亂揮',
+      '沙袋擺動中不要衝進去接著打，等它停下或控制擺動',
+    ],
+  },
+  {
+    id: 'eq51', name: '雪橇（Prowler Sled）', category: '爆發力訓練', icon: '🛷',
+    difficulty: '中級', intensity: 5, danger: 2,
+    muscles: '股四頭肌、臀大肌、小腿、核心、上肢（推）',
+    desc: '雪橇是功能性訓練中強度最高的器材之一，透過推拉重物在地面滑動，訓練全身爆發力和肌耐力。不同於大多數器材，雪橇沒有離心階段，讓你可以訓練到力竭而不增加延遲性肌肉酸痛。',
+    uses: ['推雪橇衝刺', '拉雪橇行走', '側向雪橇推拉', '雪橇上肢推'],
+    steps: [
+      '在雪橇上放置適當重量（建議從輕重量開始感受）',
+      '推雪橇：雙手握住高柄，身體前傾約 45 度，腿部驅動',
+      '步伐短而快，全腳掌接觸地面，不要拖著腳走',
+      '推完設定距離後，休息後再推回（或更換訓練方向）',
+      '拉雪橇：背向雪橇，繩索繫在腰帶，向前走拉動雪橇',
+    ],
+    tips: [
+      '地面材質影響阻力：橡膠地墊阻力大，混凝土或草地阻力較小',
+      '雪橇推沒有離心，特別適合受傷後的訓練，膝蓋恢復首選',
+      '短距離（20m）高強度，或長距離（40–80m）耐力訓練，效果不同',
+    ],
+  },
+  {
+    id: 'eq52', name: '引體向上輔助機', category: '固定軌道機器', icon: '🆙',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '背闊肌、肱二頭肌、菱形肌（同引體向上）',
+    desc: '引體向上輔助機透過抵消部分體重，讓還無法完成標準引體向上的訓練者也能感受到動作。輔助重量越大，越輕鬆；應逐漸減少輔助重量，最終過渡到無輔助引體向上。',
+    uses: ['引體向上輔助訓練', '雙槓下推輔助', '過渡到標準引體向上'],
+    steps: [
+      '設定輔助重量（建議從體重的 40–50% 開始）',
+      '踩上膝蓋墊，雙手握住引體向上握把（寬握或窄握）',
+      '讓身體懸掛，感受輔助力量托著你',
+      '吐氣，向上拉起，下巴超過握把高度',
+      '緩慢放下，隨著訓練進步逐漸減少輔助重量',
+    ],
+    tips: [
+      '輔助重量設太多會讓動作失去效果，剛好能完成 6–8 下的輔助量最佳',
+      '不要在頂點突然跳下，要控制放下',
+      '每隔 2–4 週嘗試減少輔助重量，觀察自己的進步',
+    ],
+  },
+  {
+    id: 'eq53', name: '腹部訓練椅（仰臥起坐椅）', category: '核心訓練', icon: '🪑',
+    difficulty: '入門', intensity: 2, danger: 2,
+    muscles: '腹直肌、髂腰肌（髖屈肌）',
+    desc: '腹部訓練椅（Decline Sit-up Bench）透過角度增加仰臥起坐的難度，比平地版本更能刺激腹部肌群。角度越低（越斜），難度越高。注意：仰臥起坐比捲腹對腰椎壓力更大。',
+    uses: ['下斜仰臥起坐', '捲腹（縮短版）', '負重仰臥起坐（進階）'],
+    steps: [
+      '調整椅子角度（建議從最小角度開始）',
+      '雙腳固定在腳踝固定墊上，確保穩固',
+      '雙手交叉放胸前（初學者）或放頭後（進階）',
+      '核心收緊，緩慢捲起上身，不要一次就完全坐起',
+      '回程緩慢放下，不要讓背部直接砸落',
+    ],
+    tips: [
+      '脊椎有問題的人仰臥起坐動作對腰椎壓力大，改做捲腹或懸垂抬腿',
+      '雙手放頭後容易造成頸部拉傷，交叉放胸前更安全',
+      '捲腹（只起身到肩膀離地）比完整仰臥起坐對腹肌的刺激更精準',
+    ],
+  },
+  {
+    id: 'eq54', name: '懸吊抬腿架（VKR Station）', category: '核心訓練', icon: '🧗',
+    difficulty: '中級', intensity: 3, danger: 1,
+    muscles: '腹直肌下段、髂腰肌、腹斜肌',
+    desc: '懸吊抬腿架（Vertical Knee Raise Station）讓你靠手肘撐在臂托上懸空，透過抬膝或直腿上抬訓練腹部下段。下腹部是最難訓練的部位，這台機器提供最直接的刺激方式。',
+    uses: ['懸垂抬膝（入門）', '懸垂直腿上抬（進階）', '懸垂扭轉抬膝（腹斜肌）'],
+    steps: [
+      '手肘靠在臂托上，背部貼靠背墊，身體懸空',
+      '核心先收緊，確保腰部不下塌',
+      '抬膝版本：彎曲膝蓋，用腹肌的力量讓膝蓋上升到腹部高度',
+      '直腿版本（進階）：雙腿保持伸直，靠腹肌向上抬起到水平',
+      '緩慢放下，不要讓腿部甩動借力',
+    ],
+    tips: [
+      '不要靠甩腿動作完成，要感受腹肌主動收縮',
+      '若手肘很不舒適，可以戴護肘或在臂托上加墊',
+      '懸垂直腿上抬是難度很高的動作，建議先確認能做 10 個懸垂抬膝再嘗試',
+    ],
+  },
+  {
+    id: 'eq55', name: '伏地挺身架', category: '輔助器材', icon: '🤲',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '胸大肌、三角肌前束、三頭肌、核心',
+    desc: '伏地挺身架讓手腕在中立位完成伏地挺身，比直接撐地更安全、動作範圍更大（胸肌可以更低沉）。適合手腕敏感、腕隧道症候群或想增加動作深度的訓練者。',
+    uses: ['中立握伏地挺身（手腕友善）', '窄距伏地挺身（三頭）', '寬距伏地挺身（胸）', '加深版伏地挺身'],
+    steps: [
+      '將架子放在肩膀正下方的位置，間距略寬於肩（或依目標調整）',
+      '雙手握住把手，進入伏地挺身預備姿勢，全身一條直線',
+      '核心收緊，讓身體整體下降，胸口可以低於把手高度（更大動作範圍）',
+      '吐氣，推起身體回到起始位置',
+      '把手角度可以轉動，找到最舒適的手腕角度',
+    ],
+    tips: [
+      '確認架子在防滑地面上，下壓時架子不要滑開',
+      '比平地伏地挺身更大的動作範圍也意味著更大的肌肉伸展，初學者循序漸進',
+      '可以搭配腳墊高（困難）或手墊高（簡單）來調整難度',
+    ],
+  },
+  {
+    id: 'eq56', name: '按摩槍', category: '輔助器材', icon: '🔫',
+    difficulty: '入門', intensity: 1, danger: 1,
+    muscles: '全身肌肉筋膜（使用於訓練後恢復）',
+    desc: '按摩槍透過高頻率的振動對肌肉進行深層按摩，快速緩解延遲性肌肉酸痛（DOMS）和肌肉緊繃。訓練後使用 5–10 分鐘，對加速恢復和減少肌肉僵硬有顯著效果。',
+    uses: ['訓練後肌肉恢復', '運動前喚醒肌肉', '長時間久坐後頸肩放鬆', '減少延遲性肌肉酸痛'],
+    steps: [
+      '開機後先在手掌測試振動頻率，選擇合適的速度（通常從中速開始）',
+      '將按摩頭輕放在目標肌肉上，不要用力壓，讓振動自然滲透',
+      '沿著肌肉方向緩慢移動，每個部位停留 20–30 秒',
+      '遇到特別緊繃的點可以停留稍久，但不超過 60 秒',
+      '一個肌群使用不超過 2 分鐘，總使用時間 5–10 分鐘',
+    ],
+    tips: [
+      '不要直接使用在骨頭、關節、頸部正中（頸動脈位置）',
+      '受傷急性期（紅腫發炎）不要使用按摩槍，會加重發炎',
+      '按摩槍不是萬能的，嚴重疼痛應就醫而非靠按摩槍緩解',
+    ],
+  },
+  {
+    id: 'eq57', name: '握力器', category: '輔助器材', icon: '✊',
+    difficulty: '入門', intensity: 1, danger: 1,
+    muscles: '前臂屈肌、手部肌肉、握力',
+    desc: '握力是所有訓練動作的基礎——握力不足，硬舉、划船、引體向上都會受限。握力器是最方便練握力的工具，可以在看電視或休息時間使用，不佔時間。',
+    uses: ['握力強化', '前臂肌肉訓練', '硬舉和划船輔助', '手部復健'],
+    steps: [
+      '選擇阻力適合的握力器（能完成 15–20 下的阻力）',
+      '虎口包住握力器，四指和大拇指握住兩個握把',
+      '緩慢用力握緊，完全合攏',
+      '停留 1 秒，緩慢放開到最大開口',
+      '每組 15–20 下，做 3 組，兩手都要練',
+    ],
+    tips: [
+      '不要快速連續握，要有控制的握緊和放開',
+      '手指有傷（扭傷、腱鞘炎）時請先恢復再使用',
+      '握力訓練效果要 4–6 週才明顯，需要持之以恆',
+    ],
+  },
+  {
+    id: 'eq58', name: '舉重腰帶', category: '輔助器材', icon: '🩹',
+    difficulty: '入門', intensity: 1, danger: 1,
+    muscles: '（輔助器材，保護腰椎，不直接訓練肌肉）',
+    desc: '舉重腰帶在大重量訓練時，透過提高腹內壓來保護腰椎。但切記：腰帶是輔助工具，不是替代核心訓練的方法。輕重量訓練不需要也不建議使用腰帶，否則會讓核心越來越弱。',
+    uses: ['大重量深蹲保護腰椎', '大重量硬舉', '大重量肩推', '舉重競技（力量舉）'],
+    steps: [
+      '腰帶圍繞腰部最細的地方（通常是肚臍位置）',
+      '調整到剛好能插入一個拳頭的鬆緊度（不是越緊越好）',
+      '取好槓鈴後，深吸氣讓腹部向外擴張抵住腰帶（Valsalva 呼吸法）',
+      '這個腹內壓是腰帶真正的保護機制，不只是靠腰帶勒住',
+      '完成動作後，在安全位置才放鬆呼吸',
+    ],
+    tips: [
+      '只有在接近最大重量（1RM 的 80% 以上）才需要腰帶',
+      '長期依賴腰帶訓練會讓核心退化，輕重量一定要不用腰帶',
+      '皮革腰帶比尼龍腰帶更耐用且支撐更好，但也更貴',
+    ],
+  },
+  {
+    id: 'eq59', name: 'T槓划船架', category: '複合器材', icon: '⚓',
+    difficulty: '中級', intensity: 4, danger: 2,
+    muscles: '背闊肌、菱形肌、後三角肌、肱二頭肌（背部厚度）',
+    desc: 'T 槓划船是建立背部厚度最有效的動作之一，相比槓鈴划船，固定一端的槓鈴讓動作路徑更穩定，新手更容易感受背部用力。可以使用V型握把（中立握）讓背部中段參與更多。',
+    uses: ['背部厚度訓練', 'V型握把划船', '寬握把划船（背闊肌）'],
+    steps: [
+      '站上踏板，身體俯身約 45 度，膝蓋微彎，下背保持中立位',
+      '雙手握住V型握把（或槓鈴）',
+      '核心收緊，挺胸，肩胛骨稍微夾緊做準備',
+      '吐氣，將握把向上拉向腹部，手肘緊貼身體',
+      '頂點停留 1 秒感受背部夾緊，緩慢放下到手臂完全伸展',
+    ],
+    tips: [
+      '背部一旦開始圓起，立即停止，降低重量',
+      '身體角度越垂直（越直立），背闊肌下段參與越多；越俯身，背闊肌上段參與越多',
+      '不要用下背借力搖晃，這樣做是在傷腰而不是練背',
+    ],
+  },
+  {
+    id: 'eq60', name: '滑行盤（Sliding Discs）', category: '核心訓練', icon: '💿',
+    difficulty: '中級', intensity: 3, danger: 1,
+    muscles: '核心（特別是腹橫肌）、肩膀穩定肌群、臀部',
+    desc: '滑行盤是超便宜的核心訓練工具，透過讓手或腳在光滑面上滑動，製造不穩定性讓核心必須持續穩定。在家使用地板即可，硬地板效果更好，也可以用舊 CD 或紙盤代替。',
+    uses: ['滑行棒式（Pike）', '滑行登山者', '滑行側向弓步', '滑行伏地挺身滑手', '臀部滑行訓練'],
+    steps: [
+      '光滑地板效果最佳（木地板或瓷磚），地毯上效果較差',
+      '雙腳踩在滑行盤上（腳部動作）或雙手放在滑行盤上（手部動作）',
+      '棒式滑行（Pike）：伏地挺身位置，雙腳在盤上，用腹肌將腿收向胸口',
+      '滑行登山者：伏地挺身位，輪流將膝蓋滑向胸口',
+      '核心全程收緊，腰部不要下塌',
+    ],
+    tips: [
+      '沒有滑行盤可用毛巾（在木地板上）或紙盤（在地毯上）代替',
+      '棒式滑行（Pike）是難度最高的版本，先確認能做標準棒式 60 秒再嘗試',
+      '動作速度要慢，快速移動時核心來不及穩定，效果反而差',
+    ],
+  },
+  // ── 新增 30 種（共 90 種） ────────────────────────────────────────────────
+  {
+    id: 'eq61', name: '肩膀側舉機', category: '固定軌道機器', icon: '🔀',
+    difficulty: '入門', intensity: 2, danger: 1,
+    muscles: '三角肌側束（肩膀中段）',
+    desc: '肩膀側舉機專門訓練三角肌側束（中束），這是讓肩膀看起來更寬、更圓的關鍵肌肉。相比啞鈴側平舉，機器版本在動作末段仍保持張力，效果更持續。',
+    uses: ['三角肌側束孤立訓練', '肩膀寬度雕塑'],
+    steps: [
+      '調整座椅高度讓肘關節對準機器轉軸',
+      '坐穩，前臂放在臂墊上，核心微收',
+      '吐氣，用肩膀外側的力量將手臂向上舉起至平行地面',
+      '頂點停留 1 秒感受側束最大收縮',
+      '緩慢放下，不要讓重量快速落下',
+    ],
+    tips: [
+      '不要讓重量太重讓肩膀聳起，聳肩會讓斜方肌代償',
+      '高次數（15–20 下）對側束訓練效果比低次數更好',
+      '肩膀有夾擠問題者使用前諮詢醫師',
+    ],
+  },
+  {
+    id: 'eq62', name: '腰腹旋轉機', category: '固定軌道機器', icon: '🔃',
+    difficulty: '入門', intensity: 2, danger: 2,
+    muscles: '腹內外斜肌、腰椎旋轉肌群',
+    desc: '腰腹旋轉機讓你在坐姿下訓練核心的旋轉力量，對提升運動表現（高爾夫、棒球、網球）和減少腰痛有幫助。但腰椎旋轉動作需要謹慎，重量不宜過重。',
+    uses: ['核心旋轉力量訓練', '腹斜肌訓練', '運動表現提升'],
+    steps: [
+      '坐上機器，背部貼靠背，確認腰椎在中立位',
+      '雙手握住把手，固定好',
+      '核心用力，緩慢將上半身旋轉到一側',
+      '到最大旋轉角度時停留 1 秒',
+      '緩慢回正，再旋轉到另一側（或換邊做）',
+    ],
+    tips: [
+      '旋轉速度要慢，腰椎快速旋轉容易受傷',
+      '重量從最輕開始，感受腰部舒適度再慢慢增加',
+      '有腰椎間盤突出或滑脫者禁止使用',
+    ],
+  },
+  {
+    id: 'eq63', name: '訓練沙袋', category: '自由重量', icon: '🎒',
+    difficulty: '中級', intensity: 4, danger: 2,
+    muscles: '全身功能肌群（握力、核心、腿部為主）',
+    desc: '訓練沙袋因為重心不固定，每一下動作都需要額外的穩定力量，對功能性體能的訓練效果極佳。可以做扛、舉、拋、夾等各種現實生活中可能遇到的搬運動作。',
+    uses: ['沙袋扛肩行走', '沙袋熊抱深蹲', '沙袋舉過頭', '沙袋拋接', '沙袋硬舉'],
+    steps: [
+      '選擇適合重量的沙袋（建議從自體重量 25–30% 開始）',
+      '拿取沙袋時先蹲低，用腿部力量抱起，背部保持挺直',
+      '扛肩動作：將沙袋扛在單肩，感受核心單側穩定的挑戰',
+      '熊抱深蹲：雙手環抱沙袋在胸前，執行深蹲動作',
+      '動作結束後慢慢蹲低放回地面，不要直接彎腰扔掉',
+    ],
+    tips: [
+      '沙袋重心流動，每一下都不一樣，注意保持核心穩定',
+      '地面要防滑，沙袋滑落可能傷到腳趾',
+      '沙袋縫合處定期檢查，破裂會讓沙子散落',
+    ],
+  },
+  {
+    id: 'eq64', name: '迷你跳床', category: '有氧器材', icon: '🛸',
+    difficulty: '入門', intensity: 2, danger: 1,
+    muscles: '小腿、腿部、核心、平衡協調',
+    desc: '迷你跳床（Rebounder）的彈力表面讓跳躍動作的衝擊力只有地面的 1/6，對膝蓋和踝關節極為友善。常用於淋巴排毒跳躍、低衝擊有氧和老年人平衡訓練。',
+    uses: ['低衝擊有氧跳躍', '淋巴循環訓練', '平衡協調訓練', '老年人復健運動'],
+    steps: [
+      '先站在旁邊扶著跳床邊緣，感受彈性',
+      '雙腳站上跳床中心，雙手握住安全扶手（若有）',
+      '從小幅度原地彈跳開始，不要急著大跳',
+      '穩定後可以加入手臂動作，或嘗試單腳站立',
+      '每次使用 10–20 分鐘，強度比跑步低但持久性好',
+    ],
+    tips: [
+      '確認跳床放在平坦地面，腿架都穩固',
+      '周圍淨空至少 1 公尺，以防失去平衡時有落地空間',
+      '跳床有重量限制（通常 100–150kg），使用前確認',
+    ],
+  },
+  {
+    id: 'eq65', name: '敏捷繩梯', category: '爆發力訓練', icon: '🪜',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '腿部快速肌群、協調性、敏捷性',
+    desc: '敏捷繩梯是提升腳步速度、協調性和神經肌肉控制的訓練工具，廣泛用於各項運動員訓練。多種步法組合可以訓練不同方向的快速移動能力，也是不錯的有氧工具。',
+    uses: ['基本單腳步法', '側向快步', '交叉步', '高抬腿快跑步法', '速度敏捷訓練'],
+    steps: [
+      '將繩梯平鋪在地面（草地、橡膠地墊或木地板皆可）',
+      '從繩梯一端開始，以目標步法快速通過每個格子',
+      '基本步法：每格單腳踩入踩出，保持腳步輕巧快速',
+      '進階：側向進入每格（兩腳都進去再移到下一格）',
+      '每種步法做 3–5 趟，中間休息 30–60 秒',
+    ],
+    tips: [
+      '繩梯訓練重點是腳步速度，不是跳高，腳盡量貼近地面',
+      '先慢速確認步法正確，再提升速度，不要一開始就全速',
+      '雨天或濕滑地面不要在室外使用，容易滑倒',
+    ],
+  },
+  {
+    id: 'eq66', name: '搖擺平衡板', category: '輔助器材', icon: '🏄',
+    difficulty: '入門', intensity: 1, danger: 2,
+    muscles: '踝關節穩定肌群、小腿、核心深層肌肉',
+    desc: '搖擺平衡板（Wobble Board）透過不穩定的圓弧底面，強迫身體持續微調平衡，訓練本體感覺和踝關節穩定性。是預防踝關節扭傷復發和提升運動場上平衡能力的重要工具。',
+    uses: ['踝關節穩定訓練', '本體感覺訓練', '扭傷後復健', '單腳平衡進階訓練'],
+    steps: [
+      '站在板旁，先以手扶牆或椅背輔助',
+      '雙腳踩上板面，感受搖晃，讓身體自動調整',
+      '穩定後嘗試放手，保持雙腳平衡 30 秒',
+      '進階：閉眼平衡（移除視覺輔助，更依賴本體感覺）',
+      '單腳站立（進階）：單腳站在板上保持平衡',
+    ],
+    tips: [
+      '第一次使用旁邊一定要有可抓握的支撐物',
+      '木製板面比橡膠底更滑，使用時穿有止滑底的運動鞋',
+      '踝關節急性扭傷（腫脹期）不要使用，等消腫後再做復健訓練',
+    ],
+  },
+  {
+    id: 'eq67', name: '腕力滾輪', category: '輔助器材', icon: '🌀',
+    difficulty: '入門', intensity: 2, danger: 1,
+    muscles: '前臂屈肌、前臂伸肌、腕關節肌群',
+    desc: '腕力滾輪（Wrist Roller）是訓練前臂最有效的工具之一，透過手腕旋轉捲起和放下重量，全面訓練前臂的屈肌和伸肌。對提升握力、改善「網球肘」和「高爾夫球肘」都有幫助。',
+    uses: ['前臂強化訓練', '腕關節肌力訓練', '握力提升', '網球肘復健輔助'],
+    steps: [
+      '雙手握住滾輪中央棒，手臂向前伸直與地面平行',
+      '手腕向上旋轉，讓繩子捲起，重量緩慢上升',
+      '捲到頂端後，換方向向下旋轉，讓重量緩慢放下',
+      '以上捲再放下為一組，每組 3–5 次捲放',
+      '手臂若疲勞可稍微彎曲肘關節，降低難度',
+    ],
+    tips: [
+      '前臂比較耐疲勞，但也很容易過度訓練，造成肌腱炎',
+      '有手腕或手肘疼痛時立即停止，肌腱炎恢復很慢',
+      '這個動作燃燒感強烈是正常的，但不要強撐到麻木',
+    ],
+  },
+  {
+    id: 'eq68', name: '腳踝沙袋', category: '輔助器材', icon: '🦺',
+    difficulty: '入門', intensity: 2, danger: 1,
+    muscles: '腿部（依動作而定）、臀部、腿後側',
+    desc: '腳踝沙袋（Ankle Weights）綁在腳踝上增加阻力，適合徒手腿部動作的加重版本。重量通常 0.5–5kg，特別適合復健訓練、孕婦運動和體能較弱者增加動作難度。',
+    uses: ['側躺腿部外展', '俯臥後踢腿', '站立後踢腿', '抬膝訓練', '復健期強化'],
+    steps: [
+      '將沙袋綁在腳踝上方，魔鬼氈確實黏牢，不會在動作中滑動',
+      '選擇適合動作的姿勢（站姿、俯臥或側躺）',
+      '執行目標動作，速度緩慢，感受腿部和臀部肌肉用力',
+      '動作幅度到底時停留 1 秒，再緩慢回到起始',
+      '一側完成再換腳，注意兩側訓練量要相同',
+    ],
+    tips: [
+      '重量不要超過 3kg，過重會改變步態並讓膝蓋承受不當壓力',
+      '走路時不建議長時間佩戴，會影響正常步態',
+      '加重後若感覺關節不舒適立即取下',
+    ],
+  },
+  {
+    id: 'eq69', name: '筋膜球（按摩球）', category: '輔助器材', icon: '⚾',
+    difficulty: '入門', intensity: 1, danger: 1,
+    muscles: '全身各部位筋膜（使用於恢復）',
+    desc: '筋膜球比泡棉滾筒更小更硬，可以深入特定痛點（Trigger Point），特別適合處理肩膀、臀部、腳底等難以用滾筒到達的部位。費用低廉，是最划算的恢復工具之一。',
+    uses: ['肩膀筋膜放鬆', '臀部深層放鬆（梨狀肌）', '足底筋膜放鬆', '頸部肌肉放鬆'],
+    steps: [
+      '找到目標部位，將球放在肌肉緊繃處和牆壁或地面之間',
+      '以適度體重壓在球上，找到最痛的點',
+      '停留在痛點，做緩慢的深呼吸，讓肌肉放鬆',
+      '可以小幅度滾動球，或讓身體微微移動增加刺激',
+      '一個點停留 30–60 秒，移到下一個點',
+    ],
+    tips: [
+      '比泡棉滾筒更集中，力道要輕，不要直接壓骨頭或神經路徑',
+      '足底筋膜炎：每天早上起床前用筋膜球踩 2 分鐘，效果顯著',
+      '梨狀肌（臀部深層）放鬆：坐在球上，保持 30 秒，對坐骨神經痛有幫助',
+    ],
+  },
+  {
+    id: 'eq70', name: '伸展帶（Stretch Strap）', category: '輔助器材', icon: '📏',
+    difficulty: '入門', intensity: 1, danger: 1,
+    muscles: '腿後側（膕繩肌）、臀部、肩膀（依伸展動作而定）',
+    desc: '伸展帶讓你在不需要他人輔助的情況下，進行更深度的靜態和動態伸展。多個固定環讓你可以逐步加深伸展角度，是柔軟度訓練和訓練後恢復的實用工具。',
+    uses: ['腿後側伸展', '臀部深層伸展', '肩膀和胸部伸展', '訓練後冷卻放鬆'],
+    steps: [
+      '躺在地墊上，將帶子套住腳底（腿後側伸展）',
+      '雙手握住帶子，將腿向上抬起，感受腿後側的伸展',
+      '保持伸展 20–30 秒，呼吸放鬆不要憋氣',
+      '利用帶子的多個環逐步增加伸展角度',
+      '動態版本：小幅度彈動，增加柔軟度訓練效果',
+    ],
+    tips: [
+      '靜態伸展在訓練後效果最好，訓練前用動態伸展暖身',
+      '不要在肌肉緊繃的情況下強行拉伸，容易造成肌肉拉傷',
+      '感覺「緊繃感」是正常的，感覺「疼痛」就要減少角度',
+    ],
+  },
+  {
+    id: 'eq71', name: '震動訓練台', category: '輔助器材', icon: '📳',
+    difficulty: '入門', intensity: 1, danger: 1,
+    muscles: '下肢肌群（激活和恢復）、全身神經肌肉系統',
+    desc: '震動訓練台（Vibration Plate）透過高頻震動刺激肌肉收縮，可用於訓練前的肌肉激活或訓練後的恢復放鬆。研究顯示對老年人平衡能力提升和骨密度維持有幫助。',
+    uses: ['訓練前肌肉激活', '訓練後恢復', '老年人平衡訓練', '搭配拉伸增加效果'],
+    steps: [
+      '站上台面，雙腳與肩同寬',
+      '膝蓋微彎（不要鎖死），保持直立姿勢',
+      '開機選擇適合的頻率（初學者從低頻開始）',
+      '可以在震動中做靜態站立、深蹲、弓步等動作',
+      '每次使用 5–10 分鐘，不要長時間持續震動',
+    ],
+    tips: [
+      '有心臟病、癲癇、人工植入物（心臟節律器）者禁止使用',
+      '孕婦不建議使用震動訓練台',
+      '頭部不要靠近台面震動，頭部震動可能引起不適',
+    ],
+  },
+  {
+    id: 'eq72', name: '硬舉訓練台（Olympic Platform）', category: '複合器材', icon: '🟫',
+    difficulty: '中級', intensity: 5, danger: 3,
+    muscles: '全身後鏈（臀、背、腿）——硬舉專用',
+    desc: '硬舉訓練台是橡膠地墊加上特定尺寸的平台，讓槓鈴從固定高度出發，保護地板並吸收槓鈴放下時的衝擊。是進行奧林匹克舉重和力量舉訓練的標準設備。',
+    uses: ['硬舉', '架式硬舉（Rack Pull）', '奧林匹克舉重（抓舉、挺舉）', '槓鈴划船'],
+    steps: [
+      '確認台面穩固，槓鈴放在台面中心',
+      '站在槓鈴前，雙腳與髖同寬，腳尖略微向外',
+      '下蹲握槓，採雙握（Double Overhand）或混合握法',
+      '深吸氣收緊核心（腹內壓），背部中立位',
+      '雙腿蹬地站起，讓槓鈴貼著腿部上升',
+      '完成後，控制將槓鈴放回台面，可以「drop」（大重量時）',
+    ],
+    tips: [
+      '⚠️ 大重量硬舉是最容易傷腰的動作之一，圓背是最危險的',
+      '奧林匹克舉重動作複雜，必須有教練指導才能安全學習',
+      '有些健身房禁止硬舉放下時大聲碰地，注意館規',
+    ],
+  },
+  {
+    id: 'eq73', name: '臀腿訓練機（GHD）', category: '固定軌道機器', icon: '🦵',
+    difficulty: '進階', intensity: 5, danger: 4,
+    muscles: '膕繩肌、臀大肌、豎脊肌、核心',
+    desc: 'GHD（Glute Ham Developer）是 CrossFit 和力量訓練中極有效但也極危險的後鏈訓練機器。GHD 仰臥起坐（Sit-up）和 GHD 背部伸展（Back Extension）是使用率最高的兩個動作，對核心和後鏈強度要求極高。',
+    uses: ['GHD 仰臥起坐（全幅度）', 'GHD 背部伸展', '俯臥腿彎舉（膕繩肌）', '反向超人式'],
+    steps: [
+      '調整腳踝固定墊確保雙腳穩固，膝蓋位於墊子邊緣',
+      'GHD 仰臥起坐：身體後仰到接近垂直，再用核心捲起',
+      'GHD 背部伸展：身體向下延伸，用背部和臀部抬起到水平',
+      '動作幅度大，第一次使用一定要有人旁邊監督',
+      '每組次數不超過 10 下（初學者 5 下即可）',
+    ],
+    tips: [
+      '⚠️ GHD 仰臥起坐是高強度動作，第一次做完隔天可能嚴重腹痛（橫紋肌溶解風險）',
+      '從 5 下開始，觀察隔天反應再決定增加次數',
+      '強烈建議在有教練監督下第一次學習，動作錯誤危險性極高',
+    ],
+  },
+  {
+    id: 'eq74', name: '腹部捲曲機', category: '固定軌道機器', icon: '🌀',
+    difficulty: '入門', intensity: 2, danger: 1,
+    muscles: '腹直肌上段',
+    desc: '腹部捲曲機讓你在有阻力的情況下做類似捲腹的動作，相比地板捲腹，機器版本可以調整阻力且對頸部壓力小。是腹肌入門訓練的好選擇，但核心的完整訓練需要搭配其他動作。',
+    uses: ['腹直肌訓練', '腹肌入門訓練', '核心力量建立'],
+    steps: [
+      '坐上機器，調整胸墊到胸口位置，雙腳穩踩地板',
+      '雙手握住手把（頭部旁或胸前，依機器設計）',
+      '吐氣，用腹肌的力量讓上半身向下捲，而不是用手臂拉',
+      '捲到最低點停留 1 秒，感受腹肌完全收縮',
+      '緩慢回到起始，不要讓身體完全伸展（保持腹肌張力）',
+    ],
+    tips: [
+      '感受「腹肌在縮短」的感覺，而不是靠手臂或脖子用力',
+      '這台機器主要訓練腹直肌上段，下腹和斜肌需要其他動作',
+      '頸部疼痛可能代表脖子在用力，放鬆頸部重試',
+    ],
+  },
+  {
+    id: 'eq75', name: '核心懸吊帶（Ab Straps）', category: '核心訓練', icon: '🪝',
+    difficulty: '中級', intensity: 3, danger: 1,
+    muscles: '腹直肌下段、髂腰肌、腹斜肌',
+    desc: '核心懸吊帶套在引體向上架的橫槓上，讓手臂穿入吊帶，雙手握住橫槓，以懸吊方式訓練核心。比懸吊抬腿架更方便安裝，只要有橫槓就能使用。',
+    uses: ['懸吊抬膝', '懸吊直腿上抬', '懸吊扭轉抬膝（腹斜肌）', '核心懸吊訓練'],
+    steps: [
+      '將懸吊帶套在引體向上橫槓上，調整長度讓手肘舒適',
+      '雙手臂穿入帶中，雙手握住橫槓，身體懸空',
+      '核心收緊，不要讓腰部下塌或搖晃',
+      '彎曲膝蓋用腹肌將膝蓋抬向胸口（抬膝版本）',
+      '緩慢放下，不要讓腿甩落，做下一下',
+    ],
+    tips: [
+      '確認懸吊帶牢固套在橫槓上，使用前用力測試不會滑動',
+      '手臂穿入帶的部分應在前臂中段，不要靠近手腕（會壓迫神經）',
+      '初學者先做 5 下，核心體驗強度，再決定組數和次數',
+    ],
+  },
+  {
+    id: 'eq76', name: '倒立牽引機', category: '輔助器材', icon: '🙃',
+    difficulty: '中級', intensity: 1, danger: 3,
+    muscles: '脊椎減壓（恢復用途，非肌力訓練）',
+    desc: '倒立牽引機（Inversion Table）讓你以腳踝固定後向後倒立，利用重力對脊椎進行牽引減壓。對慢性下背痛有一定的暫時緩解效果，但不是長期解決方案，需搭配核心訓練。',
+    uses: ['脊椎減壓', '下背痛緩解', '肌肉放鬆', '增加脊椎靈活度'],
+    steps: [
+      '站在機器前，雙腳固定在踝部固定器上（確實鎖緊）',
+      '雙手抓住側邊扶手，緩慢向後倒',
+      '初學者先倒到 30–45 度，不要一開始就完全倒立',
+      '在舒適角度停留 1–3 分鐘，做緩慢深呼吸',
+      '結束時用手臂的力量緩慢回正，不要快速起身',
+    ],
+    tips: [
+      '⚠️ 高血壓、青光眼、心臟病、孕婦、椎間盤破裂者絕對禁止使用',
+      '每次使用不超過 3–5 分鐘，長時間倒立讓血液大量湧向頭部',
+      '起身後原地站立一分鐘再移動，避免頭暈',
+    ],
+  },
+  {
+    id: 'eq77', name: '核心旋轉圓盤', category: '核心訓練', icon: '🎯',
+    difficulty: '入門', intensity: 2, danger: 1,
+    muscles: '腹斜肌、腰椎旋轉肌群、臀部',
+    desc: '核心旋轉圓盤（Twist Disc）是小型低成本的旋轉訓練工具，站上後可以做腰部旋轉訓練。適合辦公族伸展腰部或作為較低強度的核心訓練，但訓練效果不如其他器材深入。',
+    uses: ['腰部旋轉伸展', '腹斜肌輕度訓練', '辦公疲勞緩解'],
+    steps: [
+      '雙腳站在圓盤上，腳跟與腳尖對應盤面',
+      '雙手叉腰或向前伸直（平衡輔助）',
+      '核心微收，讓身體下半段左右旋轉，上半身保持面向前方',
+      '每次旋轉到底時稍微停留，感受腰部和腹斜肌伸展',
+      '每次練習 2–3 分鐘，作為暖身或訓練後放鬆',
+    ],
+    tips: [
+      '這個器材適合輕度伸展，不適合作為主要核心訓練工具',
+      '不要旋轉過猛，腰椎快速旋轉可能傷害',
+      '有腰部椎間盤問題者使用前先諮詢醫師',
+    ],
+  },
+  {
+    id: 'eq78', name: '競速跳繩', category: '有氧器材', icon: '⚡',
+    difficulty: '中級', intensity: 4, danger: 1,
+    muscles: '心肺、協調性、小腿、全身節奏感',
+    desc: '競速跳繩（Speed Rope）採用輕量鋼絲繩和軸承設計，可以高速旋轉完成快速跳繩、雙搖等進階技巧。CrossFit 和拳擊訓練的標準訓練工具，30 秒可以跳超過 100 下。',
+    uses: ['快速連跳（每分鐘 120–180 下）', '雙搖（Double Under）', '交叉跳', 'HIIT 訓練', '拳擊訓練'],
+    steps: [
+      '確認繩長：踩住繩中點，握把到達腋下（比普通跳繩略短）',
+      '從慢速開始適應鋼絲繩的感覺（比布繩更快但更痛打到）',
+      '快速連跳：加快手腕旋轉速度，腳盡量輕踮腳尖快速彈跳',
+      '雙搖入門：每跳一下讓繩子旋轉兩圈，需要更高跳躍和更快手腕',
+      '打到腳是正常的，休息後繼續',
+    ],
+    tips: [
+      '鋼絲繩打到皮膚非常痛，初學者可以先用普通跳繩練速度',
+      '地板材質影響繩子彈跳：橡膠地最理想，水泥地會快速磨損鋼絲繩',
+      '手腕的旋轉速度比手臂畫圓更重要，學會用手腕而不是整隻手臂',
+    ],
+  },
+  {
+    id: 'eq79', name: '彈力管組', category: '輔助器材', icon: '🔌',
+    difficulty: '入門', intensity: 2, danger: 1,
+    muscles: '依動作而定，全身各部位皆可訓練',
+    desc: '彈力管（Resistance Tube）相比彈力帶，有握把設計更方便握持，且通常有門錨點配件，可以模擬滑輪機的各種動作。重量輕、可折疊，是出差旅行健身的首選工具。',
+    uses: ['二頭彎舉', '肩推', '側平舉', '胸部推舉', '划船動作', '居家全身訓練'],
+    steps: [
+      '選擇適合阻力的管子（通常以顏色區分，深色阻力大）',
+      '將管子固定：踩在腳下、固定在門縫或掛在固定點上',
+      '雙手握住握把，保持身體穩定',
+      '執行目標動作，注意彈力管阻力在末段會更大（非線性）',
+      '使用完後確認管子無龜裂或磨損',
+    ],
+    tips: [
+      '使用前一定要檢查管子是否有裂縫，斷裂時彈回速度很快會傷人',
+      '避免在尖銳邊角使用，會割傷彈力管',
+      '與真實重量不同，彈力管末段阻力大，訓練效果分布不均',
+    ],
+  },
+  {
+    id: 'eq80', name: '訓練沙牆球（Wall Ball）', category: '爆發力訓練', icon: '🏐',
+    difficulty: '中級', intensity: 4, danger: 2,
+    muscles: '全身複合（深蹲＋推舉）、心肺',
+    desc: 'Wall Ball 是 CrossFit 的標誌性動作，以一顆加重藥球深蹲後爆發性投擲至牆壁高處目標，落下時接球緩衝再深蹲。結合下肢、上肢和心肺的全身複合訓練，效率極高。',
+    uses: ['Wall Ball Shot（標準動作）', '過頭投擲', '深蹲爆發訓練', 'CrossFit 訓練'],
+    steps: [
+      '面向牆壁站立，距離約 1–1.5 公尺',
+      '雙手捧球在胸口高度，做深蹲',
+      '站起時爆發用力，將球投向牆壁 2.7–3 公尺高處（標準目標高度）',
+      '球從牆壁彈回，雙手接球，順著球的重力下蹲緩衝',
+      '立即進入下一次深蹲，節奏連貫不停頓',
+    ],
+    tips: [
+      '牆壁要夠堅固，確認能承受球的衝擊',
+      '球漏接時不要用頭部去接，讓球落地再撿起',
+      '初學者先練習動作分解（深蹲和投球分開），再合在一起做',
+    ],
+  },
+  {
+    id: 'eq81', name: '軟墊跳箱（泡棉跳箱）', category: '爆發力訓練', icon: '🟫',
+    difficulty: '入門', intensity: 3, danger: 2,
+    muscles: '股四頭肌、臀大肌、小腿爆發力',
+    desc: '軟墊泡棉跳箱比木製或金屬跳箱更安全，跳不上去時腿部會陷進去而不是被割傷。適合跳箱訓練初學者，也常用於爆發力復健和青少年訓練，有多個高度可選。',
+    uses: ['箱式跳躍（Box Jump）', '步上跳（Step-up）', '落地緩衝訓練', '反應訓練'],
+    steps: [
+      '選擇適合高度（初學者從 30–45cm 開始）',
+      '站在跳箱前方約半步距離，做預備下蹲',
+      '爆發起跳，雙腳同時輕柔落在箱面中央，膝蓋微彎吸收',
+      '穩定後站直，再踩下或後跳下（不要跳下）',
+      '練習落地緩衝：從箱上踏下，感受落地時肌肉如何吸震',
+    ],
+    tips: [
+      '即使是軟墊跳箱，落地仍要學會正確緩衝姿勢，避免膝蓋承受過大衝擊',
+      '不要在太高的泡棉箱上跳，泡棉可能使腳陷入、扭傷踝關節',
+      '跳箱高度的提升應緩慢，每次增加不超過 5cm',
+    ],
+  },
+  {
+    id: 'eq82', name: '阻力傘（跑步阻力傘）', category: '爆發力訓練', icon: '🪂',
+    difficulty: '中級', intensity: 4, danger: 2,
+    muscles: '腿部爆發力、衝刺肌群、心肺',
+    desc: '阻力傘在跑步時在身後打開，透過空氣阻力增加跑步難度，有效提升腿部爆發力和短跑速度。是田徑運動員和球類運動員提升衝刺能力的常用訓練工具。',
+    uses: ['直線衝刺阻力訓練', '速度爆發力提升', '田徑輔助訓練'],
+    steps: [
+      '將傘的腰帶套在腰部，確認扣牢',
+      '站在空曠的田徑跑道或草地上，確認身後有足夠空間',
+      '開始跑步，傘會在加速後自動打開並產生阻力',
+      '以全力短距離（20–40 公尺）衝刺為主',
+      '每趟後走回起點讓傘自然收攏，休息 90–120 秒再衝刺',
+    ],
+    tips: [
+      '不要在室內或人多的地方使用，傘打開範圍很大',
+      '風大時傘的方向不定，注意控制跑步方向',
+      '從短距離開始（20m），適應阻力感後再增加距離',
+    ],
+  },
+  {
+    id: 'eq83', name: '固定重量槓鈴組', category: '自由重量', icon: '🏋️',
+    difficulty: '入門', intensity: 4, danger: 2,
+    muscles: '全身（依動作而定，同標準槓鈴但重量固定）',
+    desc: '固定重量槓鈴（Preloaded Barbell）是預先設定好重量的槓鈴，不需要換片，直接拿起使用。從 10kg 到 50kg 排成一排，適合需要快速換重量的訓練或不想自行加減片的訓練者。',
+    uses: ['槓鈴彎舉', '槓鈴深蹲（輕重量）', '槓鈴划船', '槓鈴肩推'],
+    steps: [
+      '找到適合重量的固定槓鈴（確認重量標示）',
+      '雙手握住，確認握距舒適',
+      '執行目標動作',
+      '使用完畢後放回原位（通常有專屬位置）',
+      '不要將固定槓鈴放在地板上滾動，容易傷到腳',
+    ],
+    tips: [
+      '固定槓鈴通常比奧林匹克槓鈴短，握距選擇較少',
+      '確認重量標示正確，不同品牌可能有誤差',
+      '使用後務必放回正確位置，否則下一個人找不到',
+    ],
+  },
+  {
+    id: 'eq84', name: '曲面跑步機（自驅跑步機）', category: '有氧器材', icon: '🌙',
+    difficulty: '中級', intensity: 4, danger: 2,
+    muscles: '腿部後側（膕繩肌、臀大肌）、心肺',
+    desc: '曲面跑步機（Curved Manual Treadmill）不用電力，靠自身腳步驅動，曲面設計讓步態更自然，更多訓練到後側鏈肌肉。研究顯示比一般跑步機消耗更多卡路里（約多 30%）。',
+    uses: ['自然步態跑步', 'HIIT 間歇（加速和停止更靈活）', '後鏈強化有氧'],
+    steps: [
+      '站上機器，雙手輕放扶手，不要靠著支撐',
+      '向前踩踏，機器會跟著你的腳步速度轉動',
+      '踏步越快，跑帶越快；放慢或停止踏步，跑帶立即減速',
+      '保持在跑帶中後段位置（靠前容易被拋出）',
+      '結束時讓步伐自然放慢直到停止，不需要按停止鍵',
+    ],
+    tips: [
+      '與一般跑步機不同，第一次使用需要幾分鐘適應曲面和自驅感',
+      '不要在跑帶上突然停止腳步，身體要跟著減速',
+      '比普通跑步機強度高很多，心率計輔助確認訓練強度',
+    ],
+  },
+  {
+    id: 'eq85', name: '上斜訓練椅', category: '複合器材', icon: '📐',
+    difficulty: '入門', intensity: 3, danger: 2,
+    muscles: '胸大肌上段、三角肌前束（角度訓練）',
+    desc: '上斜訓練椅（Incline Bench）固定在 30–45 度角，專門訓練胸肌上段，打造飽滿的鎖骨下方胸肌線條。搭配啞鈴或槓鈴使用，是完整胸部訓練計畫的必要組成部分。',
+    uses: ['上斜槓鈴臥推（上胸）', '上斜啞鈴臥推', '上斜啞鈴飛鳥', '上斜二頭彎舉'],
+    steps: [
+      '調整椅背角度到 30–45 度（超過 45 度會讓肩膀過多代償）',
+      '躺上椅子，頭、肩、臀都貼合椅面',
+      '肩胛骨收緊，下沉，建立穩定基礎',
+      '啞鈴版本：雙手各持啞鈴，從肩膀高度下放，感受上胸伸展',
+      '吐氣推起，感受上胸的發力',
+    ],
+    tips: [
+      '角度超過 45 度時，三角肌前束代償增加，上胸刺激反而減少',
+      '上斜推舉使用的重量通常比平推輕 10–20%，這是正常的',
+      '頸部後方要有椅背支撐，避免做動作時頸部懸空受力',
+    ],
+  },
+  {
+    id: 'eq86', name: '瑜珈墊', category: '輔助器材', icon: '🟩',
+    difficulty: '入門', intensity: 1, danger: 1,
+    muscles: '（場地器材，配合伸展、核心、瑜珈等訓練使用）',
+    desc: '瑜珈墊是任何地板訓練的基本配備，提供緩衝保護膝蓋和脊椎，防止在訓練時直接接觸硬地板。厚度越厚緩衝越好，但穩定性越差；薄墊穩定性好但緩衝不足。',
+    uses: ['伸展和柔軟度訓練', '核心訓練', '瑜珈', '皮拉提斯', '緩和運動'],
+    steps: [
+      '將墊子鋪在平坦地面，確認下方無尖銳物品',
+      '站在或躺在墊子上進行目標訓練或伸展',
+      '使用後擦拭汗水，特別是腳部接觸的地方',
+      '定期清洗，尤其是做熱瑜珈或流汗很多後',
+      '捲起儲存，或掛在牆上通風',
+    ],
+    tips: [
+      '厚度選擇：瑜珈 4–6mm、核心訓練 6–8mm、膝蓋問題 10mm 以上',
+      '天然橡膠墊止滑性更好但較重，PVC 墊輕巧但止滑稍差',
+      '健身房的共用瑜珈墊使用前要用消毒噴霧清潔',
+    ],
+  },
+  {
+    id: 'eq87', name: '計時器／訓練碼錶', category: '輔助器材', icon: '⏱️',
+    difficulty: '入門', intensity: 1, danger: 1,
+    muscles: '（輔助工具，提升訓練效率和強度控制）',
+    desc: '訓練碼錶或間歇計時器是科學訓練不可缺少的工具。精確掌握組間休息時間、訓練時長和 HIIT 間隔，比憑感覺計時更有效率。現代款式有預設 Tabata、AMRAP 等訓練模式。',
+    uses: ['精確計算組間休息', 'HIIT 間歇計時', 'Tabata 計時（20秒動/10秒休）', '訓練總時長追蹤'],
+    steps: [
+      '選擇訓練模式：基本計時、倒數計時或間歇模式',
+      '設定工作時間和休息時間（HIIT 模式）',
+      '訓練開始時按啟動，讓計時器管理時間，你專注在訓練上',
+      '聽到提示音就切換工作/休息狀態',
+      '訓練完成後記錄今天的訓練時長',
+    ],
+    tips: [
+      '組間休息時間對訓練效果很重要：肌力訓練 2–5 分鐘，肌耐力 30–90 秒',
+      '不要靠「感覺」計時，同樣「感覺」的時間每次都不一樣',
+      '手機計時器也可以，但專用訓練計時器更方便且不會被通知打擾',
+    ],
+  },
+  {
+    id: 'eq88', name: '訓練輪胎（重型橡膠輪胎）', category: '爆發力訓練', icon: '⭕',
+    difficulty: '進階', intensity: 5, danger: 3,
+    muscles: '全身爆發力：腿、背、肩、核心',
+    desc: '訓練輪胎翻轉（Tire Flip）是功能性訓練中最全面的爆發力動作，一個翻轉幾乎調用了全身所有主要肌群。常見於 CrossFit、橄欖球和美式足球體能訓練中，也是農夫運動會的標誌項目。',
+    uses: ['輪胎翻轉', '輪胎大槌訓練（搭配大錘）', '輪胎跳入跳出', '輪胎推撞'],
+    steps: [
+      '輪胎放在地上，站在輪胎旁，雙腳略寬於肩',
+      '半蹲姿，雙手插入輪胎底部，手肘抵住輪胎內側',
+      '深吸氣，核心收緊，以腿部爆發力蹬地站起，同時推輪胎',
+      '輪胎翻起時，換握方式改為推向前方，讓輪胎翻落',
+      '走到翻落的輪胎旁邊重複',
+    ],
+    tips: [
+      '⚠️ 輪胎翻轉重量很大（通常 100–300kg），必須有教練指導第一次學習',
+      '圓背翻輪胎是腰部受傷的主要原因，技術優先於重量',
+      '輪胎底部可能有碎石，使用前先清潔輪胎內部',
+    ],
+  },
+  {
+    id: 'eq89', name: '啞鈴架（展示架）', category: '複合器材', icon: '🗄️',
+    difficulty: '入門', intensity: 1, danger: 2,
+    muscles: '（存放器材用，搭配啞鈴使用）',
+    desc: '啞鈴展示架讓不同重量的啞鈴整齊排列，方便取用。雖然不是訓練器材本身，但取放啞鈴的姿勢正確與否也關係到受傷風險。大重量啞鈴放在架的中層，存取更安全。',
+    uses: ['啞鈴存取', '訓練場地組織', '安全存放重物'],
+    steps: [
+      '取啞鈴時先蹲低，背部保持直立，不要彎腰取',
+      '雙腳分開站穩，用腿的力量站起',
+      '訓練完成後立即將啞鈴放回原位，不要放在地板上',
+      '放回架上時先蹲低，確認啞鈴穩穩放上再放手',
+      '不要將啞鈴扔回架上，輕柔放置才安全',
+    ],
+    tips: [
+      '取用重啞鈴（30kg以上）時旁邊最好有人，以防手滑',
+      '啞鈴架倒塌是健身房常見意外，不要讓過多重量集中在架的一側',
+      '地面潮濕或啞鈴有汗水時特別注意握緊，防止滑落砸腳',
+    ],
+  },
+  {
+    id: 'eq90', name: '懸掛式沙袋（訓練袋）', category: '爆發力訓練', icon: '💼',
+    difficulty: '中級', intensity: 4, danger: 2,
+    muscles: '全身功能肌群、核心穩定、爆發力',
+    desc: '懸掛式訓練沙袋懸吊在空中，重心不固定，每次打擊或抓握都需要額外的穩定力量。廣泛用於格鬥訓練、功能訓練和爆發力訓練，是融合有氧與肌力的高效工具。',
+    uses: ['打擊訓練（拳打腳踢）', '摔抱訓練（搭格鬥訓練）', '懸掛推舉', '旋轉爆發訓練'],
+    steps: [
+      '確認懸吊點牢固，沙袋掛高讓底部在腰到胸口高度',
+      '戴好拳擊手套或護手布',
+      '站在沙袋前方，保持基本拳擊站架',
+      '出擊時從核心旋轉帶動肩膀，手臂只是傳遞力量的工具',
+      '每次打擊後快速回到防守姿勢，保持腳步移動',
+    ],
+    tips: [
+      '懸掛鏈條或勾子要定期檢查，長期使用容易疲勞斷裂',
+      '沙袋擺盪時不要站在搖擺方向上，沙袋撞上身體力量很大',
+      '訓練前充分暖身手腕和肩膀，冷肌肉打擊訓練容易扭傷',
+    ],
+  },
+  // ── 第 91–100 種 ──────────────────────────────────────────────────────────
+  {
+    id: 'eq91', name: '頸部哈馬（Neck Harness）', category: '輔助器材', icon: '🪖',
+    difficulty: '中級', intensity: 2, danger: 3,
+    muscles: '頸部屈肌、頸部伸肌、斜方肌上段',
+    desc: '頸部哈馬是套在頭部的帶子，可以懸掛重量或連接彈力帶來訓練頸部力量。強壯的頸部對美式足球、橄欖球、格鬥選手尤其重要，可減少頭部被撞擊時的腦震盪風險。頸部訓練需要特別謹慎，是最需要循序漸進的訓練之一。',
+    uses: ['頸部前彎（頸部屈曲）', '頸部後仰（頸部伸展）', '頸部側彎', '格鬥頸部強化'],
+    steps: [
+      '將哈馬套在頭頂，調整好讓受力均勻分布在頭骨',
+      '坐在訓練椅邊緣，身體前傾，讓頸部自然垂下',
+      '掛上輕量（初學者 2–5kg）',
+      '緩慢讓頭往下，再收縮頸部肌肉把頭抬起',
+      '動作幅度小而緩慢，感受頸部肌肉用力',
+    ],
+    tips: [
+      '⚠️ 頸椎是非常脆弱的部位，重量永遠從最輕開始，絕不追求大重量',
+      '每組次數不超過 15 下，動作速度要最慢',
+      '有頸椎問題、頸椎退化或頸部受傷史者禁止使用',
+    ],
+  },
+  {
+    id: 'eq92', name: '水阻划船機', category: '有氧器材', icon: '🌊',
+    difficulty: '中級', intensity: 4, danger: 1,
+    muscles: '背肌、腿部、手臂、核心（全身複合）',
+    desc: '水阻划船機用水槳葉在水中旋轉產生阻力，划得越快阻力越大，感覺最接近真實在水上划船。水流聲讓訓練有如置身水上，訓練體驗絕佳。木製機身（如 WaterRower）兼具美觀，深受精品健身房青睞。',
+    uses: ['有氧划船訓練', '間歇衝刺', '全身低衝擊訓練'],
+    steps: [
+      '坐上座椅，腳踩進踏板並固定腳帶',
+      '雙手握住拉繩把手（掌心向下）',
+      '起始姿勢：膝蓋彎曲，身體略前傾，手臂向前伸',
+      '腿部先發力蹬直，身體後仰，最後手臂拉到腹部',
+      '回程：手臂先伸出，身體前傾，腿部彎曲回起始位置',
+    ],
+    tips: [
+      '水阻機的阻力由划速決定，速度越快阻力越大（無法手動調整）',
+      '水槽需要定期加入適量水，並使用抑菌劑防止藻類生長',
+      '比空氣阻力划船機安靜，更適合在安靜環境中使用',
+    ],
+  },
+  {
+    id: 'eq93', name: '滑雪划槳機（SkiErg）', category: '有氧器材', icon: '⛷️',
+    difficulty: '中級', intensity: 4, danger: 1,
+    muscles: '背闊肌、三頭肌、核心、肩膀（上肢為主）',
+    desc: 'SkiErg 模擬越野滑雪的划杆動作，是少數以上肢為主的有氧訓練器材。對上肢肌耐力、心肺和核心的訓練效果極佳，特別適合下肢受傷者需要維持有氧體能的時期，或想強化上肢耐力的運動員。',
+    uses: ['上肢有氧訓練', '越野滑雪體能模擬', '核心與上背訓練', 'HIIT 間歇'],
+    steps: [
+      '站在機器前，雙腳與肩同寬，雙手握住拉繩把手',
+      '雙手高舉過頭，深吸氣，核心收緊',
+      '雙手同時向下拉，帶動背闊肌和三頭肌做功',
+      '拉至腰部時，膝蓋微蹲，增加下半身參與和全身動力',
+      '鬆開讓繩子回彈，雙手跟著回到高點再開始下一下',
+    ],
+    tips: [
+      '掌握好重心，向下拉時身體有前傾趨勢，注意保持穩定',
+      '配速很重要，不要一開始全力衝，先建立節奏感',
+      '下肢受傷復健期的好替代有氧選項',
+    ],
+  },
+  {
+    id: 'eq94', name: '槓鈴配重鏈條', category: '自由重量', icon: '⛓️',
+    difficulty: '進階', intensity: 5, danger: 3,
+    muscles: '全身（搭配槓鈴訓練使用）',
+    desc: '訓練用重量鏈條掛在槓鈴兩端，動作頂點時鏈條完全離地重量最重，底端時鏈條落地重量最輕。這種「可變阻力」訓練特別適合力量舉選手克服停滯點，在關節最強力的角度增加最大刺激。',
+    uses: ['鏈條臥推（克服上推停滯點）', '鏈條深蹲', '鏈條硬舉', '爆發力訓練'],
+    steps: [
+      '將鏈條掛鉤扣在槓鈴末端，調整讓鏈條底端剛好落地（動作底端）',
+      '確認兩側鏈條等長、等重，否則槓鈴會傾斜',
+      '以正常訓練方式執行動作（深蹲、臥推等）',
+      '底端時大部分鏈條落地，槓鈴較輕；頂端鏈條懸空，重量最大',
+      '這是進階技術，先確保動作技術完美再引入鏈條',
+    ],
+    tips: [
+      '鏈條訓練不適合初學者，需要已有紮實的動作基礎',
+      '落地的鏈條會在動作中發出聲響，注意館規是否允許',
+      '重量計算：槓鈴重量 + 片重 + 鏈條頂端懸空部分重量',
+    ],
+  },
+  {
+    id: 'eq95', name: '下斜仰臥起坐板', category: '核心訓練', icon: '📉',
+    difficulty: '入門', intensity: 3, danger: 2,
+    muscles: '腹直肌（整體）、髂腰肌',
+    desc: '下斜板讓雙腳高於頭部，增加仰臥起坐的動作難度和腹肌參與度。因為重力方向的改變，下斜板仰臥起坐比平地版本更能訓練到整個腹直肌，是傳統訓練的進階版本。',
+    uses: ['下斜仰臥起坐', '下斜捲腹', '反向捲腹（腳在高位）'],
+    steps: [
+      '坐上板子，雙腳鉤住高位腳墊，確認穩固',
+      '身體向後躺下，越低角度難度越高（從 30 度開始）',
+      '雙手放在胸口或頭部旁（不要用手抱頭往上拉）',
+      '吐氣，腹肌用力讓上半身坐起',
+      '捲起到腹肌完全收縮後，緩慢放下',
+    ],
+    tips: [
+      '下斜板仰臥起坐對髂腰肌刺激也很強，髂腰肌緊繃者可能感到下背不適',
+      '不要讓頭部往後過度伸展到底，保護頸椎',
+      '腳鉤要確實固定，防止動作中腳滑出',
+    ],
+  },
+  {
+    id: 'eq96', name: '功率計踏車（Wattbike）', category: '有氧器材', icon: '📊',
+    difficulty: '中級', intensity: 4, danger: 1,
+    muscles: '股四頭肌、膕繩肌、臀大肌、心肺系統',
+    desc: 'Wattbike 等功率計踏車能即時顯示每一踩踏的瓦特數（功率輸出），是精確測量體能的頂級工具。廣泛用於職業自行車隊和奧運訓練，讓訓練強度有科學化的數字依據而非主觀感受。',
+    uses: ['FTP 測試（功能閾值功率）', '功率區間訓練', '自行車選手體能訓練', 'VO₂max 測試'],
+    steps: [
+      '調整座椅高度：坐上後腿在踏板最低點時微彎（150° 左右）',
+      '調整把手到舒適高度',
+      '選擇訓練模式（自由騎乘或特定訓練計畫）',
+      '以目標功率區間維持踩踏，注意螢幕上的即時瓦特數',
+      '訓練結束後記錄平均功率和心率作為下次基準',
+    ],
+    tips: [
+      '功率訓練需要先做 FTP 測試建立個人基準，再依百分比設定訓練強度',
+      '相比一般飛輪車，數據更精確，適合認真追蹤進步的騎者',
+      '每 4–6 週重新測試 FTP，隨體能提升調整訓練強度',
+    ],
+  },
+  {
+    id: 'eq97', name: '印度俱樂部鈴（Clubbell）', category: '自由重量', icon: '🏏',
+    difficulty: '中級', intensity: 3, danger: 2,
+    muscles: '肩旋轉袖、前臂、核心旋轉肌群',
+    desc: '印度俱樂部鈴（Clubbell）是棒球棒形狀的訓練器材，重心偏向末端，旋轉時產生的離心力訓練肩膀旋轉袖和前臂。幾百年前印度摔跤手和英國軍隊都使用此器材，現代也用於肩膀復健和靈活度訓練。',
+    uses: ['肩膀旋轉訓練', '前臂強化', '旋轉袖復健', '協調性和靈活度訓練'],
+    steps: [
+      '從最輕的俱樂部鈴開始（1–2kg）熟悉重心偏移的感覺',
+      '基本甩動（Swipe）：單手握住底部，讓鈴往後甩到肩後再向前',
+      '圓圈甩動（Mill）：繞著肩膀做圓形旋轉動作',
+      '保持手腕放鬆，讓重量自然引導動作方向',
+      '從低次數開始（每種動作 5 次），感受後再增加',
+    ],
+    tips: [
+      '第一次練習前先看教學影片，錯誤的旋轉方式容易傷肩',
+      '確認練習空間周圍無人，甩動失控時器材可能飛出',
+      '肩膀有舊傷者從最輕重量開始，感受有無不適',
+    ],
+  },
+  {
+    id: 'eq98', name: '多角度訓練椅（FID Bench）', category: '複合器材', icon: '🛋️',
+    difficulty: '入門', intensity: 3, danger: 1,
+    muscles: '依動作而定（胸、肩、背等）',
+    desc: 'FID 訓練椅（Flat / Incline / Decline）可以調整為平躺、多種上斜角度和下斜角度，一張椅子涵蓋所有胸肌訓練角度。是家庭健身房和商業健身房的核心器材，搭配啞鈴或槓鈴可訓練胸、肩、手臂等各部位。',
+    uses: ['平推（啞鈴/槓鈴臥推）', '上斜推（上胸）', '下斜推（下胸）', '上斜二頭彎舉'],
+    steps: [
+      '依目標訓練調整椅背角度：0° 平躺、30–45° 上斜、10–20° 下斜',
+      '坐上椅子，確認調整扣已鎖緊再使用',
+      '以啞鈴臥推為例：雙手持啞鈴，肩膀緊貼椅面，肩胛骨收緊',
+      '吸氣下放至胸口感到充分伸展，吐氣推起',
+      '大重量時請旁人遞啞鈴，不要自行從地上拿著啞鈴躺下',
+    ],
+    tips: [
+      '調整角度後一定要確認插銷已完全插入，防止訓練中椅背塌陷',
+      '不同角度訓練的肌肉重點不同，完整胸訓建議每個角度都做',
+      '椅面高度要適合讓雙腳平踩地面，增加穩定性',
+    ],
+  },
+  {
+    id: 'eq99', name: '充氣平衡氣墊', category: '輔助器材', icon: '🫧',
+    difficulty: '入門', intensity: 1, danger: 1,
+    muscles: '深層核心穩定肌群、踝關節本體感覺',
+    desc: '充氣平衡氣墊（Air Cushion Disc）是小型充氣坐墊，坐在椅子上使用時持續激活核心深層肌肉，適合辦公室使用；站立使用時提升平衡和本體感覺，比搖擺板更輕薄便攜。',
+    uses: ['辦公時核心激活（坐在椅子上）', '站姿平衡訓練', '本體感覺復健', '深蹲輔助訓練'],
+    steps: [
+      '充氣至適合硬度（越硬越不穩定，從偏軟開始）',
+      '坐姿使用：放在椅子上，坐在上面辦公或進行輕度核心訓練',
+      '站姿使用：雙腳站在氣墊上，挑戰平衡',
+      '進階：站在氣墊上做輕重量訓練（啞鈴彎舉等）',
+      '充氣量可以調整，空氣越多越不穩定，難度越高',
+    ],
+    tips: [
+      '氣墊比平衡板便宜很多，是平衡訓練的入門選擇',
+      '坐在上面長時間使用可能讓坐骨不舒服，適度休息',
+      '站立使用前確認氣墊放在防滑地面，氣墊本身可能滑動',
+    ],
+  },
+  {
+    id: 'eq100', name: '髖屈肌訓練機', category: '固定軌道機器', icon: '🦿',
+    difficulty: '入門', intensity: 2, danger: 2,
+    muscles: '髂腰肌、股直肌、縫匠肌',
+    desc: '髖屈肌訓練機讓你在站立或坐姿下，以機器阻力訓練髖屈肌（主要為髂腰肌）。髖屈肌是現代人因久坐而最容易緊繃且薄弱的肌群，強化後對跑步速度、踢腿力量和下背痛改善都有幫助。',
+    uses: ['站姿髖屈抬膝訓練', '坐姿髖屈肌訓練', '跑者髖部力量訓練', '足球和格鬥踢腿力量'],
+    steps: [
+      '調整機器到適合高度，固定好腰部或腿部的支撐',
+      '站姿版本：單腳踩入阻力環，挺直站立',
+      '核心收緊，大腿抬起（膝蓋彎曲），感受髖屈肌用力',
+      '緩慢放下，不要讓腿快速甩落',
+      '一側完成後換腳，注意兩側訓練量相同',
+    ],
+    tips: [
+      '髂腰肌既容易緊繃也容易薄弱，訓練前先做髖屈肌伸展暖身',
+      '動作幅度不要追求過大，以感受到髖屈肌明確收縮為準',
+      '有腰椎前凸（骨盆前傾）問題者，強化髖屈肌同時要加強臀肌拮抗訓練',
+    ],
+  },
+];
+
+const BEAR_SLEEP_SCRIPTS = [
+  "今天已經很努力了...把身上所有的重量慢慢放下...熊大大在這裡陪著你...",
+  "吸氣...慢慢地吸...然後吐氣...讓你的肩膀沉下去...很好...",
+  "你知道嗎，熊大大每天睡前都會想著...今天有什麼值得感謝的事...你今天做得很好...",
+  "閉上眼睛，想像你在森林裡...有微風，有樹葉的聲音...熊大大坐在你旁邊...很安全...",
+  "別想太多了...明天的事明天再說...現在只要呼吸就好...你不需要做任何事...",
+  "你今天付出了這麼多...身體需要休息...大腦也需要放空...讓自己沉進去...",
+  "熊大大說，睡眠是最好的恢復...比任何保養品都有效...現在就是你的黃金時間...",
+  "慢慢數：一...（停頓）...二...（停頓）...三...感覺怎樣？眼皮是不是重了一點？",
+  "今天有什麼讓你煩惱的事？放在這裡，我幫你保管...明天再還給你...現在不需要了...",
+  "你的身體正在修復...肌肉在生長...大腦在整理記憶...這一切都在你睡著的時候發生...",
+];
+
+const BEAR_FOOD_REACTIONS = {
+  high_protein: ["💪 蛋白質不錯！今天的訓練很值得。", "🔥 高蛋白！熊大大給你比讚！", "對！就是這樣補！"],
+  high_cal: ["😅 熱量有點高...但沒關係，運動就好！", "熱量不少，今天多走幾步吧！", "嘿，偶爾一次沒關係的～"],
+  low_cal: ["😊 清淡！很健康！", "熱量控制得不錯！", "繼續保持！熊大大以你為傲！"],
+  balanced: ["剛剛好！均衡飲食就是這樣！", "完美搭配！", "這一餐很漂亮！"],
+  default: ["記錄完成！繼續加油！", "吃得很好！", "熊大大幫你記下來了！"],
+};
+
+// ── UTILITIES ─────────────────────────────────────────────────────────────
+function useLS(key, def) {
+  const [v, setV] = useState(() => { try { const s=localStorage.getItem(key); return s?JSON.parse(s):def; } catch(e){return def;} });
+  const save = useCallback(val => { const next=typeof val==='function'?val(v):val; setV(next); try{localStorage.setItem(key,JSON.stringify(next));}catch(e){} }, [key,v]);
+  return [v, save];
+}
+
+function today() { return new Date().toISOString().slice(0,10); }
+function now_h() { return new Date().getHours(); }
+
+function timeOfDay() {
+  const h = now_h();
+  if (h >= 5 && h < 12) return 'morning';
+  if (h >= 12 && h < 17) return 'afternoon';
+  if (h >= 17 && h < 21) return 'evening';
+  return 'night';
+}
+
+function greeting(name) {
+  const tod = timeOfDay();
+  const n = name || '訓練者';
+  const g = { morning: `早安，${n} ☀️`, afternoon: `午安，${n} 🌤️`, evening: `晚安，${n} 🌆`, night: `夜深了，${n} 🌙` };
+  return g[tod];
+}
+
+function tdee(profile) {
+  if (!profile?.weight||!profile?.height||!profile?.age) return 2000;
+  const bmr = profile.gender==='female'
+    ? 655.1 + 9.563*profile.weight + 1.85*profile.height - 4.676*profile.age
+    : 88.36 + 13.4*profile.weight + 4.8*profile.height - 5.7*profile.age;
+  const act = {sedentary:1.2,light:1.375,moderate:1.55,active:1.725,very:1.9};
+  return Math.round(bmr * (act[profile.activity||'moderate']||1.55));
+}
+
+function sleepColor(h) {
+  if (!h || h === 0) return '#94a3b8';
+  if (h >= 7 && h <= 9) return '#22c55e';
+  if (h === 6 || h === 10) return '#eab308';
+  return '#ef4444';
+}
+
+function sleepMood(h) {
+  if (!h || h === 0) return 'neutral';
+  if (h >= 7 && h <= 9) return 'happy';
+  if (h === 6 || h === 10) return 'thinking';
+  if (h < 6) return 'sad';
+  return 'tired';
+}
+
+// ── BEAR FACE SVG ─────────────────────────────────────────────────────────
+function BearFace({ mood = 'happy', size = 120, animate = false }) {
+  const c = size / 2;
+  const moodMap = {
+    happy:    { lEye:'arc', rEye:'arc', mouth:'smile', blush:true, brows:'up' },
+    excited:  { lEye:'big', rEye:'big', mouth:'bigSmile', blush:true, brows:'up' },
+    sad:      { lEye:'drop', rEye:'drop', mouth:'frown', blush:false, brows:'sad' },
+    thinking: { lEye:'dot', rEye:'arc', mouth:'hmm', blush:false, brows:'tilt' },
+    tired:    { lEye:'half', rEye:'half', mouth:'yawn', blush:false, brows:'flat' },
+    sleepy:   { lEye:'line', rEye:'line', mouth:'sleep', blush:false, brows:'flat' },
+    worried:  { lEye:'dot', rEye:'dot', mouth:'worry', blush:false, brows:'sad' },
+    neutral:  { lEye:'dot', rEye:'dot', mouth:'flat', blush:false, brows:'flat' },
+    love:     { lEye:'heart', rEye:'heart', mouth:'smile', blush:true, brows:'up' },
+  };
+  const m = moodMap[mood] || moodMap.happy;
+
+  function Eye({ type, cx, cy }) {
+    const r = size * 0.072;
+    if (type === 'arc') return <path d={`M${cx-r},${cy} Q${cx},${cy-r*1.2} ${cx+r},${cy}`} stroke="#1a1a1a" strokeWidth={size*0.025} fill="none" strokeLinecap="round"/>;
+    if (type === 'big') return <><circle cx={cx} cy={cy} r={r*1.1} fill="#1a1a1a"/><circle cx={cx+r*0.4} cy={cy-r*0.4} r={r*0.35} fill="white"/></>;
+    if (type === 'dot') return <circle cx={cx} cy={cy} r={r*0.85} fill="#1a1a1a"/>;
+    if (type === 'drop') return <><ellipse cx={cx} cy={cy+r*0.3} rx={r*0.8} ry={r} fill="#1a1a1a"/><ellipse cx={cx+r*0.2} cy={cy-r*0.1} rx={r*0.25} ry={r*0.25} fill="white"/></>;
+    if (type === 'half') return <><rect x={cx-r} y={cy-r*0.1} width={r*2} height={r*1.1} rx={r} fill="#1a1a1a"/><rect x={cx-r*1.1} y={cy-r*0.8} width={r*2.2} height={r*0.9} fill="var(--card)"/></>;
+    if (type === 'line') return <line x1={cx-r} y1={cy} x2={cx+r} y2={cy} stroke="#1a1a1a" strokeWidth={size*0.022} strokeLinecap="round"/>;
+    if (type === 'heart') return <text x={cx} y={cy+r*0.4} textAnchor="middle" fontSize={r*1.6} fill="#ef4444">♥</text>;
+    return <circle cx={cx} cy={cy} r={r} fill="#1a1a1a"/>;
+  }
+
+  function Mouth({ type }) {
+    const mx = c, my = c + size*0.12;
+    const sw = size*0.028;
+    if (type === 'smile') return <path d={`M${mx-size*.15},${my} Q${mx},${my+size*.12} ${mx+size*.15},${my}`} stroke="#1a1a1a" strokeWidth={sw} fill="none" strokeLinecap="round"/>;
+    if (type === 'bigSmile') return <path d={`M${mx-size*.18},${my-size*.02} Q${mx},${my+size*.15} ${mx+size*.18},${my-size*.02}`} stroke="#1a1a1a" strokeWidth={sw} fill="none" strokeLinecap="round"/>;
+    if (type === 'frown') return <path d={`M${mx-size*.14},${my+size*.06} Q${mx},${my-size*.08} ${mx+size*.14},${my+size*.06}`} stroke="#1a1a1a" strokeWidth={sw} fill="none" strokeLinecap="round"/>;
+    if (type === 'hmm') return <path d={`M${mx-size*.1},${my+size*.04} Q${mx+size*.04},${my} ${mx+size*.13},${my+size*.04}`} stroke="#1a1a1a" strokeWidth={sw} fill="none" strokeLinecap="round"/>;
+    if (type === 'yawn') return <><ellipse cx={mx} cy={my+size*.04} rx={size*.1} ry={size*.07} fill="#1a1a1a"/><ellipse cx={mx} cy={my+size*.06} rx={size*.06} ry={size*.04} fill="#8B2252"/></>;
+    if (type === 'sleep') return <path d={`M${mx-size*.07},${my+size*.02} Q${mx},${my+size*.06} ${mx+size*.07},${my+size*.02}`} stroke="#1a1a1a" strokeWidth={sw} fill="none" strokeLinecap="round"/>;
+    if (type === 'worry') return <path d={`M${mx-size*.12},${my+size*.06} Q${mx},${my} ${mx+size*.12},${my+size*.06}`} stroke="#1a1a1a" strokeWidth={sw} fill="none" strokeLinecap="round"/>;
+    return <line x1={mx-size*.1} y1={my+size*.03} x2={mx+size*.1} y2={my+size*.03} stroke="#1a1a1a" strokeWidth={sw} strokeLinecap="round"/>;
+  }
+
+  const earR = size * 0.18;
+  const faceR = size * 0.42;
+  const lx = c - faceR*0.65, rx = c + faceR*0.65, ey = c - faceR*0.52;
+  const eyeY = c - size*0.04;
+  const eyeGap = size*0.19;
+
+  return (
+    <svg viewBox={`0 0 ${size} ${size}`} width={size} height={size} style={{display:'block',overflow:'visible'}} className={animate?'bear-bounce':''}>
+      {/* Ears */}
+      <circle cx={c - faceR*0.7} cy={c - faceR*0.72} r={earR} fill="#8B5E3C"/>
+      <circle cx={c + faceR*0.7} cy={c - faceR*0.72} r={earR} fill="#8B5E3C"/>
+      <circle cx={c - faceR*0.7} cy={c - faceR*0.72} r={earR*0.55} fill="#C49A3C"/>
+      <circle cx={c + faceR*0.7} cy={c - faceR*0.72} r={earR*0.55} fill="#C49A3C"/>
+      {/* Face */}
+      <circle cx={c} cy={c} r={faceR} fill="#8B5E3C"/>
+      {/* Muzzle */}
+      <ellipse cx={c} cy={c+size*.1} rx={size*.22} ry={size*.17} fill="#A07830"/>
+      {/* Eyes */}
+      <Eye type={m.lEye} cx={c - eyeGap} cy={eyeY}/>
+      <Eye type={m.rEye} cx={c + eyeGap} cy={eyeY}/>
+      {/* Blush */}
+      {m.blush && <>
+        <ellipse cx={c-faceR*.56} cy={c+size*.06} rx={size*.08} ry={size*.045} fill="rgba(255,150,120,.55)"/>
+        <ellipse cx={c+faceR*.56} cy={c+size*.06} rx={size*.08} ry={size*.045} fill="rgba(255,150,120,.55)"/>
+      </>}
+      {/* Nose */}
+      <ellipse cx={c} cy={c+size*.06} rx={size*.07} ry={size*.05} fill="#3d1a0a"/>
+      {/* Mouth */}
+      <Mouth type={m.mouth}/>
+    </svg>
+  );
+}
+
+// ── HOME PAGE ─────────────────────────────────────────────────────────────
+function HomePage({ profile, records, dietLog, affection, setPage, onSleepOpen }) {
+  const todayStr = today();
+  const tod = timeOfDay();
+
+  // Sleep today
+  const sleepRec = records.find(r => r.type==='sleep' && r.date===todayStr);
+  const sleepH = sleepRec?.hours || 0;
+
+  // Workout today
+  const trainedToday = records.some(r => r.type==='workout' && r.date===todayStr);
+  const lastWorkout = [...records].reverse().find(r => r.type==='workout');
+
+  // Calories today
+  const todayDiet = dietLog[todayStr] || [];
+  const todayCals = todayDiet.reduce((s,e) => s+(e.kcal||0), 0);
+  const targetCals = tdee(profile);
+  const calPct = Math.min(100, Math.round(todayCals/targetCals*100));
+
+  // Bear mood based on data
+  const bearMood = useMemo(() => {
+    if (tod === 'night' || tod === 'evening') return 'sleepy';
+    if (sleepH >= 7 && sleepH <= 9 && trainedToday) return 'excited';
+    if (sleepH > 0 && sleepH < 6) return 'worried';
+    if (trainedToday) return 'happy';
+    return 'neutral';
+  }, [tod, sleepH, trainedToday]);
+
+  // Bear message
+  const bearMsg = useMemo(() => {
+    if (tod === 'night') return '要睡覺了！點下面的月亮，讓熊大大陪你入睡 🌙';
+    if (!sleepH) return '你昨晚睡得好嗎？記得告訴我！';
+    if (sleepH < 6) return `只睡了 ${sleepH} 小時？今天先做輕度訓練就好，身體要休息。`;
+    if (sleepH >= 7 && sleepH <= 9) {
+      if (!trainedToday) return '睡得很棒！今天來訓練吧？我幫你準備好課表了！';
+      return '今天已經訓練了！繼續保持這節奏！';
+    }
+    return '記得今晚早點睡喔！';
+  }, [tod, sleepH, trainedToday]);
+
+  // Smart workout recommendation
+  const lastTarget = lastWorkout?.target || '';
+  const recWorkout = useMemo(() => {
+    const all = [...HOME_WORKOUTS, ...GYM_WORKOUTS];
+    if (!lastTarget) return all.find(w => w.level==='入門') || all[0];
+    // alternate muscle groups
+    const pushMuscles = ['胸','肩','三頭'];
+    const pullMuscles = ['背','二頭'];
+    const legMuscles = ['腿','臀'];
+    const wasPush = pushMuscles.some(m => lastTarget.includes(m));
+    const wasPull = pullMuscles.some(m => lastTarget.includes(m));
+    const wasLeg = legMuscles.some(m => lastTarget.includes(m));
+    if (wasPush) return all.find(w => pullMuscles.some(m=>w.target.includes(m))) || all[1];
+    if (wasPull) return all.find(w => legMuscles.some(m=>w.target.includes(m))) || all[2];
+    if (wasLeg) return all.find(w => pushMuscles.some(m=>w.target.includes(m))) || all[0];
+    return all[0];
+  }, [lastTarget]);
+
+  const isNight = tod === 'night' || tod === 'evening';
+
+  return (
+    <div className="page fade" style={{paddingTop:24}}>
+      {/* Greeting */}
+      <div style={{textAlign:'center',marginBottom:8}}>
+        <p style={{color:'var(--sub)',fontSize:13,marginBottom:4}}>{new Date().toLocaleDateString('zh-TW',{month:'long',day:'numeric',weekday:'short'})}</p>
+        <h1 style={{fontSize:22,fontWeight:700,margin:0}}>{greeting(profile?.name)}</h1>
+      </div>
+
+      {/* Bear face hero */}
+      <div style={{display:'flex',justifyContent:'center',margin:'20px 0',position:'relative'}}>
+        <div className={isNight?'':'pulse-ring'} style={{position:'relative',width:140,height:140,borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <BearFace mood={bearMood} size={140} animate={!isNight}/>
+        </div>
+      </div>
+
+      {/* Bear speech bubble */}
+      <div className="card p-4 mb-4" style={{background:'rgba(249,115,22,.06)',borderColor:'rgba(249,115,22,.2)',textAlign:'center',position:'relative'}}>
+        <div style={{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',width:20,height:12,overflow:'hidden'}}>
+          <div style={{width:16,height:16,background:'rgba(249,115,22,.1)',border:'1px solid rgba(249,115,22,.2)',transform:'rotate(45deg)',marginLeft:2,marginTop:4}}/>
+        </div>
+        <p style={{fontSize:15,margin:0,lineHeight:1.6,color:'var(--text)'}}>{bearMsg}</p>
+      </div>
+
+      {/* 3 quick stats */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:16}}>
+        <div className="card p-3" style={{textAlign:'center',cursor:'pointer'}} onClick={()=>setPage('sleep')}>
+          <div style={{fontSize:24,marginBottom:4}}>{sleepH>=7&&sleepH<=9?'😴':sleepH>0?'😪':'❓'}</div>
+          <div style={{fontSize:20,fontWeight:700,color:sleepColor(sleepH)}}>{sleepH||'—'}{sleepH?'h':''}</div>
+          <div style={{fontSize:11,color:'var(--sub)'}}>睡眠</div>
+        </div>
+        <div className="card p-3" style={{textAlign:'center',cursor:'pointer'}} onClick={()=>setPage('eat')}>
+          <div style={{fontSize:24,marginBottom:4}}>🍱</div>
+          <div style={{fontSize:20,fontWeight:700,color:'var(--orange)'}}>{todayCals}</div>
+          <div style={{fontSize:11,color:'var(--sub)'}}>卡路里</div>
+        </div>
+        <div className="card p-3" style={{textAlign:'center',cursor:'pointer'}} onClick={()=>setPage('train')}>
+          <div style={{fontSize:24,marginBottom:4}}>{trainedToday?'💪':'🛋️'}</div>
+          <div style={{fontSize:20,fontWeight:700,color:trainedToday?'var(--green)':'var(--sub)'}}>{trainedToday?'完成':'未練'}</div>
+          <div style={{fontSize:11,color:'var(--sub)'}}>訓練</div>
+        </div>
+      </div>
+
+      {/* Calorie bar */}
+      {targetCals > 0 && (
+        <div className="card p-4 mb-4">
+          <div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}>
+            <span style={{fontSize:14,fontWeight:600}}>今日熱量</span>
+            <span style={{fontSize:14,color:'var(--sub)'}}>{todayCals} / {targetCals} kcal</span>
+          </div>
+          <div style={{height:8,background:'var(--border)',borderRadius:99,overflow:'hidden'}}>
+            <div style={{height:'100%',width:`${calPct}%`,background:calPct>110?'var(--red)':calPct>85?'var(--orange)':'var(--green)',borderRadius:99,transition:'width .5s'}}/>
+          </div>
+        </div>
+      )}
+
+      {/* Recommended workout */}
+      {!trainedToday && recWorkout && (
+        <div className="card p-4 mb-4" style={{borderLeft:'3px solid var(--orange)'}}>
+          <p style={{fontSize:12,color:'var(--orange)',fontWeight:600,margin:'0 0 6px'}}>🐻 熊大大推薦</p>
+          <p style={{fontSize:16,fontWeight:700,margin:'0 0 4px'}}>{recWorkout.name}</p>
+          <p style={{fontSize:13,color:'var(--sub)',margin:'0 0 12px'}}>{recWorkout.target} · {recWorkout.duration}</p>
+          <button className="btn-primary" onClick={()=>setPage('train')}>開始訓練 💪</button>
+        </div>
+      )}
+
+      {/* Night mode CTA */}
+      {isNight && (
+        <div className="card p-4" style={{background:'linear-gradient(135deg,#1e1b4b,#312e81)',border:'none',textAlign:'center'}}>
+          <p style={{fontSize:24,margin:'0 0 8px'}}>🌙</p>
+          <p style={{fontSize:16,fontWeight:600,color:'#e0e7ff',margin:'0 0 4px'}}>準備睡覺了嗎？</p>
+          <p style={{fontSize:13,color:'#a5b4fc',margin:'0 0 14px'}}>讓熊大大陪你放鬆入睡</p>
+          <button onClick={onSleepOpen} style={{background:'#818cf8',color:'#fff',border:'none',borderRadius:12,padding:'10px 24px',fontSize:15,fontWeight:600,cursor:'pointer'}}>進入睡眠模式</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── SLEEP PAGE ─────────────────────────────────────────────────────────────
+
+// ── MINI TREND CHART ───────────────────────────────────────────────────────
+function MiniTrendChart({ data, color, unit = '', targetLine = null }) {
+  const maxVal = Math.max(...data.map(d => d.value), targetLine || 0, 1);
+  const H = 72, cols = data.length;
+  const bw = 28, gap = (100 - cols * bw) / (cols + 1);
+
+  return (
+    <div style={{position:'relative'}}>
+      <svg width="100%" height={H + 4} viewBox={`0 0 320 ${H + 4}`} preserveAspectRatio="none" style={{overflow:'visible'}}>
+        {/* Target line */}
+        {targetLine && (() => {
+          const y = H - (targetLine / maxVal) * (H - 8) + 2;
+          return <line x1="0" x2="320" y1={y} y2={y} stroke="var(--green)" strokeWidth="1" strokeDasharray="4,3" opacity="0.6"/>;
+        })()}
+        {data.map((d, i) => {
+          const x = (i * (320 / cols)) + (320 / cols) * 0.15;
+          const w = (320 / cols) * 0.7;
+          const barH = d.value ? Math.max(6, (d.value / maxVal) * (H - 8)) : 3;
+          const y = H - barH + 2;
+          const isToday = d.isToday;
+          return (
+            <g key={i}>
+              <rect x={x} y={y} width={w} height={barH} rx="4"
+                fill={d.value ? (isToday ? color : color) : 'var(--border)'}
+                opacity={d.value ? (isToday ? 1 : 0.45) : 1}/>
+              {d.value > 0 && (
+                <text x={x + w/2} y={Math.max(y - 3, 10)} textAnchor="middle"
+                  fontSize="9" fill={isToday ? color : 'var(--sub)'}
+                  fontWeight={isToday ? '600' : '400'}>
+                  {d.value}{unit}
+                </text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+      <div style={{display:'flex', marginTop:2}}>
+        {data.map((d, i) => (
+          <div key={i} style={{flex:1, textAlign:'center', fontSize:10,
+            color: d.isToday ? color : 'var(--sub)',
+            fontWeight: d.isToday ? 600 : 400}}>
+            {d.label}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── NOVEL PLAYER ──────────────────────────────────────────────────────────
+const VOICES = [
+  { id:'male-warm',   label:'🐻 熊大大', desc:'溫柔磁性男聲' },
+  { id:'male-news',   label:'📻 播音腔', desc:'沉穩新聞男聲' },
+  { id:'female-soft', label:'🌙 睡眠天使', desc:'輕柔女聲' },
+];
+const TTS_BASE = '/tts';
+const STORY_URL = './story.json';
+const LS_KEY = 'novelState';
+const MOTION_STILL_MS = 8 * 60 * 1000; // 8 min no motion → sleep
+
+function loadState() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch { return null; }
+}
+function saveState(s) {
+  localStorage.setItem(LS_KEY, JSON.stringify(s));
+}
+
+function NovelPlayer() {
+  const [chapters, setChapters] = useState(null);
+  const [voiceId, setVoiceId] = useState(() => loadState()?.voiceId || 'male-warm');
+  const [chapIdx, setChapIdx] = useState(() => loadState()?.chapIdx || 0);
+  const [paraIdx, setParaIdx] = useState(() => loadState()?.paraIdx || 0);
+  const [playing, setPlaying] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [bookmarks, setBookmarks] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('novelBookmarks') || '[]'); } catch { return []; }
+  });
+  const [timer, setTimer] = useState(0); // minutes, 0=off
+  const [timerLeft, setTimerLeft] = useState(0);
+  const [showChapList, setShowChapList] = useState(false);
+  const [showBmList, setShowBmList] = useState(false);
+  const [morningBanner, setMorningBanner] = useState(false);
+  const [error, setError] = useState('');
+
+  const audioRef = useRef(null);
+  const playQueueRef = useRef([]);
+  const playingRef = useRef(false);
+  const timerRef = useRef(null);
+  const motionRef = useRef({ lastMove: Date.now(), timer: null });
+  const chapIdxRef = useRef(chapIdx);
+  const paraIdxRef = useRef(paraIdx);
+  chapIdxRef.current = chapIdx;
+  paraIdxRef.current = paraIdx;
+
+  // Load story.json once
+  useEffect(() => {
+    fetch(STORY_URL)
+      .then(r => r.json())
+      .then(data => setChapters(data))
+      .catch(() => setError('故事載入失敗，請重新整理'));
+  }, []);
+
+  // Morning banner: if there's a saved sleep bookmark from yesterday
+  useEffect(() => {
+    const bms = bookmarks.filter(b => b.type === 'auto-sleep');
+    if (bms.length > 0) {
+      const last = bms[bms.length - 1];
+      const today = new Date().toISOString().slice(0, 10);
+      if (last.date !== today) setMorningBanner(last);
+    }
+  }, []);
+
+  // Persist progress
+  useEffect(() => {
+    saveState({ chapIdx, paraIdx, voiceId });
+  }, [chapIdx, paraIdx, voiceId]);
+
+  // Persist bookmarks
+  useEffect(() => {
+    localStorage.setItem('novelBookmarks', JSON.stringify(bookmarks));
+  }, [bookmarks]);
+
+  // Sleep timer countdown
+  useEffect(() => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (timer > 0) {
+      setTimerLeft(timer * 60);
+      timerRef.current = setInterval(() => {
+        setTimerLeft(t => {
+          if (t <= 1) {
+            clearInterval(timerRef.current);
+            stopPlayback();
+            addAutoSleepBookmark();
+            return 0;
+          }
+          return t - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timerRef.current);
+  }, [timer]);
+
+  // DeviceMotion sleep detection
+  useEffect(() => {
+    const onMotion = (e) => {
+      const a = e.accelerationIncludingGravity;
+      if (!a) return;
+      const mag = Math.sqrt((a.x||0)**2 + (a.y||0)**2 + (a.z||0)**2);
+      if (Math.abs(mag - 9.8) > 0.3) { // device moved
+        motionRef.current.lastMove = Date.now();
+      }
+    };
+    window.addEventListener('devicemotion', onMotion);
+    const checker = setInterval(() => {
+      if (playingRef.current && Date.now() - motionRef.current.lastMove > MOTION_STILL_MS) {
+        stopPlayback();
+        addAutoSleepBookmark();
+      }
+    }, 60000);
+    return () => { window.removeEventListener('devicemotion', onMotion); clearInterval(checker); };
+  }, []);
+
+  const addAutoSleepBookmark = () => {
+    if (!chapters) return;
+    const ch = chapters[chapIdxRef.current];
+    const bm = {
+      id: 'sleep-' + Date.now(),
+      label: `😴 睡前書籤`,
+      chapIdx: chapIdxRef.current,
+      paraIdx: paraIdxRef.current,
+      chapterTitle: ch?.title || '',
+      type: 'auto-sleep',
+      date: new Date().toISOString().slice(0, 10),
+    };
+    setBookmarks(prev => [...prev.filter(b => b.type !== 'auto-sleep'), bm]);
+  };
+
+  const addManualBookmark = () => {
+    if (!chapters) return;
+    const ch = chapters[chapIdx];
+    const bm = {
+      id: 'bm-' + Date.now(),
+      label: `🔖 ${ch?.title?.slice(0,8) || ''}`,
+      chapIdx, paraIdx,
+      chapterTitle: ch?.title || '',
+      type: 'manual',
+      date: new Date().toISOString().slice(0, 10),
+    };
+    setBookmarks(prev => [...prev, bm]);
+  };
+
+  const stopPlayback = () => {
+    playingRef.current = false;
+    setPlaying(false);
+    playQueueRef.current = [];
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+  };
+
+  const fetchAudio = async (text, voice) => {
+    const url = `${TTS_BASE}?voice=${voice}&text=${encodeURIComponent(text)}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('TTS 請求失敗');
+    const blob = await res.blob();
+    return URL.createObjectURL(blob);
+  };
+
+  const playFrom = async (ci, pi) => {
+    if (!chapters) return;
+    stopPlayback();
+    setLoading(true);
+    setError('');
+    playingRef.current = true;
+    setPlaying(true);
+    setChapIdx(ci);
+    setParaIdx(pi);
+
+    let currentCi = ci;
+    let currentPi = pi;
+
+    const playNext = async () => {
+      if (!playingRef.current) { setLoading(false); return; }
+      const ch = chapters[currentCi];
+      if (!ch) { stopPlayback(); setLoading(false); return; }
+      const paras = ch.paragraphs;
+      if (currentPi >= paras.length) {
+        // next chapter
+        currentCi += 1;
+        currentPi = 0;
+        if (currentCi >= chapters.length) { stopPlayback(); setLoading(false); return; }
+        setChapIdx(currentCi);
+        setParaIdx(0);
+      }
+      const text = paras[currentPi];
+      setChapIdx(currentCi);
+      setParaIdx(currentPi);
+      try {
+        const objUrl = await fetchAudio(text, voiceId);
+        setLoading(false);
+        if (!playingRef.current) { URL.revokeObjectURL(objUrl); return; }
+        const audio = new Audio(objUrl);
+        audioRef.current = audio;
+        audio.onended = () => {
+          URL.revokeObjectURL(objUrl);
+          currentPi++;
+          playNext();
+        };
+        audio.onerror = () => { setError('音訊播放失敗'); stopPlayback(); };
+        audio.play().catch(() => { setError('瀏覽器阻擋自動播放，請點一下頁面再試'); stopPlayback(); });
+      } catch (e) {
+        setError('TTS 服務暫時無法使用：' + e.message);
+        stopPlayback();
+        setLoading(false);
+      }
+    };
+
+    await playNext();
+  };
+
+  const togglePlay = () => {
+    if (playing) { stopPlayback(); }
+    else { playFrom(chapIdx, paraIdx); }
+  };
+
+  const nextChap = () => {
+    stopPlayback();
+    const ni = Math.min(chapIdx + 1, (chapters?.length || 1) - 1);
+    setChapIdx(ni); setParaIdx(0);
+  };
+  const prevChap = () => {
+    stopPlayback();
+    const ni = Math.max(chapIdx - 1, 0);
+    setChapIdx(ni); setParaIdx(0);
+  };
+
+  const goToBookmark = (bm) => {
+    setChapIdx(bm.chapIdx); setParaIdx(bm.paraIdx);
+    setMorningBanner(false);
+    playFrom(bm.chapIdx, bm.paraIdx);
+  };
+
+  const delBookmark = (id) => setBookmarks(prev => prev.filter(b => b.id !== id));
+
+  const chapter = chapters?.[chapIdx];
+  const totalParas = chapter?.paragraphs?.length || 1;
+  const progress = Math.round((paraIdx / Math.max(totalParas - 1, 1)) * 100);
+  const timerFmt = timerLeft > 0 ? `${Math.floor(timerLeft/60)}:${String(timerLeft%60).padStart(2,'0')}` : '';
+
+  return (
+    <div className="card p-4" style={{marginBottom:80}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14}}>
+        <p style={{fontSize:15,fontWeight:700,margin:0}}>🎙️ 有聲故事</p>
+        <span style={{fontSize:11,color:'var(--sub)'}}>熊大大說故事・助眠版</span>
+      </div>
+
+      {/* Morning banner */}
+      {morningBanner && (
+        <div style={{background:'#312e81',borderRadius:10,padding:'10px 14px',marginBottom:14,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <div>
+            <div style={{fontSize:12,color:'#a5b4fc',marginBottom:2}}>🌅 昨晚聽到這裡</div>
+            <div style={{fontSize:13,fontWeight:600,color:'#e0e7ff'}}>{morningBanner.chapterTitle}</div>
+          </div>
+          <button onClick={()=>goToBookmark(morningBanner)}
+            style={{background:'#6366f1',color:'#fff',border:'none',borderRadius:8,padding:'6px 12px',fontSize:12,cursor:'pointer'}}>
+            繼續聽
+          </button>
+        </div>
+      )}
+
+      {/* Voice selector */}
+      <div style={{display:'flex',gap:8,marginBottom:14,flexWrap:'wrap'}}>
+        {VOICES.map(v => (
+          <button key={v.id} onClick={()=>{ stopPlayback(); setVoiceId(v.id); }}
+            style={{flex:1,padding:'8px 4px',borderRadius:10,border:`2px solid ${voiceId===v.id?'#6366f1':'var(--border)'}`,
+              background:voiceId===v.id?'#eef2ff':'var(--card)',cursor:'pointer',minWidth:90}}>
+            <div style={{fontSize:16}}>{v.label.slice(0,2)}</div>
+            <div style={{fontSize:11,fontWeight:600,color:voiceId===v.id?'#4338ca':'var(--text)'}}>{v.label.slice(2)}</div>
+            <div style={{fontSize:10,color:'var(--sub)'}}>{v.desc}</div>
+          </button>
+        ))}
+      </div>
+
+      {/* Error */}
+      {error && <div style={{background:'#fef2f2',color:'#dc2626',padding:'8px 12px',borderRadius:8,fontSize:12,marginBottom:10}}>{error}</div>}
+
+      {/* Now playing */}
+      {chapters && (
+        <div style={{background:'var(--bg)',borderRadius:10,padding:'12px 14px',marginBottom:14}}>
+          <div style={{fontSize:11,color:'var(--sub)',marginBottom:4}}>
+            第 {chapIdx+1} / {chapters.length} 章
+          </div>
+          <div style={{fontSize:14,fontWeight:600,marginBottom:8,color:'var(--text)'}}>{chapter?.title}</div>
+          {/* Progress bar */}
+          <div style={{height:4,background:'var(--border)',borderRadius:2,marginBottom:8,overflow:'hidden'}}>
+            <div style={{height:'100%',width:`${progress}%`,background:'#6366f1',borderRadius:2,transition:'width .3s'}}/>
+          </div>
+          <div style={{fontSize:11,color:'var(--sub)'}}>段落 {paraIdx+1} / {totalParas}</div>
+          {/* Current paragraph preview */}
+          {chapter?.paragraphs?.[paraIdx] && (
+            <div style={{fontSize:12,color:'var(--sub)',marginTop:8,lineHeight:1.6,
+              maxHeight:60,overflow:'hidden',textOverflow:'ellipsis',
+              display:'-webkit-box',WebkitLineClamp:3,WebkitBoxOrient:'vertical'}}>
+              {chapter.paragraphs[paraIdx]}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Controls */}
+      <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:20,marginBottom:14}}>
+        <button onClick={prevChap} style={{background:'none',border:'none',fontSize:24,cursor:'pointer',opacity:chapIdx===0?.4:1}}>⏮</button>
+        <button onClick={togglePlay}
+          style={{width:56,height:56,borderRadius:'50%',background:'#6366f1',border:'none',
+            fontSize:24,color:'#fff',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',
+            boxShadow:'0 4px 12px rgba(99,102,241,.4)'}}>
+          {loading ? '⏳' : playing ? '⏸' : '▶'}
+        </button>
+        <button onClick={nextChap} style={{background:'none',border:'none',fontSize:24,cursor:'pointer',opacity:!chapters||chapIdx===chapters.length-1?.4:1}}>⏭</button>
+        <button onClick={addManualBookmark} style={{background:'none',border:'none',fontSize:20,cursor:'pointer'}} title="加書籤">🔖</button>
+      </div>
+
+      {/* Chapter list toggle */}
+      <button onClick={()=>setShowChapList(v=>!v)}
+        style={{width:'100%',padding:'8px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:8,
+          fontSize:13,cursor:'pointer',marginBottom:8,color:'var(--text)'}}>
+        📖 章節列表 {showChapList?'▲':'▼'}
+      </button>
+      {showChapList && chapters && (
+        <div style={{maxHeight:200,overflowY:'auto',borderRadius:8,border:'1px solid var(--border)',marginBottom:8}}>
+          {chapters.map((ch,i) => (
+            <div key={i} onClick={()=>{ setShowChapList(false); stopPlayback(); setChapIdx(i); setParaIdx(0); }}
+              style={{padding:'10px 14px',fontSize:13,borderBottom:'1px solid var(--border)',cursor:'pointer',
+                background:i===chapIdx?'#eef2ff':'transparent',
+                color:i===chapIdx?'#4338ca':'var(--text)',fontWeight:i===chapIdx?600:400}}>
+              {ch.title}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Sleep timer */}
+      <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:8,flexWrap:'wrap'}}>
+        <span style={{fontSize:12,color:'var(--sub)'}}>睡眠計時：</span>
+        {[0,15,30,60].map(m => (
+          <button key={m} onClick={()=>setTimer(m)}
+            style={{padding:'5px 10px',borderRadius:20,border:`1px solid ${timer===m?'#6366f1':'var(--border)'}`,
+              background:timer===m?'#eef2ff':'var(--card)',fontSize:12,cursor:'pointer',
+              color:timer===m?'#4338ca':'var(--sub)'}}>
+            {m===0?'關閉':`${m}分`}
+          </button>
+        ))}
+        {timerFmt && <span style={{fontSize:12,color:'#6366f1',fontWeight:600}}>{timerFmt}</span>}
+      </div>
+
+      {/* Bookmarks */}
+      {bookmarks.length > 0 && (
+        <>
+          <button onClick={()=>setShowBmList(v=>!v)}
+            style={{width:'100%',padding:'8px',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:8,
+              fontSize:13,cursor:'pointer',color:'var(--text)'}}>
+            🔖 我的書籤（{bookmarks.length}）{showBmList?'▲':'▼'}
+          </button>
+          {showBmList && (
+            <div style={{marginTop:6,borderRadius:8,border:'1px solid var(--border)'}}>
+              {bookmarks.map(bm => (
+                <div key={bm.id} style={{display:'flex',alignItems:'center',padding:'10px 12px',
+                  borderBottom:'1px solid var(--border)',gap:8}}>
+                  <div style={{flex:1,cursor:'pointer'}} onClick={()=>goToBookmark(bm)}>
+                    <div style={{fontSize:13,fontWeight:600}}>{bm.label}</div>
+                    <div style={{fontSize:11,color:'var(--sub)'}}>{bm.chapterTitle} · {bm.date}</div>
+                  </div>
+                  <button onClick={()=>delBookmark(bm.id)}
+                    style={{background:'none',border:'none',color:'var(--sub)',fontSize:16,cursor:'pointer'}}>×</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+// ── SLEEP PAGE ─────────────────────────────────────────────────────────────
+function SleepPage({ records, setRecords }) {
+  const todayStr = today();
+  const existing = records.find(r=>r.type==='sleep'&&r.date===todayStr);
+  const [hours, setHours] = useState(existing?.hours||7);
+  const [saved, setSaved] = useState(!!existing);
+  const [playingSound, setPlayingSound] = useState(null);
+  const [scriptIdx, setScriptIdx] = useState(0);
+  const [showScript, setShowScript] = useState(false);
+  const audioCtxRef = useRef(null);
+  const sourceRef = useRef(null);
+  const gainRef = useRef(null);
+
+  const sleepChart = useMemo(() => {
+    const dayNames = ['日','一','二','三','四','五','六'];
+    return Array.from({length:7}, (_,i) => {
+      const d = new Date(); d.setDate(d.getDate()-(6-i));
+      const ds = d.toISOString().slice(0,10);
+      const rec = records.find(r=>r.type==='sleep'&&r.date===ds);
+      return { label: i===6?'今天':dayNames[d.getDay()], value: rec?.hours||0, isToday: i===6 };
+    });
+  }, [records]);
+
+  const mood = sleepMood(hours);
+  const color = sleepColor(hours);
+
+  const sleepLabel = h => {
+    if (h === 0) return '略過';
+    if (h < 6) return `${h} 小時 😟 睡太少`;
+    if (h === 6) return `${h} 小時 😐 稍嫌不足`;
+    if (h >= 7 && h <= 9) return `${h} 小時 😊 剛剛好！`;
+    if (h === 10) return `${h} 小時 😐 稍嫌過多`;
+    return `${h} 小時 😴 睡太多`;
+  };
+
+  const saveSleep = () => {
+    setRecords(r => {
+      const filtered = r.filter(x=>!(x.type==='sleep'&&x.date===todayStr));
+      return [...filtered, {type:'sleep',date:todayStr,hours}];
+    });
+    setSaved(true);
+  };
+
+  // Web Audio sound generation
+  const stopSound = useCallback(() => {
+    if (sourceRef.current) { try{sourceRef.current.stop();}catch(e){} sourceRef.current=null; }
+    if (gainRef.current) { gainRef.current=null; }
+    setPlayingSound(null);
+  }, []);
+
+  const playSound = useCallback((type) => {
+    if (playingSound === type) { stopSound(); return; }
+    stopSound();
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    audioCtxRef.current = ctx;
+    let source;
+
+    if (type === 'white') {
+      const bufLen = ctx.sampleRate * 3;
+      const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i=0; i<bufLen; i++) data[i] = Math.random()*2-1;
+      source = ctx.createBufferSource();
+      source.buffer = buf;
+      source.loop = true;
+    } else if (type === 'brown') {
+      const bufLen = ctx.sampleRate * 3;
+      const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      let last = 0;
+      for (let i=0; i<bufLen; i++) {
+        const w = Math.random()*2-1;
+        data[i] = (last + .02*w) / 1.02;
+        last = data[i];
+        data[i] *= 4;
+      }
+      source = ctx.createBufferSource();
+      source.buffer = buf;
+      source.loop = true;
+    } else if (type === 'rain') {
+      const bufLen = ctx.sampleRate * 2;
+      const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i=0; i<bufLen; i++) {
+        data[i] = Math.random()*2-1;
+        if (Math.random() < .001) data[i] *= 3;
+      }
+      source = ctx.createBufferSource();
+      source.buffer = buf;
+      source.loop = true;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 1800;
+      filter.Q.value = 0.4;
+      source.connect(filter);
+      const gain = ctx.createGain();
+      gain.gain.value = 0.4;
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      source.start();
+      gainRef.current = gain;
+      sourceRef.current = source;
+      setPlayingSound(type);
+      return;
+    } else if (type === 'fan') {
+      // oscillator-based fan sound
+      const osc = ctx.createOscillator();
+      osc.type = 'sawtooth';
+      osc.frequency.value = 60;
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 400;
+      const gain = ctx.createGain();
+      gain.gain.value = 0.15;
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      gainRef.current = gain;
+      sourceRef.current = osc;
+      setPlayingSound(type);
+      return;
+    }
+
+    if (source) {
+      const gain = ctx.createGain();
+      gain.gain.value = type==='brown'?0.6:0.3;
+      source.connect(gain);
+      gain.connect(ctx.destination);
+      source.start();
+      gainRef.current = gain;
+      sourceRef.current = source;
+    }
+    setPlayingSound(type);
+  }, [playingSound, stopSound]);
+
+  useEffect(() => () => stopSound(), []);
+
+  const sounds = [
+    { id:'white', icon:'🌫️', label:'白噪音' },
+    { id:'brown', icon:'🌊', label:'褐色噪音' },
+    { id:'rain',  icon:'🌧️', label:'雨聲' },
+    { id:'fan',   icon:'🌀', label:'電風扇' },
+  ];
+
+  const nextScript = () => setScriptIdx(i=>(i+1)%BEAR_SLEEP_SCRIPTS.length);
+
+  return (
+    <div className="page fade" style={{paddingTop:20}}>
+      <h2 style={{fontSize:20,fontWeight:700,margin:'0 0 20px'}}>😴 睡眠</h2>
+
+      {/* Sleep check-in */}
+      <div className="card p-5 mb-4">
+        <p style={{fontSize:15,fontWeight:600,margin:'0 0 6px'}}>🐻 昨晚睡幾小時？</p>
+        <p style={{fontSize:13,color:'var(--sub)',margin:'0 0 20px'}}>拖動滑桿，看熊大大的反應！</p>
+
+        {/* Bear face + hours display */}
+        <div style={{display:'flex',alignItems:'center',gap:20,marginBottom:20}}>
+          <BearFace mood={mood} size={90}/>
+          <div>
+            <div style={{fontSize:40,fontWeight:800,color:color,lineHeight:1}}>{hours}</div>
+            <div style={{fontSize:14,color:color,fontWeight:500}}>小時</div>
+            <div style={{fontSize:12,color:'var(--sub)',marginTop:4}}>{
+              hours>=7&&hours<=9?'睡眠品質優秀！':
+              hours===6||hours===10?'還可以，再調整一下':
+              hours<6?'睡太少了，今天輕鬆點':
+              '睡太多，注意一下作息'
+            }</div>
+          </div>
+        </div>
+
+        {/* Slider */}
+        <div style={{position:'relative',marginBottom:16}}>
+          <input type="range" min={1} max={12} value={hours}
+            onChange={e=>setHours(Number(e.target.value))}
+            className="sleep-range"
+            style={{background:`linear-gradient(to right, ${color} ${(hours-1)/11*100}%, var(--border) ${(hours-1)/11*100}%)`}}
+          />
+          <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'var(--sub)',marginTop:6}}>
+            <span>1h</span><span style={{color:'var(--green)'}}>7-9h 最佳</span><span>12h</span>
+          </div>
+        </div>
+
+        {saved ? (
+          <div style={{textAlign:'center',padding:'10px',background:'rgba(34,197,94,.1)',borderRadius:10,color:'var(--green)',fontWeight:600}}>
+            ✅ 已記錄 {hours} 小時！
+          </div>
+        ) : (
+          <button className="btn-primary" onClick={saveSleep}>記錄睡眠</button>
+        )}
+      </div>
+
+      {/* Bear coaching monologue */}
+      <div className="card p-4 mb-4" style={{background:'linear-gradient(135deg,rgba(99,102,241,.08),rgba(168,85,247,.08))',borderColor:'rgba(99,102,241,.2)'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:12}}>
+          <p style={{fontSize:15,fontWeight:600,margin:0}}>🐻 熊大大碎唸</p>
+          <button onClick={()=>setShowScript(s=>!s)} style={{background:'var(--border)',border:'none',borderRadius:8,padding:'4px 10px',fontSize:12,cursor:'pointer',color:'var(--text)'}}>
+            {showScript?'收起':'展開'}
+          </button>
+        </div>
+        {showScript && (
+          <>
+            <p style={{fontSize:14,lineHeight:1.8,color:'var(--text)',margin:'0 0 12px',fontStyle:'italic'}}>
+              「{BEAR_SLEEP_SCRIPTS[scriptIdx]}」
+            </p>
+            <button onClick={nextScript} style={{background:'transparent',border:'1px solid rgba(99,102,241,.3)',borderRadius:8,padding:'6px 14px',fontSize:12,cursor:'pointer',color:'#6366f1'}}>換一段 →</button>
+          </>
+        )}
+        {!showScript && <p style={{fontSize:13,color:'var(--sub)',margin:0}}>點展開聽熊大大說晚安故事</p>}
+      </div>
+
+      {/* Sound player */}
+      <div className="card p-4 mb-4">
+        <p style={{fontSize:15,fontWeight:600,margin:'0 0 14px'}}>🎵 助眠音效</p>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
+          {sounds.map(s => (
+            <button key={s.id} className={`sound-btn ${playingSound===s.id?'playing':''}`} onClick={()=>playSound(s.id)}>
+              <span style={{fontSize:28}}>{s.icon}</span>
+              <span>{s.label}</span>
+              {playingSound===s.id && <span style={{fontSize:10,color:'var(--orange)'}}>播放中 ●</span>}
+            </button>
+          ))}
+        </div>
+        {playingSound && (
+          <button onClick={stopSound} className="btn-secondary" style={{marginTop:12}}>⏹ 停止音效</button>
+        )}
+        <p style={{fontSize:11,color:'var(--sub)',margin:'10px 0 0',textAlign:'center'}}>建議配合睡眠計時器使用</p>
+      </div>
+
+      {/* 7-day sleep trend */}
+      <div className="card p-4 mb-4">
+        <p style={{fontSize:15,fontWeight:600,margin:'0 0 14px'}}>📈 近7天睡眠趨勢</p>
+        <MiniTrendChart data={sleepChart} color="#6366f1" unit="h" targetLine={8}/>
+        <div style={{display:'flex',alignItems:'center',gap:6,marginTop:10,fontSize:11,color:'var(--sub)'}}>
+          <div style={{width:20,height:1.5,background:'var(--green)',borderRadius:1,flexShrink:0}}/>
+          <span>8小時目標線</span>
+        </div>
+      </div>
+
+      {/* Sleep tips */}
+      <div className="card p-4 mb-4">
+        <p style={{fontSize:15,fontWeight:600,margin:'0 0 12px'}}>💡 睡眠小貼士</p>
+        {[
+          {icon:'🌡️', tip:'保持室溫 18-22°C，最好入睡'},
+          {icon:'📱', tip:'睡前 30 分鐘遠離藍光屏幕'},
+          {icon:'🕙', tip:'固定時間上床，建立身體節律'},
+          {icon:'🍵', tip:'睡前 4 小時避免咖啡因'},
+        ].map((t,i) => (
+          <div key={i} style={{display:'flex',gap:12,marginBottom:10,alignItems:'flex-start'}}>
+            <span style={{fontSize:18}}>{t.icon}</span>
+            <span style={{fontSize:13,color:'var(--sub)',lineHeight:1.5}}>{t.tip}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* 🎙️ 有聲故事 */}
+      <NovelPlayer />
+    </div>
+  );
+}
+
+// ── EAT PAGE ──────────────────────────────────────────────────────────────
+function EatPage({ profile, dietLog, setDietLog }) {
+  const todayStr = today();
+  const [search, setSearch] = useState('');
+  const [bearReaction, setBearReaction] = useState('');
+  const [showAdd, setShowAdd] = useState(false);
+  const [qty, setQty] = useState(1);
+  const [selectedFood, setSelectedFood] = useState(null);
+  const [scanMode, setScanMode] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const fileRef = useRef(null);
+  const [meal, setMeal] = useState('lunch');
+
+  const todayEntries = dietLog[todayStr] || [];
+  const targetCals = tdee(profile);
+  const todayCals = todayEntries.reduce((s,e)=>s+(e.kcal||0),0);
+  const todayProt = todayEntries.reduce((s,e)=>s+(e.prot||0),0);
+  const calPct = Math.min(110, Math.round(todayCals/targetCals*100));
+
+  const mealLabels = {breakfast:'🌅 早餐',lunch:'☀️ 午餐',dinner:'🌙 晚餐',snack:'🍎 點心'};
+
+  const addFood = (food) => {
+    const entry = {...food, kcal: Math.round((food.kcal||0)*qty), prot: Math.round((food.prot||0)*qty), qty, meal, time: new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'})};
+    setDietLog(prev => ({...prev, [todayStr]: [...(prev[todayStr]||[]), entry]}));
+    // bear reaction
+    const kcal = entry.kcal;
+    const prot = entry.prot;
+    let cat = 'default';
+    if (prot >= 20) cat = 'high_protein';
+    else if (kcal >= 600) cat = 'high_cal';
+    else if (kcal <= 200) cat = 'low_cal';
+    else cat = 'balanced';
+    const reactions = BEAR_FOOD_REACTIONS[cat];
+    setBearReaction(reactions[Math.floor(Math.random()*reactions.length)]);
+    setShowAdd(false);
+    setSearch('');
+    setSelectedFood(null);
+    setQty(1);
+    setTimeout(()=>setBearReaction(''), 4000);
+  };
+
+  const simulateScan = () => {
+    setScanning(true);
+    setTimeout(() => {
+      setScanning(false);
+      setScanMode(false);
+      setShowAdd(true);
+      setSearch('');
+      setBearReaction('我好像看到了什麼！幫我選一下是哪個食物？');
+      setTimeout(()=>setBearReaction(''), 5000);
+    }, 2000);
+  };
+
+  const filtered = useMemo(() => {
+    if (!search) return FOOD_DB.slice(0,30);
+    const q = search.toLowerCase();
+    return FOOD_DB.filter(f => f.name.toLowerCase().includes(q) || (f.cat||'').includes(q)).slice(0,40);
+  }, [search]);
+
+  const deleteEntry = (idx) => {
+    setDietLog(prev => ({...prev, [todayStr]: prev[todayStr].filter((_,i)=>i!==idx)}));
+  };
+
+  const eatChart = useMemo(() => {
+    const dayNames = ['日','一','二','三','四','五','六'];
+    return Array.from({length:7}, (_,i) => {
+      const d = new Date(); d.setDate(d.getDate()-(6-i));
+      const ds = d.toISOString().slice(0,10);
+      const entries = dietLog[ds] || [];
+      const cals = entries.reduce((s,e)=>s+(e.kcal||0),0);
+      return { label: i===6?'今天':dayNames[d.getDay()], value: cals, isToday: i===6 };
+    });
+  }, [dietLog]);
+
+  const byMeal = useMemo(() => {
+    const g = {};
+    todayEntries.forEach((e,i) => { const m=e.meal||'lunch'; if(!g[m])g[m]=[]; g[m].push({...e,_idx:i}); });
+    return g;
+  }, [todayEntries]);
+
+  return (
+    <div className="page fade" style={{paddingTop:20}}>
+      <h2 style={{fontSize:20,fontWeight:700,margin:'0 0 16px'}}>🍱 飲食</h2>
+
+      {/* Bear reaction toast */}
+      {bearReaction && (
+        <div className="card p-3 mb-3 fade" style={{background:'rgba(249,115,22,.08)',borderColor:'rgba(249,115,22,.3)',display:'flex',gap:10,alignItems:'center'}}>
+          <BearFace mood="happy" size={40}/>
+          <p style={{fontSize:14,margin:0,flex:1}}>{bearReaction}</p>
+        </div>
+      )}
+
+      {/* TDEE progress */}
+      <div className="card p-4 mb-4">
+        <div style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+          <div>
+            <span style={{fontSize:28,fontWeight:800,color:'var(--orange)'}}>{todayCals}</span>
+            <span style={{fontSize:14,color:'var(--sub)'}}> / {targetCals} kcal</span>
+          </div>
+          <div style={{textAlign:'right'}}>
+            <div style={{fontSize:16,fontWeight:600}}>{todayProt}g</div>
+            <div style={{fontSize:11,color:'var(--sub)'}}>蛋白質</div>
+          </div>
+        </div>
+        <div style={{height:10,background:'var(--border)',borderRadius:99,overflow:'hidden'}}>
+          <div style={{height:'100%',width:`${calPct}%`,background:calPct>100?'var(--red)':calPct>75?'var(--orange)':'var(--green)',borderRadius:99,transition:'width .5s'}}/>
+        </div>
+        <div style={{fontSize:12,color:'var(--sub)',marginTop:6}}>
+          {calPct<75?`還差 ${targetCals-todayCals} kcal`:calPct>100?`超出 ${todayCals-targetCals} kcal`:`還剩 ${targetCals-todayCals} kcal`}
+        </div>
+      </div>
+
+      {/* Action buttons */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10,marginBottom:16}}>
+        <button className="btn-primary" onClick={()=>{setShowAdd(true);setSearch('')}}>+ 新增食物</button>
+        <button onClick={()=>{fileRef.current?.click();setScanMode(true)}} style={{display:'flex',alignItems:'center',justifyContent:'center',gap:6,background:'var(--card)',border:'2px solid var(--border)',borderRadius:12,padding:'10px',fontSize:14,fontWeight:600,cursor:'pointer',color:'var(--text)'}}>
+          📷 拍照辨識
+        </button>
+        <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{display:'none'}} onChange={simulateScan}/>
+      </div>
+
+      {/* Scanning overlay */}
+      {scanning && (
+        <div className="card p-5 mb-4" style={{textAlign:'center'}}>
+          <div style={{fontSize:36,marginBottom:8}}>🔍</div>
+          <p style={{fontSize:14,color:'var(--sub)',margin:0}}>熊大大正在辨識中...</p>
+          <div style={{marginTop:12,height:4,background:'var(--border)',borderRadius:99,overflow:'hidden'}}>
+            <div style={{height:'100%',width:'60%',background:'var(--orange)',borderRadius:99,animation:'pulse-ring 1s ease-in-out infinite'}}/>
+          </div>
+        </div>
+      )}
+
+      {/* Add food panel */}
+      {showAdd && (
+        <div className="card p-4 mb-4">
+          <div style={{display:'flex',justifyContent:'space-between',marginBottom:12}}>
+            <p style={{fontSize:15,fontWeight:600,margin:0}}>搜尋食物</p>
+            <button onClick={()=>{setShowAdd(false);setSearch('');setSelectedFood(null)}} style={{background:'none',border:'none',fontSize:20,cursor:'pointer',color:'var(--sub)'}}>✕</button>
+          </div>
+          <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="搜尋食物名稱..." style={{marginBottom:10}}/>
+          {/* Meal selector */}
+          <div style={{display:'flex',gap:6,marginBottom:12,flexWrap:'wrap'}}>
+            {Object.entries(mealLabels).map(([k,v])=>(
+              <button key={k} className={`chip ${meal===k?'chip-active':'chip-inactive'}`} onClick={()=>setMeal(k)} style={{fontSize:12}}>{v}</button>
+            ))}
+          </div>
+          {selectedFood ? (
+            <div>
+              <div className="card p-3 mb-3" style={{borderColor:'var(--orange)'}}>
+                <p style={{fontSize:15,fontWeight:600,margin:'0 0 4px'}}>{selectedFood.name}</p>
+                <p style={{fontSize:13,color:'var(--sub)',margin:0}}>{selectedFood.kcal*qty} kcal · 蛋白質 {selectedFood.prot*qty}g</p>
+              </div>
+              <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:12}}>
+                <button onClick={()=>setQty(q=>Math.max(.5,q-.5))} style={{width:36,height:36,borderRadius:'50%',border:'2px solid var(--border)',background:'var(--card)',fontSize:18,cursor:'pointer',color:'var(--text)'}}>－</button>
+                <span style={{flex:1,textAlign:'center',fontSize:16,fontWeight:600}}>{qty} 份</span>
+                <button onClick={()=>setQty(q=>q+.5)} style={{width:36,height:36,borderRadius:'50%',border:'2px solid var(--border)',background:'var(--card)',fontSize:18,cursor:'pointer',color:'var(--text)'}}>＋</button>
+              </div>
+              <button className="btn-primary" onClick={()=>addFood(selectedFood)}>加入記錄 🐻</button>
+            </div>
+          ) : (
+            <div style={{maxHeight:260,overflowY:'auto'}}>
+              {filtered.map((f,i) => (
+                <div key={i} onClick={()=>setSelectedFood(f)} style={{display:'flex',justifyContent:'space-between',padding:'10px 0',borderBottom:'1px solid var(--border)',cursor:'pointer',alignItems:'center'}}>
+                  <div>
+                    <p style={{fontSize:14,fontWeight:500,margin:0}}>{f.name}</p>
+                    <p style={{fontSize:12,color:'var(--sub)',margin:0}}>{f.cat||''}</p>
+                  </div>
+                  <div style={{textAlign:'right'}}>
+                    <p style={{fontSize:14,fontWeight:600,margin:0,color:'var(--orange)'}}>{f.kcal}</p>
+                    <p style={{fontSize:11,color:'var(--sub)',margin:0}}>kcal</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Today's log by meal */}
+      {Object.keys(mealLabels).map(mKey => {
+        const entries = byMeal[mKey];
+        if (!entries?.length) return null;
+        const mCals = entries.reduce((s,e)=>s+(e.kcal||0),0);
+        return (
+          <div key={mKey} className="card p-4 mb-3">
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:10}}>
+              <span style={{fontSize:14,fontWeight:600}}>{mealLabels[mKey]}</span>
+              <span style={{fontSize:13,color:'var(--orange)',fontWeight:600}}>{mCals} kcal</span>
+            </div>
+            {entries.map((e,i) => (
+              <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'6px 0',borderBottom:i<entries.length-1?'1px solid var(--border)':'none',alignItems:'center'}}>
+                <div>
+                  <p style={{fontSize:13,margin:0}}>{e.name}</p>
+                  <p style={{fontSize:11,color:'var(--sub)',margin:0}}>{e.time} · {e.qty}份</p>
+                </div>
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  <span style={{fontSize:13,color:'var(--sub)'}}>{e.kcal} kcal</span>
+                  <button onClick={()=>deleteEntry(e._idx)} style={{background:'none',border:'none',color:'var(--sub)',cursor:'pointer',fontSize:14}}>✕</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+      })}
+
+      {/* 7-day calorie trend */}
+      <div className="card p-4 mb-4">
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
+          <p style={{fontSize:15,fontWeight:600,margin:0}}>📈 近7天熱量趨勢</p>
+          <span style={{fontSize:12,color:'var(--sub)'}}>{targetCals} kcal 目標</span>
+        </div>
+        <MiniTrendChart data={eatChart} color="var(--orange)" targetLine={targetCals}/>
+        <div style={{display:'flex',alignItems:'center',gap:6,marginTop:10,fontSize:11,color:'var(--sub)'}}>
+          <div style={{width:20,height:1.5,background:'var(--green)',borderRadius:1,flexShrink:0}}/>
+          <span>目標熱量線</span>
+        </div>
+      </div>
+
+      {todayEntries.length === 0 && !showAdd && (
+        <div style={{textAlign:'center',padding:'40px 0',color:'var(--sub)'}}>
+          <p style={{fontSize:32,margin:'0 0 8px'}}>🍽️</p>
+          <p>今天還沒有記錄，去吃點東西吧！</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── WORKOUT MODAL ─────────────────────────────────────────────────────────
+function WorkoutModal({ workout, onClose, onComplete, records }) {
+  const [step, setStep] = useState(0); // 0=detail, 1=countdown, 2=doing
+  const [countdown, setCountdown] = useState(3);
+  const [sets, setSets] = useState({});
+
+  useEffect(() => {
+    if (step !== 1) return;
+    if (countdown <= 0) { setStep(2); return; }
+    const t = setTimeout(() => setCountdown(c=>c-1), 1000);
+    return () => clearTimeout(t);
+  }, [step, countdown]);
+
+  const complete = () => {
+    onComplete(workout);
+    onClose();
+  };
+
+  if (!workout) return null;
+  const lvlColor = {入門:'var(--green)',中級:'var(--yellow)',進階:'var(--red)'};
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-sheet" onClick={e=>e.stopPropagation()}>
+        {step === 0 && (<>
+          <div style={{display:'flex',justifyContent:'space-between',marginBottom:16}}>
+            <div>
+              <span className={`badge ${workout.level==='入門'?'badge-green':workout.level==='中級'?'badge-yellow':'badge-red'}`}>{workout.level}</span>
+              <h2 style={{fontSize:20,fontWeight:700,margin:'8px 0 4px'}}>{workout.name}</h2>
+              <p style={{fontSize:13,color:'var(--sub)',margin:0}}>🎯 {workout.target} · ⏱ {workout.duration}</p>
+            </div>
+            <button onClick={onClose} style={{background:'none',border:'none',fontSize:22,cursor:'pointer',color:'var(--sub)',alignSelf:'flex-start'}}>✕</button>
+          </div>
+          {workout.desc && <p style={{fontSize:14,color:'var(--sub)',marginBottom:16,lineHeight:1.6}}>{workout.desc}</p>}
+          {workout.steps && (<>
+            <p style={{fontSize:14,fontWeight:600,marginBottom:10}}>動作步驟</p>
+            {workout.steps.map((s,i) => (
+              <div key={i} style={{display:'flex',gap:12,marginBottom:10}}>
+                <div style={{width:24,height:24,borderRadius:'50%',background:'var(--orange)',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:12,fontWeight:700,flexShrink:0}}>{i+1}</div>
+                <p style={{fontSize:13,color:'var(--text)',margin:0,lineHeight:1.6}}>{s}</p>
+              </div>
+            ))}
+          </>)}
+          {workout.sets && workout.sets.map((s,i) => (
+            <div key={i} className="card p-3 mb-2" style={{display:'flex',alignItems:'center',gap:12}}>
+              <div style={{flex:1}}>
+                <p style={{fontSize:14,fontWeight:600,margin:0}}>{s.name}</p>
+                <p style={{fontSize:12,color:'var(--sub)',margin:0}}>{s.reps}</p>
+              </div>
+              <div style={{display:'flex',alignItems:'center',gap:8}}>
+                <button onClick={e=>{e.stopPropagation();setSets(prev=>({...prev,[i]:Math.max(0,(prev[i]||0)-1)}))}} style={{width:28,height:28,borderRadius:'50%',border:'1px solid var(--border)',background:'var(--card)',cursor:'pointer',fontSize:16,display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text)'}}>－</button>
+                <span style={{fontSize:16,fontWeight:600,minWidth:20,textAlign:'center'}}>{sets[i]||0}</span>
+                <button onClick={e=>{e.stopPropagation();setSets(prev=>({...prev,[i]:(prev[i]||0)+1}))}} style={{width:28,height:28,borderRadius:'50%',border:'1px solid var(--border)',background:'var(--card)',cursor:'pointer',fontSize:16,display:'flex',alignItems:'center',justifyContent:'center',color:'var(--text)'}}>＋</button>
+              </div>
+            </div>
+          ))}
+          {workout.tips && <div className="card p-3 mb-4" style={{background:'rgba(249,115,22,.06)'}}><p style={{fontSize:12,color:'var(--orange)',margin:0}}>💡 {workout.tips}</p></div>}
+          <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent((workout.name||'')+'教學 健身 動作示範')}`}
+            target="_blank" rel="noopener noreferrer"
+            style={{display:'flex',alignItems:'center',justifyContent:'center',gap:8,width:'100%',padding:'12px',marginBottom:10,background:'var(--card)',border:'1.5px solid var(--border)',borderRadius:12,fontSize:14,color:'var(--sub)',textDecoration:'none',boxSizing:'border-box'}}>
+            📺 觀看動作示範影片
+          </a>
+          <button className="btn-primary" onClick={()=>{setStep(1);setCountdown(3)}}>開始訓練 🔥</button>
+        </>)}
+        {step === 1 && (
+          <div style={{textAlign:'center',padding:'60px 0'}}>
+            <div style={{fontSize:80,fontWeight:800,color:'var(--orange)',lineHeight:1}}>{countdown}</div>
+            <p style={{color:'var(--sub)',marginTop:12}}>準備好了嗎？</p>
+          </div>
+        )}
+        {step === 2 && (<>
+          <h2 style={{fontSize:20,fontWeight:700,marginBottom:8}}>訓練中 🔥</h2>
+          <p style={{fontSize:14,color:'var(--sub)',marginBottom:20}}>{workout.name}</p>
+          <BearFace mood="excited" size={80} animate/>
+          <p style={{textAlign:'center',color:'var(--orange)',fontWeight:600,margin:'16px 0 24px'}}>熊大大為你加油！</p>
+          <button className="btn-primary" onClick={complete}>完成訓練 🎉</button>
+        </>)}
+      </div>
+    </div>
+  );
+}
+
+// ── EQUIP PAGE ─────────────────────────────────────────────────────────────
+function EquipPage() {
+  const [search, setSearch] = useState('');
+  const [selCat, setSelCat] = useState('全部');
+  const [detail, setDetail] = useState(null);
+
+  const cats = useMemo(() => ['全部', ...new Set(EQUIPMENT_LIST.map(e=>e.cat||'其他'))], []);
+  const filtered = useMemo(() => {
+    return EQUIPMENT_LIST.filter(e =>
+      (selCat==='全部'||e.cat===selCat) &&
+      (!search || e.name.toLowerCase().includes(search.toLowerCase()))
+    );
+  }, [search, selCat]);
+
+  if (detail) return (
+    <div className="page fade" style={{paddingTop:20}}>
+      <button onClick={()=>setDetail(null)} style={{background:'none',border:'none',color:'var(--orange)',fontSize:15,cursor:'pointer',marginBottom:16,padding:0}}>← 返回</button>
+      <h2 style={{fontSize:20,fontWeight:700,margin:'0 0 4px'}}>{detail.name}</h2>
+      <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:16}}>
+        {detail.cat && <span className="badge badge-blue">{detail.cat}</span>}
+        {detail.difficulty && <span className="badge badge-yellow">難度 {detail.difficulty}</span>}
+        {detail.intensity && <span className="badge badge-orange">強度 {detail.intensity}</span>}
+        {detail.danger && <span className="badge badge-red">風險 {detail.danger}</span>}
+      </div>
+      {detail.muscles && <div className="card p-3 mb-3"><p style={{fontSize:13,color:'var(--sub)',margin:'0 0 4px'}}>目標肌群</p><p style={{fontSize:14,margin:0}}>{detail.muscles}</p></div>}
+      {detail.desc && <div className="card p-4 mb-3"><p style={{fontSize:14,lineHeight:1.7,margin:0,color:'var(--text)'}}>{detail.desc}</p></div>}
+      {detail.steps && (<>
+        <p style={{fontSize:14,fontWeight:600,marginBottom:8}}>使用方式</p>
+        {detail.steps.map((s,i)=>(
+          <div key={i} style={{display:'flex',gap:10,marginBottom:8}}>
+            <div style={{width:22,height:22,borderRadius:'50%',background:'var(--orange)',color:'#fff',fontSize:11,fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>{i+1}</div>
+            <p style={{fontSize:13,margin:0,lineHeight:1.6,color:'var(--text)'}}>{s}</p>
+          </div>
+        ))}
+      </>)}
+      {detail.tips && <div className="card p-3 mt-3" style={{background:'rgba(249,115,22,.06)'}}><p style={{fontSize:12,color:'var(--orange)',margin:0}}>💡 {detail.tips}</p></div>}
+    </div>
+  );
+
+  return (
+    <div className="page fade" style={{paddingTop:20}}>
+      <h2 style={{fontSize:20,fontWeight:700,margin:'0 0 14px'}}>🏋️ 器材百科</h2>
+      <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="搜尋器材..." style={{marginBottom:12}}/>
+      <div style={{display:'flex',gap:8,overflowX:'auto',paddingBottom:8,marginBottom:14}}>
+        {cats.map(c=>(
+          <button key={c} className={`chip ${selCat===c?'chip-active':'chip-inactive'}`} onClick={()=>setSelCat(c)} style={{flexShrink:0}}>{c}</button>
+        ))}
+      </div>
+      <p style={{fontSize:12,color:'var(--sub)',marginBottom:12}}>{filtered.length} 件器材</p>
+      {filtered.map((e,i) => (
+        <div key={i} className="card p-4 mb-2" style={{cursor:'pointer'}} onClick={()=>setDetail(e)}>
+          <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+            <div style={{flex:1}}>
+              <p style={{fontSize:15,fontWeight:600,margin:'0 0 4px'}}>{e.name}</p>
+              <p style={{fontSize:12,color:'var(--sub)',margin:0}}>{e.cat}{e.muscles?` · ${e.muscles.slice(0,20)}...`:''}</p>
+            </div>
+            <div style={{display:'flex',gap:4,flexWrap:'wrap',justifyContent:'flex-end'}}>
+              {e.difficulty && <span className="badge badge-yellow">{e.difficulty}</span>}
+              {e.danger && <span className="badge badge-red">⚠️{e.danger}</span>}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── PROGRESS PAGE ──────────────────────────────────────────────────────────
+function ProgressPage({ records, setRecords }) {
+  const workouts = records.filter(r=>r.type==='workout');
+  const weights = records.filter(r=>r.type==='weight');
+  const [wInput, setWInput] = useState('');
+
+  const addWeight = () => {
+    const w = parseFloat(wInput);
+    if (!w || w<20||w>300) return;
+    setRecords(r=>[...r,{type:'weight',date:today(),weight:w,ts:Date.now()}]);
+    setWInput('');
+  };
+
+  // Heatmap: last 35 days
+  const heatDays = useMemo(() => {
+    const days = [];
+    for (let i=34; i>=0; i--) {
+      const d = new Date(); d.setDate(d.getDate()-i);
+      const ds = d.toISOString().slice(0,10);
+      const count = records.filter(r=>r.type==='workout'&&r.date===ds).length;
+      days.push({date:ds,count,day:d.getDate()});
+    }
+    return days;
+  }, [records]);
+
+  const streak = useMemo(() => {
+    let s=0, d=new Date();
+    while (true) {
+      const ds = d.toISOString().slice(0,10);
+      if (records.some(r=>r.type==='workout'&&r.date===ds)) { s++; d.setDate(d.getDate()-1); }
+      else break;
+    }
+    return s;
+  }, [records]);
+
+  return (
+    <div className="page fade" style={{paddingTop:20}}>
+      <h2 style={{fontSize:20,fontWeight:700,margin:'0 0 16px'}}>📊 進度</h2>
+
+      {/* Stats row */}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:10,marginBottom:16}}>
+        {[
+          {label:'總訓練',val:workouts.length,unit:'次',color:'var(--orange)'},
+          {label:'本週',val:workouts.filter(r=>{const d=new Date(r.date),now=new Date();return (now-d)<7*86400000;}).length,unit:'次',color:'var(--green)'},
+          {label:'連續天',val:streak,unit:'天',color:'var(--yellow)'},
+        ].map((s,i)=>(
+          <div key={i} className="card p-3" style={{textAlign:'center'}}>
+            <div style={{fontSize:26,fontWeight:800,color:s.color}}>{s.val}</div>
+            <div style={{fontSize:11,color:'var(--sub)'}}>{s.label} {s.unit}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Heatmap */}
+      <div className="card p-4 mb-4">
+        <p style={{fontSize:14,fontWeight:600,margin:'0 0 12px'}}>訓練熱力圖（近35天）</p>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:4}}>
+          {heatDays.map((d,i)=>(
+            <div key={i} title={d.date} style={{aspectRatio:'1',borderRadius:4,background:d.count?`rgba(249,115,22,${Math.min(1,d.count*0.5+0.3)})`:'var(--border)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:8,color:d.count?'#fff':'transparent'}}>{d.day}</div>
+          ))}
+        </div>
+      </div>
+
+      {/* Weight log */}
+      <div className="card p-4 mb-4">
+        <p style={{fontSize:14,fontWeight:600,margin:'0 0 12px'}}>體重記錄</p>
+        <div style={{display:'flex',gap:8,marginBottom:12}}>
+          <input type="number" value={wInput} onChange={e=>setWInput(e.target.value)} placeholder="今日體重 kg" style={{flex:1}}/>
+          <button className="btn-primary" onClick={addWeight} style={{width:'auto',padding:'10px 18px',flexShrink:0}}>記錄</button>
+        </div>
+        {weights.slice(-10).reverse().map((w,i)=>(
+          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--border)'}}>
+            <span style={{fontSize:13,color:'var(--sub)'}}>{w.date}</span>
+            <span style={{fontSize:14,fontWeight:600}}>{w.weight} kg</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Recent workouts */}
+      <div className="card p-4">
+        <p style={{fontSize:14,fontWeight:600,margin:'0 0 12px'}}>訓練紀錄</p>
+        {workouts.length===0 && <p style={{color:'var(--sub)',fontSize:13}}>還沒有訓練紀錄</p>}
+        {workouts.slice(-15).reverse().map((w,i)=>(
+          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'8px 0',borderBottom:'1px solid var(--border)'}}>
+            <div>
+              <p style={{fontSize:13,fontWeight:500,margin:0}}>{w.name||'訓練'}</p>
+              <p style={{fontSize:11,color:'var(--sub)',margin:0}}>{w.target||''}</p>
+            </div>
+            <span style={{fontSize:12,color:'var(--sub)'}}>{w.date}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── TRAIN PAGE ─────────────────────────────────────────────────────────────
+function TrainPage({ records, setRecords }) {
+  const [mode, setMode] = useState('home');  // 'home'|'gym'
+  const [diffFilter, setDiffFilter] = useState('全部');
+  const [muscleFilter, setMuscleFilter] = useState('全部');
+  const [subPage, setSubPage] = useState('workouts'); // 'workouts'|'equip'|'progress'
+  const [activeWorkout, setActiveWorkout] = useState(null);
+  const [favs, setFavs] = useLS('gym_favorites', []);
+
+  const MUSCLE_KW = {
+    胸:['胸'],背:['背','背闊','中背'],肩:['肩','三角'],
+    手臂:['三頭','二頭','肱'],腿:['腿','股','膕'],
+    臀:['臀'],核心:['核心','腹'],全身:['全身','爆發'],
+  };
+
+  const base = mode==='home'?HOME_WORKOUTS:GYM_WORKOUTS;
+  const workouts = base.filter(w =>
+    (diffFilter==='全部'||w.level===diffFilter) &&
+    (muscleFilter==='全部'||( MUSCLE_KW[muscleFilter]||[]).some(k=>(w.target||'').includes(k)))
+  );
+
+  const completeWorkout = (w) => {
+    setRecords(r=>[...r,{type:'workout',date:today(),name:w.name,target:w.target,ts:Date.now()}]);
+  };
+
+  const toggleFav = (id) => setFavs(f=>f.includes(id)?f.filter(x=>x!==id):[...f,id]);
+
+  // Smart recommendation
+  const lastWorkout = [...records].reverse().find(r=>r.type==='workout');
+  const todayStr = today();
+  const trainedToday = records.some(r=>r.type==='workout'&&r.date===todayStr);
+
+  if (subPage==='equip') return (
+    <div className="page fade" style={{paddingTop:20}}>
+      <h2 style={{fontSize:20,fontWeight:700,margin:'0 0 14px'}}>💪 練</h2>
+      <div style={{display:'flex',gap:0,marginBottom:20,background:'var(--card)',borderRadius:12,padding:4,border:'0.5px solid var(--border)'}}>
+        {[{id:'workouts',icon:'📋',label:'課表'},{id:'equip',icon:'🏋️',label:'器材百科'},{id:'progress',icon:'📊',label:'進度'}].map(t=>(
+          <button key={t.id} onClick={()=>setSubPage(t.id)}
+            style={{flex:1,padding:'9px 4px',border:'none',borderRadius:9,cursor:'pointer',fontSize:12,fontWeight:t.id==='equip'?600:400,
+              background:t.id==='equip'?'var(--orange)':'transparent',
+              color:t.id==='equip'?'#fff':'var(--sub)',
+              transition:'all .15s',display:'flex',alignItems:'center',justifyContent:'center',gap:4}}>
+            <span style={{fontSize:15}}>{t.icon}</span>{t.label}
+          </button>
+        ))}
+      </div>
+      <EquipPage/>
+    </div>
+  );
+  if (subPage==='progress') return (
+    <div className="page fade" style={{paddingTop:20}}>
+      <h2 style={{fontSize:20,fontWeight:700,margin:'0 0 14px'}}>💪 練</h2>
+      <div style={{display:'flex',gap:0,marginBottom:20,background:'var(--card)',borderRadius:12,padding:4,border:'0.5px solid var(--border)'}}>
+        {[{id:'workouts',icon:'📋',label:'課表'},{id:'equip',icon:'🏋️',label:'器材百科'},{id:'progress',icon:'📊',label:'進度'}].map(t=>(
+          <button key={t.id} onClick={()=>setSubPage(t.id)}
+            style={{flex:1,padding:'9px 4px',border:'none',borderRadius:9,cursor:'pointer',fontSize:12,fontWeight:t.id==='progress'?600:400,
+              background:t.id==='progress'?'var(--orange)':'transparent',
+              color:t.id==='progress'?'#fff':'var(--sub)',
+              transition:'all .15s',display:'flex',alignItems:'center',justifyContent:'center',gap:4}}>
+            <span style={{fontSize:15}}>{t.icon}</span>{t.label}
+          </button>
+        ))}
+      </div>
+      <ProgressPage records={records} setRecords={setRecords}/>
+    </div>
+  );
+
+  return (
+    <div className="page fade" style={{paddingTop:20}}>
+      {activeWorkout && <WorkoutModal workout={activeWorkout} onClose={()=>setActiveWorkout(null)} onComplete={completeWorkout} records={records}/>}
+
+      <h2 style={{fontSize:20,fontWeight:700,margin:'0 0 14px'}}>💪 練</h2>
+
+      {/* 三 Tab 分頁 */}
+      <div style={{display:'flex',gap:0,marginBottom:20,background:'var(--card)',borderRadius:12,padding:4,border:'0.5px solid var(--border)'}}>
+        {[
+          {id:'workouts', icon:'📋', label:'課表'},
+          {id:'equip',    icon:'🏋️', label:'器材百科'},
+          {id:'progress', icon:'📊', label:'進度'},
+        ].map(t => (
+          <button key={t.id} onClick={()=>setSubPage(t.id)}
+            style={{flex:1,padding:'9px 4px',border:'none',borderRadius:9,cursor:'pointer',fontSize:12,fontWeight:subPage===t.id?600:400,
+              background:subPage===t.id?'var(--orange)':'transparent',
+              color:subPage===t.id?'#fff':'var(--sub)',
+              transition:'all .15s',display:'flex',alignItems:'center',justifyContent:'center',gap:4}}>
+            <span style={{fontSize:15}}>{t.icon}</span>{t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Bear recommendation */}
+      {!trainedToday && lastWorkout && (
+        <div className="card p-3 mb-4" style={{display:'flex',gap:10,alignItems:'center',borderLeft:'3px solid var(--orange)'}}>
+          <BearFace mood="happy" size={44}/>
+          <p style={{fontSize:13,margin:0,color:'var(--sub)'}}>上次練了 <strong>{lastWorkout.target}</strong>，今天可以換個部位</p>
+        </div>
+      )}
+      {trainedToday && (
+        <div className="card p-3 mb-4" style={{background:'rgba(34,197,94,.08)',borderColor:'var(--green)',display:'flex',gap:10,alignItems:'center'}}>
+          <BearFace mood="excited" size={44}/>
+          <p style={{fontSize:13,margin:0,color:'var(--green)',fontWeight:600}}>今天已完成訓練！🎉 休息也是訓練的一部分</p>
+        </div>
+      )}
+
+      {/* Mode switcher */}
+      <div style={{display:'flex',gap:8,marginBottom:12}}>
+        {[{id:'home',label:'🏠 居家'},{id:'gym',label:'🏋️ 健身房'}].map(m=>(
+          <button key={m.id} className={`chip ${mode===m.id?'chip-active':'chip-inactive'}`} onClick={()=>setMode(m.id)} style={{flex:1,textAlign:'center'}}>{m.label}</button>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div style={{display:'flex',gap:6,marginBottom:6,flexWrap:'wrap'}}>
+        <span style={{fontSize:12,color:'var(--sub)',alignSelf:'center',minWidth:28}}>難度</span>
+        {['全部','入門','中級','進階'].map(d=>(
+          <button key={d} className={`chip ${diffFilter===d?'chip-active':'chip-inactive'}`} onClick={()=>setDiffFilter(d)}>{d}</button>
+        ))}
+      </div>
+      <div style={{display:'flex',gap:6,marginBottom:16,flexWrap:'wrap'}}>
+        <span style={{fontSize:12,color:'var(--sub)',alignSelf:'center',minWidth:28}}>部位</span>
+        {['全部','胸','背','肩','手臂','腿','臀','核心','全身'].map(m=>(
+          <button key={m} className={`chip ${muscleFilter===m?'chip-active':'chip-inactive'}`} onClick={()=>setMuscleFilter(m)}>{m}</button>
+        ))}
+      </div>
+
+      {/* Workout cards */}
+      {workouts.length===0 && (
+        <div style={{textAlign:'center',padding:'40px 0',color:'var(--sub)'}}>
+          <p>找不到「{muscleFilter}」相關課表</p>
+          <button onClick={()=>{setMuscleFilter('全部');setDiffFilter('全部')}} className="chip chip-inactive" style={{marginTop:8}}>清除篩選</button>
+        </div>
+      )}
+      {workouts.map((w,i) => (
+        <div key={w.id||i} className="card p-4 mb-3" style={{cursor:'pointer'}} onClick={()=>setActiveWorkout(w)}>
+          <div style={{display:'flex',gap:12,alignItems:'center'}}>
+            <div style={{fontSize:32}}>{w.icon||'💪'}</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{display:'flex',gap:6,marginBottom:4,alignItems:'center'}}>
+                <span className={`badge ${w.level==='入門'?'badge-green':w.level==='中級'?'badge-yellow':'badge-red'}`}>{w.level}</span>
+              </div>
+              <p style={{fontSize:15,fontWeight:600,margin:'0 0 2px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{w.name}</p>
+              <p style={{fontSize:12,color:'var(--sub)',margin:0}}>{w.target} · {w.duration}</p>
+            </div>
+            <button onClick={e=>{e.stopPropagation();toggleFav(w.id||w.name)}} style={{background:'none',border:'none',fontSize:20,cursor:'pointer',color:favs.includes(w.id||w.name)?'#f59e0b':'var(--border)'}}>⭐</button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── PROFILE SETUP ─────────────────────────────────────────────────────────
+function ProfileSetup({ onDone }) {
+  const [form, setForm] = useState({name:'',gender:'male',age:'',height:'',weight:'',goal:'fat_loss',activity:'moderate'});
+  const set = (k,v) => setForm(f=>({...f,[k]:v}));
+  const valid = form.name && form.age && form.height && form.weight;
+
+  return (
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',minHeight:'100dvh',padding:24,background:'var(--bg)'}}>
+      <div style={{textAlign:'center',marginBottom:28}}>
+        <BearFace mood="excited" size={100} animate/>
+        <h1 style={{fontSize:24,fontWeight:700,margin:'16px 0 4px'}}>你好！我是熊大大</h1>
+        <p style={{fontSize:14,color:'var(--sub)',margin:0}}>讓我先認識一下你 🐻</p>
+      </div>
+      <div style={{width:'100%',maxWidth:380,display:'flex',flexDirection:'column',gap:12}}>
+        <input placeholder="你的名字" value={form.name} onChange={e=>set('name',e.target.value)}/>
+        <select value={form.gender} onChange={e=>set('gender',e.target.value)}>
+          <option value="male">男生</option><option value="female">女生</option>
+        </select>
+        <input type="number" placeholder="年齡" value={form.age} onChange={e=>set('age',e.target.value)}/>
+        <input type="number" placeholder="身高 (cm)" value={form.height} onChange={e=>set('height',e.target.value)}/>
+        <input type="number" placeholder="體重 (kg)" value={form.weight} onChange={e=>set('weight',e.target.value)}/>
+        <select value={form.goal} onChange={e=>set('goal',e.target.value)}>
+          <option value="fat_loss">減脂</option><option value="muscle">增肌</option><option value="maintain">維持</option>
+        </select>
+        <select value={form.activity} onChange={e=>set('activity',e.target.value)}>
+          <option value="sedentary">久坐（辦公室）</option>
+          <option value="light">輕度活動（每週1-2次）</option>
+          <option value="moderate">中度活動（每週3-4次）</option>
+          <option value="active">高度活動（每週5-6次）</option>
+          <option value="very">非常活躍（每天）</option>
+        </select>
+        <button className="btn-primary" disabled={!valid} onClick={()=>onDone({...form,age:Number(form.age),height:Number(form.height),weight:Number(form.weight)})}
+          style={{opacity:valid?1:.4}}>開始與熊大大一起練 💪</button>
+      </div>
+    </div>
+  );
+}
+
+// ── NAVBAR ─────────────────────────────────────────────────────────────────
+function NavBar({ page, setPage }) {
+  const items = [
+    {id:'eat',  icon:'🍱', label:'吃'},
+    {id:'home', icon:'🐻', label:'熊大大', isBear:true},
+    {id:'sleep',icon:'😴', label:'睡'},
+    {id:'train',icon:'💪', label:'練'},
+  ];
+  return (
+    <nav className="nav-bar" style={{height:'var(--nav-h)'}}>
+      {items.map(item => item.isBear ? (
+        <div key={item.id} className="nav-bear" onClick={()=>setPage(item.id)}>
+          <div className={`nav-bear-bubble ${page===item.id?'pulse-ring':''}`} style={{background:page===item.id?'var(--orange)':'#475569'}}>
+            <span style={{fontSize:28}}>🐻</span>
+          </div>
+          <span style={{fontSize:10,color:page===item.id?'var(--orange)':'var(--sub)',marginTop:32,fontWeight:page===item.id?600:400}}>{item.label}</span>
+        </div>
+      ) : (
+        <div key={item.id} className={`nav-item ${page===item.id?'active':''}`} onClick={()=>setPage(item.id)}>
+          <span style={{fontSize:22}}>{item.icon}</span>
+          <span style={{fontWeight:page===item.id?600:400}}>{item.label}</span>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+
+
+// ── HEALTH SYNC HELPERS ────────────────────────────────────────────────────
+
+async function parseAppleHealthZip(file) {
+  if (!window.JSZip) throw new Error('JSZip 未載入');
+  const zip = await JSZip.loadAsync(file);
+  let xmlFile = null;
+  zip.forEach((relPath, f) => { if (relPath.endsWith('export.xml') && !xmlFile) xmlFile = f; });
+  if (!xmlFile) throw new Error('找不到 export.xml，請確認是 Apple Health 匯出的 .zip 檔');
+  const xmlText = await xmlFile.async('string');
+  return parseSleepFromHealthXML(xmlText);
+}
+
+function parseSleepFromHealthXML(xmlText) {
+  const ASLEEP = new Set([
+    'HKCategoryValueSleepAnalysisAsleepUnspecified',
+    'HKCategoryValueSleepAnalysisAsleepCore',
+    'HKCategoryValueSleepAnalysisAsleepDeep',
+    'HKCategoryValueSleepAnalysisAsleepREM',
+  ]);
+  const nights = {};
+  const tagRe = /<Record\b([^>]+)\/>/g;
+  const attrRe = /(\w+)="([^"]*)"/g;
+  let tag;
+  while ((tag = tagRe.exec(xmlText)) !== null) {
+    const attrs = {};
+    let a; attrRe.lastIndex = 0;
+    while ((a = attrRe.exec(tag[1])) !== null) attrs[a[1]] = a[2];
+    if (attrs.type !== 'HKCategoryTypeIdentifierSleepAnalysis') continue;
+    if (!ASLEEP.has(attrs.value)) continue;
+    const start = new Date(attrs.startDate);
+    const end   = new Date(attrs.endDate);
+    if (isNaN(start) || isNaN(end)) continue;
+    const hours = (end - start) / 3600000;
+    const nd = new Date(start);
+    if (start.getHours() < 12) nd.setDate(nd.getDate() - 1);
+    const ds = nd.toISOString().slice(0, 10);
+    nights[ds] = (nights[ds] || 0) + hours;
+  }
+  return Object.entries(nights)
+    .filter(([, h]) => h > 0.5 && h < 20)
+    .map(([date, hours]) => ({ type: 'sleep', date, hours: Math.round(hours * 10) / 10 }));
+}
+
+function mergeSleepRecords(existing, imported) {
+  const seen = new Set(existing.filter(r => r.type === 'sleep').map(r => r.date));
+  return [...existing, ...imported.filter(r => !seen.has(r.date))];
+}
+
+async function fetchGoogleFitSleep(accessToken) {
+  const now = Date.now();
+  const ago90 = now - 90 * 24 * 60 * 60 * 1000;
+  const res = await fetch(
+    `https://www.googleapis.com/fitness/v1/users/me/sessions?activityType=72&startTime=${new Date(ago90).toISOString()}&endTime=${new Date(now).toISOString()}`,
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+  if (!res.ok) throw new Error('Google Fit API 錯誤 ' + res.status);
+  const data = await res.json();
+  return (data.session || []).map(s => {
+    const start = new Date(parseInt(s.startTimeMillis));
+    const end   = new Date(parseInt(s.endTimeMillis));
+    const hours = (end - start) / 3600000;
+    const nd = new Date(start);
+    if (start.getHours() < 12) nd.setDate(nd.getDate() - 1);
+    return { type: 'sleep', date: nd.toISOString().slice(0, 10), hours: Math.round(hours * 10) / 10 };
+  }).filter(r => r.hours > 1 && r.hours < 16);
+}
+
+// ── DATA SETTINGS ──────────────────────────────────────────────────────────
+function DataSettings({ open, onClose, records, setRecords }) {
+  const [tab, setTab] = React.useState('backup');
+  const [importStatus, setImportStatus] = React.useState(null);
+  const [healthStatus, setHealthStatus] = React.useState(null);
+  const [gfClientId, setGfClientId] = useLS('bear_gfit_client', '');
+  const fileRef = React.useRef();
+  const ahRef = React.useRef();
+
+  const KEYS = ['bear_profile','gym_records','gym_diet','gym_favorites','bear_dark'];
+
+  function handleExport() {
+    const data = { version: 1, exported_at: new Date().toISOString() };
+    KEYS.forEach(k => { try { data[k] = JSON.parse(localStorage.getItem(k) || 'null'); } catch(e) { data[k] = null; } });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `熊大大備份_${new Date().toISOString().slice(0,10)}.json`; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function handleImport(e) {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (!data.version) throw new Error('格式錯誤');
+        KEYS.forEach(k => { if (data[k] != null) localStorage.setItem(k, JSON.stringify(data[k])); });
+        setImportStatus('ok');
+        setTimeout(() => window.location.reload(), 1200);
+      } catch(err) { setImportStatus('err'); }
+    };
+    reader.readAsText(file);
+  }
+
+  async function handleAppleHealth(e) {
+    const file = e.target.files[0]; if (!file) return;
+    setHealthStatus('loading');
+    try {
+      const imported = await parseAppleHealthZip(file);
+      if (!imported.length) { setHealthStatus('empty'); return; }
+      setRecords(prev => mergeSleepRecords(prev, imported));
+      setHealthStatus({ count: imported.length });
+    } catch(err) { setHealthStatus('err:' + err.message); }
+  }
+
+  function handleGoogleFit() {
+    if (!gfClientId.trim()) { setHealthStatus('no_client_id'); return; }
+    if (!window.google?.accounts?.oauth2) { setHealthStatus('gis_not_loaded'); return; }
+    setHealthStatus('connecting');
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: gfClientId.trim(),
+      scope: 'https://www.googleapis.com/auth/fitness.sleep.read',
+      callback: async (resp) => {
+        if (resp.error) { setHealthStatus('err:' + resp.error); return; }
+        try {
+          const imported = await fetchGoogleFitSleep(resp.access_token);
+          if (!imported.length) { setHealthStatus('empty'); return; }
+          setRecords(prev => mergeSleepRecords(prev, imported));
+          setHealthStatus({ count: imported.length });
+        } catch(e) { setHealthStatus('err:' + e.message); }
+      }
+    });
+    client.requestAccessToken();
+  }
+
+  const btnStyle = { width:'100%', padding:'14px', marginBottom:10, background:'var(--card)', border:'1.5px solid var(--border)', borderRadius:12, fontSize:15, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:8, color:'var(--text)' };
+
+  if (!open) return null;
+
+  return (
+    <div style={{position:'fixed',inset:0,zIndex:300,background:'rgba(0,0,0,.5)',display:'flex',alignItems:'flex-end'}} onClick={onClose}>
+      <div style={{width:'100%',background:'var(--bg)',borderRadius:'20px 20px 0 0',padding:'24px 20px 36px',boxShadow:'0 -4px 24px rgba(0,0,0,.2)',maxHeight:'85vh',overflowY:'auto'}} onClick={e=>e.stopPropagation()}>
+        <div style={{width:40,height:4,background:'var(--border)',borderRadius:99,margin:'0 auto 16px'}}/>
+
+        {/* Tabs */}
+        <div style={{display:'flex',gap:8,marginBottom:20}}>
+          {[['backup','📦 備份'],['health','🏥 健康資料']].map(([id,label])=>(
+            <button key={id} onClick={()=>{setTab(id);setImportStatus(null);setHealthStatus(null);}}
+              style={{flex:1,padding:'10px',borderRadius:10,border:`1.5px solid ${tab===id?'#6366f1':'var(--border)'}`,background:tab===id?'#6366f115':'var(--card)',color:tab===id?'#6366f1':'var(--text)',cursor:'pointer',fontSize:14,fontWeight:tab===id?600:400}}>
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* Backup Tab */}
+        {tab === 'backup' && <>
+          <button onClick={handleExport} style={btnStyle}>⬇️ 匯出備份（下載 JSON）</button>
+          <button onClick={()=>fileRef.current.click()} style={btnStyle}>⬆️ 匯入備份（還原 JSON）</button>
+          <input ref={fileRef} type="file" accept=".json" style={{display:'none'}} onChange={handleImport}/>
+          {importStatus === 'ok' && <p style={{textAlign:'center',color:'#22c55e',fontSize:14,margin:'8px 0'}}>✅ 匯入成功，即將重新載入…</p>}
+          {importStatus === 'err' && <p style={{textAlign:'center',color:'#ef4444',fontSize:14,margin:'8px 0'}}>❌ 格式錯誤，請使用熊大大匯出的備份檔</p>}
+          <p style={{fontSize:12,color:'var(--text-muted)',textAlign:'center',marginTop:12,lineHeight:1.6}}>備份包含個人資料、訓練紀錄、飲食日誌<br/>匯入後將覆蓋現有資料</p>
+        </>}
+
+        {/* Health Tab */}
+        {tab === 'health' && <>
+          {/* iOS: Apple Health */}
+          <p style={{fontSize:13,color:'var(--text-muted)',marginBottom:8,fontWeight:600}}>🍎 iOS — Apple Health</p>
+          <button onClick={()=>ahRef.current.click()} style={btnStyle}>📂 匯入 Apple Health 匯出檔</button>
+          <input ref={ahRef} type="file" accept=".zip" style={{display:'none'}} onChange={handleAppleHealth}/>
+          <p style={{fontSize:11,color:'var(--text-muted)',marginBottom:16,lineHeight:1.6}}>
+            iPhone → 健康 → 右上角頭像 → 匯出所有健康資料 → 分享 .zip → 選取
+          </p>
+
+          {/* Android: Google Fit */}
+          <p style={{fontSize:13,color:'var(--text-muted)',marginBottom:8,fontWeight:600}}>🤖 Android — Google Fit</p>
+          <input
+            value={gfClientId}
+            onChange={e=>setGfClientId(e.target.value)}
+            placeholder="貼上 Google OAuth Client ID"
+            style={{width:'100%',padding:'10px 12px',borderRadius:10,border:'1.5px solid var(--border)',background:'var(--card)',color:'var(--text)',fontSize:13,boxSizing:'border-box',marginBottom:8}}
+          />
+          <button onClick={handleGoogleFit} style={{...btnStyle, marginBottom:4}}>
+            {healthStatus==='connecting'?'🔄 授權中…':'🔗 連接 Google Fit'}
+          </button>
+          <p style={{fontSize:11,color:'var(--text-muted)',marginBottom:16,lineHeight:1.6}}>
+            需先在 Google Cloud Console 建立 OAuth 憑證（Fitness API）
+          </p>
+
+          {/* Status messages */}
+          {healthStatus === 'loading' && <p style={{textAlign:'center',color:'#6366f1',fontSize:14}}>⏳ 解析中，大檔案可能需要幾秒…</p>}
+          {healthStatus === 'empty' && <p style={{textAlign:'center',color:'#f59e0b',fontSize:14}}>⚠️ 找不到睡眠紀錄，請確認裝置已記錄睡眠</p>}
+          {healthStatus === 'no_client_id' && <p style={{textAlign:'center',color:'#ef4444',fontSize:14}}>❌ 請先貼上 Google Client ID</p>}
+          {healthStatus === 'gis_not_loaded' && <p style={{textAlign:'center',color:'#ef4444',fontSize:14}}>❌ Google 驗證庫載入失敗，請重新整理</p>}
+          {typeof healthStatus === 'object' && healthStatus?.count && (
+            <p style={{textAlign:'center',color:'#22c55e',fontSize:14}}>✅ 匯入 {healthStatus.count} 筆睡眠紀錄！</p>
+          )}
+          {typeof healthStatus === 'string' && healthStatus.startsWith('err:') && (
+            <p style={{textAlign:'center',color:'#ef4444',fontSize:13,lineHeight:1.5}}>❌ {healthStatus.slice(4)}</p>
+          )}
+        </>}
+      </div>
+    </div>
+  );
+}
+
+
+function ThemeToggle({ dark, toggle }) {
+  return (
+    <button onClick={toggle} style={{position:'fixed',top:14,right:16,zIndex:150,background:'var(--card)',border:'1px solid var(--border)',borderRadius:99,width:38,height:38,fontSize:18,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 6px rgba(0,0,0,.1)'}}>
+      {dark?'☀️':'🌙'}
+    </button>
+  );
+}
+
+// ── APP ROOT ───────────────────────────────────────────────────────────────
+function App() {
+  const [profile, setProfile] = useLS('bear_profile', null);
+  const [records, setRecords] = useLS('gym_records', []);
+  const [dietLog, setDietLog] = useLS('gym_diet', {});
+  const [page, setPage] = useState('home');
+  const [darkMode, setDarkMode] = useLS('bear_dark', null); // null=auto
+  const [showSettings, setShowSettings] = useState(false);
+
+  // Auto dark based on time or saved preference
+  const isNight = timeOfDay() === 'night';
+  const dark = darkMode !== null ? darkMode : isNight;
+
+  useEffect(() => {
+    document.body.classList.toggle('dark', dark);
+  }, [dark]);
+
+  const toggleDark = () => setDarkMode(d => d===null ? !isNight : !d);
+
+  if (!profile) return <><ProfileSetup onDone={p=>setProfile(p)}/></>;
+
+  return (
+    <>
+      <ThemeToggle dark={dark} toggle={toggleDark}/>
+      <button onClick={()=>setShowSettings(true)} style={{position:'fixed',top:14,left:16,zIndex:150,background:'var(--card)',border:'1px solid var(--border)',borderRadius:99,width:38,height:38,fontSize:18,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 6px rgba(0,0,0,.1)'}}>
+        ⚙️
+      </button>
+      <DataSettings open={showSettings} onClose={()=>setShowSettings(false)} records={records} setRecords={setRecords}/>
+      {page === 'home'  && <HomePage profile={profile} records={records} dietLog={dietLog} affection={70} setPage={setPage} onSleepOpen={()=>setPage('sleep')}/>}
+      {page === 'eat'   && <EatPage profile={profile} dietLog={dietLog} setDietLog={setDietLog}/>}
+      {page === 'sleep' && <SleepPage records={records} setRecords={setRecords}/>}
+      {page === 'train' && <TrainPage records={records} setRecords={setRecords}/>}
+      <NavBar page={page} setPage={setPage}/>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW:',e));
+  });
+}
+</script>
+</body>
+</html>
